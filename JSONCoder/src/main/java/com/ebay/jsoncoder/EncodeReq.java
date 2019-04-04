@@ -1,0 +1,34 @@
+/*************************************************************
+ Copyright 2018-2019 eBay Inc.
+ Author/Developer: Jianwu Chen
+
+ Use of this source code is governed by an MIT-style
+ license that can be found in the LICENSE file or at
+ https://opensource.org/licenses/MIT.
+ ************************************************************/
+
+package com.ebay.jsoncoder;
+
+import java.io.Writer;
+import java.lang.reflect.Type;
+
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
+
+@Accessors(chain=true)
+public class EncodeReq {
+  /**
+   * If writer is specified, the encoder will only write to the writer and return null.
+   */
+  @Getter @Setter Appendable writer;
+  @Getter @Setter Object object;
+  /**
+   * Optional, if type is not specified, it will use the object.getClass() as the type 
+   */
+  @Getter @Setter Type type;
+  
+  private EncodeReq() {}
+  
+  public static EncodeReq of(Object obj) { return new EncodeReq().setObject(obj); }
+}
