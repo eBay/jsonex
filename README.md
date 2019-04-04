@@ -116,6 +116,6 @@ this issue.
 ## License
  
 Copyright 2018-2019 eBay Inc. <BR>
-Author/Developer: Jianwu Chen
+Author/Developer: Jianwu Chen, Narendra Jain
  
 Use of this source code is governed by an MIT-style license that can be found in the LICENSE file or at https://opensource.org/licenses/MIT.
