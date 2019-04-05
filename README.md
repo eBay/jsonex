@@ -106,7 +106,7 @@ Please refer the unit test class for more detailed usage patterns:
     String jsonStr = JSONCoder.global.encode(new BigInteger("1234"), opt);  
     ```
  
-## Limitation and Future enhancement
+## Limitations and Future enhancements
 * Support comments "//", "/*.. */"
 * Currently for serialized JSON with "$ref", it can't be de-serialized due to the limitation of JSON parser
 in standard JSON library, Will implement custom JSON parser to decouple from standard JSON library to solve
