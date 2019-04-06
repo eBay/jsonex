@@ -4,7 +4,7 @@
 JSONCoder is a light weight generic object serialization / deserialization library similar to Jackson and FastJson.
 This library has been widely used in various eBay domain projects for many years. It does not mean to be a replacement 
 for other popular libraries. But it solves some specific problems which are not available or not well supported in other 
-alternatives. Following are some of the particular features which make this library useful for certain scenario:
+alternatives. Following are some of the particular features which make this library useful for certain scenarios:
  
 * Focuses on serialize arbitrary java objects by default by detecting cyclic object references
 * Makes sensible default over configuration, such as silently ignore unknown properties by default for forward compatibility 
@@ -28,12 +28,11 @@ options to use single quote, thus avoid un-necessary escape)
 * Support nested JSON String within JSON as normal sub JSON Object instead of serialized json string to avoid un-necessary
  escape in String literal
 * Support Forward compatibility features: silently ignore unknown properties, use @DefaultEnum to annotate a default enum
-which be used if unknown enum value encountered
+which be used if unknown enum value is encountered
 * Partially Support proposed json extension format ([JSONX](./JSONX.md))
   * Certain compact JSON variations such as: quote with: ', ",`, and make quote for key optional 
   * Multi-line string literal with back quote '`'  
 
- 
 
 And many more, please refer the class [JSONCoderOption](JSONCoder/src/main/java/com/ebay/jsoncoder/JSONCoderOption.java)
 for more details. 
