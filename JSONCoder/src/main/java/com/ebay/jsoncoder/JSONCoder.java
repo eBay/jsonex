@@ -9,25 +9,13 @@
 
 package com.ebay.jsoncoder;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.io.StringWriter;
-import java.io.Writer;
-
-import com.ebay.jsoncoder.BeanCoder;
-import com.ebay.jsoncoder.BeanCoderContext;
-import com.ebay.jsoncoder.BeanCoderException;
-import com.ebay.jsoncoder.DecodeReq;
-import com.ebay.jsoncoder.EncodeReq;
-import com.ebay.jsoncoder.JSONCoderOption;
-import com.ebay.jsoncoder.JSONConverter;
-import com.ebay.jsoncoder.JSONTokenerExt;
 import com.ebay.jsoncoder.treedoc.TDJSONParser;
 import com.ebay.jsoncoder.treedoc.TDJSONWriter;
 import com.ebay.jsoncoder.treedoc.TDNode;
-import org.json.JSONException;
-
 import lombok.Getter;
+
+import java.io.Reader;
+import java.io.Writer;
 
 @SuppressWarnings("ALL")
 public class JSONCoder {
