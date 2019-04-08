@@ -35,21 +35,21 @@ public class TDJSONParser {
         case '\'':
         case '`':
           in.read();
-          return node.setVal(in.readQuotedString(c));
+          return node.setValue(in.readQuotedString(c));
         default:
           String str = in.readUntil(",}]\n\r\t").trim();
           if ("null".equals(str))
-            return node.setVal(null);
+            return node.setValue(null);
           if ("true".equals(str))
-            return node.setVal(true);
+            return node.setValue(true);
           if ("false".equals(str))
-            return node.setVal(false);
+            return node.setValue(false);
           if (c == '-' || (c >= '0' && c <= '9')) {
-            return node.setVal(parseNumber(str));
+            return node.setValue(parseNumber(str));
           }
           if (str.isEmpty())
             str = in.read(1);  // At least read one to avoid infinit loop
-          return node.setVal(str);
+          return node.setValue(str);
       }
     } finally {
       node.length = in.getPos() - node.start;
@@ -109,7 +109,7 @@ public class TDJSONParser {
         in.read();
       }
 
-      node.addChild(parse(in, new TDNode(node, key)));
+      parse(in, node.createChild(key));
     }
     return node;
   }
@@ -129,7 +129,7 @@ public class TDJSONParser {
         c = skipSpaceAndComments(in);
         continue;
       }
-      node.addChild(parse(in, new TDNode(node, null)));
+      parse(in, node.createChild(null));
     }
     return node;
   }

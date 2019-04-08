@@ -12,6 +12,7 @@ package com.ebay.jsoncoder.coder;
 import com.ebay.jsoncoder.BeanCoderContext;
 import com.ebay.jsoncoder.BeanCoderException;
 import com.ebay.jsoncoder.ICoder;
+import com.ebay.jsoncoder.treedoc.TDNode;
 import com.ebay.jsoncodercore.util.ClassUtil;
 import lombok.Getter;
 
@@ -25,27 +26,28 @@ import static com.ebay.jsoncodercore.util.StringUtil.toTrimmedStr;
 public class CoderArray implements ICoder<Object> {
   @Getter private static final CoderArray instance = new CoderArray();
 
-  public Class<Object> getType() {return Object.class;}
+  @Override public Class<Object> getType() {return Object.class;}
 
   @Override
-  public Object encode(Object obj, Type type, BeanCoderContext ctx) {
+  public TDNode encode(Object obj, Type type, BeanCoderContext ctx, TDNode target) {
+    target.setType(TDNode.Type.ARRAY);
     Class<?> cls = ClassUtil.getGenericClass(type);
-    List<Object> result = new ArrayList<>();
-    for(int i = 0; i< Array.getLength(obj); i++)
-      result.add(ctx.encode(Array.get(obj, i), cls.getComponentType()));
-    return result;
+    for(int i = 0; i< Array.getLength(obj); i++) {
+      TDNode cn = new TDNode(target, null);
+      ctx.encode(Array.get(obj, i), cls.getComponentType(), target.createChild(null));
+    }
+    return target;
   }
 
   @Override
-  public Object decode(Object obj, Type type, Object targetObj, BeanCoderContext ctx) {
-    if (!(obj instanceof List))
-      throw new BeanCoderException("Incorrect input, the input has to be an array:" + toTrimmedStr(obj, 500));
-    List<?> list = (List<?>) obj;
+  public Object decode(TDNode jsonNode, Type type, Object targetObj, BeanCoderContext ctx) {
+    if (jsonNode.getType() != TDNode.Type.ARRAY)
+      throw new BeanCoderException("Incorrect input, the input has to be an array:" + toTrimmedStr(jsonNode, 500));
     Class<?> cls = ClassUtil.getGenericClass(type);
-    Object array = Array.newInstance(cls.getComponentType(), list.size());
+    Object array = Array.newInstance(cls.getComponentType(), jsonNode.getChildren().size());
     ctx.getObjectPath().push(array);
-    for (int i=0; i<list.size(); i++)
-      Array.set(array, i, ctx.decode(list.get(i), cls.getComponentType(), null, Integer.toString(i)));
+    for (int i=0; i<jsonNode.getChildrenSize(); i++)
+      Array.set(array, i, ctx.decode(jsonNode.getChild(i), cls.getComponentType(), null, Integer.toString(i)));
     return array;
   }
 }

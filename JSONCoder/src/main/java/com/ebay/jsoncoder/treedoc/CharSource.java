@@ -109,12 +109,12 @@ public abstract class CharSource {
     return true;
   }
 
-  // For performance, avoid create String object every time
+  // For performance, avoid creating String object every time
   private String getTermStrWithQuoteAndEscape(char quote) {
     switch (quote) {
       case '\'': return "\\'";
       case '"': return "\\\"";
-      case '`': return "`";
+      case '`': return "\\`";
       default: return "\\";
     }
   }

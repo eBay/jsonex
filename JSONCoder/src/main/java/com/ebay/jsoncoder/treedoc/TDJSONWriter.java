@@ -123,17 +123,17 @@ public class TDJSONWriter {
 
   @SneakyThrows
   private void writeSimple(Appendable out, TDNode node, JSONOption opt) {
-    if (node.val instanceof String) {
-      writeQuotedString(out, (String)node.val, opt.quoteChar);
+    if (node.value instanceof String) {
+      writeQuotedString(out, (String)node.value, opt.quoteChar);
       return;
     }
 
-    if (node.val instanceof Character) {
-      writeQuotedString(out, String.valueOf(node.val), opt.quoteChar);
+    if (node.value instanceof Character) {
+      writeQuotedString(out, String.valueOf(node.value), opt.quoteChar);
       return;
     }
 
-    out.append(node.val.toString());
+    out.append(String.valueOf(node.value));
   }
 
   private void writeQuotedString(Appendable out, String str, char quoteChar) throws IOException {

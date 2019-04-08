@@ -14,11 +14,14 @@ import java.math.BigInteger;
 
 import com.ebay.jsoncoder.BeanCoderContext;
 import com.ebay.jsoncoder.ICoder;
+import com.ebay.jsoncoder.treedoc.TDNode;
 
 public class CoderBigInteger implements ICoder<BigInteger> {
-  public Class<BigInteger> getType() {return BigInteger.class;}
+  @Override public Class<BigInteger> getType() {return BigInteger.class;}
   
-  @Override public Object encode(BigInteger obj, Type type, BeanCoderContext context) { return obj.toString(); }
+  @Override public TDNode encode(BigInteger obj, Type type, BeanCoderContext context, TDNode target) { return target.setValue(obj.toString()); }
 
-  @Override public BigInteger decode(Object obj, Type type, Object targetObj, BeanCoderContext context) { return new BigInteger((String) obj); }
+  @Override public BigInteger decode(TDNode jsonNode, Type type, Object targetObj, BeanCoderContext context) {
+    return new BigInteger((String) jsonNode.getValue());
+  }
 }

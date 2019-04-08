@@ -13,8 +13,11 @@ import com.ebay.jsoncoder.BeanCoderContext;
 import com.ebay.jsoncoder.BeanCoderException;
 import com.ebay.jsoncoder.ICoder;
 import com.ebay.jsoncoder.JSONCoderOption;
+import com.ebay.jsoncoder.treedoc.TDJSONWriter;
+import com.ebay.jsoncoder.treedoc.TDNode;
 import com.ebay.jsoncodercore.util.BeanProperty;
 import com.ebay.jsoncodercore.util.ClassUtil;
+import com.ebay.jsoncodercore.util.ListUtil;
 import com.ebay.jsoncodercore.util.StringUtil;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -24,7 +27,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static com.ebay.jsoncoder.BeanCoder.HASH_KEY;
@@ -37,20 +39,18 @@ public class CoderObject implements ICoder<Object> {
 
   private final static String TYPE_KEY = "$type";
 
-  public Class<Object> getType() { return Object.class; }
+  @Override public Class<Object> getType() { return Object.class; }
 
-  @Override
-  public Object encode(Object obj, Type type, BeanCoderContext ctx) {
+  @Override public TDNode encode(Object obj, Type type, BeanCoderContext ctx, TDNode target) {
+    target.setType(TDNode.Type.MAP);
     JSONCoderOption opt = ctx.getOption();
 
     Class<?> cls = obj.getClass();  // Use the real object;
     if (opt.isIgnoreSubClassFields(cls) && type != null)
       cls = ClassUtil.getGenericClass(type);
 
-    Map<String, Object> result = new LinkedHashMap<>();//NOPMD
-
     if(opt.isShowType() || cls != obj.getClass())
-      result.put(TYPE_KEY, obj.getClass().getName());
+      target.createChild(TYPE_KEY).setValue(obj.getClass().getName());
 
     Map<String, BeanProperty> pds = ClassUtil.getProperties(cls);
     for(BeanProperty pd : pds.values()){
@@ -69,29 +69,33 @@ public class CoderObject implements ICoder<Object> {
       //V3DAL will cause Lazy load exception, we have to catch it
       try{
         Type childType = pd.getGenericType();
-        Object v = ctx.encode(pd.get(obj), childType);
-        if(v != null)
-          result.put(pd.getName(), v);
+        Object co = pd.get(obj);
+        if (co != null) {
+          TDNode cn = ctx.encode(co, childType, target.createChild(pd.getName()));
+          if (cn.getType() == TDNode.Type.SIMPLE && cn.getValue() == null)
+            ListUtil.removeLast(target.getChildren());
+        }
       }catch(Exception e) {
         log.info("warning during encoding", e);
         //ignore this exception
       }
     }
-    return result;
+    return target;
   }
 
   @Override @SneakyThrows
-  public Object decode(Object obj, Type type, Object targetObj, BeanCoderContext ctx) {
+  public Object decode(TDNode jsonNode, Type type, Object targetObj, BeanCoderContext ctx) {
     Class<?> cls = ClassUtil.getGenericClass(type);
 
-    if (! (obj instanceof Map)) {
-      if (cls.isAssignableFrom(obj.getClass()))
-        return obj;  // If cls is Object.class, we don't do further decoding
-      throw new BeanCoderException("Expect an Map object, but actual type=" + obj.getClass() + ";o=" + toTrimmedStr(obj, 500));
+    if (jsonNode.getType() != TDNode.Type.MAP) {
+      if (jsonNode.getValue() != null && cls.isAssignableFrom(jsonNode.getValue().getClass()))
+        return jsonNode.getValue();  // SIMPLE type
+      if (cls.isAssignableFrom(TDNode.class))
+        return jsonNode;  // If cls is Object.class, we don't do further decoding
+      throw new BeanCoderException("Expect an Map object, but actual type=" + jsonNode.getType() +
+          ";o=" + toTrimmedStr(TDJSONWriter.getInstance().writeAsString(jsonNode), 500));
     }
-
-    Map<String, Object> map = (Map<String, Object>) obj;
-    Object subType = map.get(TYPE_KEY);
+    Object subType = jsonNode.getChildValue(TYPE_KEY);
     if (subType instanceof String) {
       try {
         cls = Class.forName((String) subType);
@@ -100,8 +104,9 @@ public class CoderObject implements ICoder<Object> {
       }
     }
 
-    if (cls.isAssignableFrom(obj.getClass()))
-      return obj;
+    // TODO: confirm the test case
+    if (cls.isAssignableFrom(TDNode.class))
+      return jsonNode;
 
     Object result = targetObj;
     if (result == null) {
@@ -111,27 +116,31 @@ public class CoderObject implements ICoder<Object> {
     }
 
     ctx.getObjectPath().push(result);
-    if (map.containsKey(HASH_KEY))
-      ctx.getHashToObjectMap().put((String)map.get(HASH_KEY), result);
+    String hash = (String) jsonNode.getChildValue(HASH_KEY);
+    if (hash != null)
+      ctx.getHashToObjectMap().put(hash, result);
 
     Map<String, BeanProperty> pds = ClassUtil.getProperties(cls);
 
     JSONCoderOption opt = ctx.getOption();
-    for(String key : map.keySet()){
-      BeanProperty prop = pds.get(key);
-      if(prop == null)  //Certain serializer does't follow java bean naming convention, the attribute name is capitalized
-        prop = pds.get(StringUtil.lowerFirst(key));
+    if (jsonNode.getChildren() == null)
+      return result;  // Empty object
+
+    for(TDNode nc : jsonNode.getChildren()){
+      BeanProperty prop = pds.get(nc.getKey());
+      if(prop == null)  // Certain serializer does't follow java bean naming convention, the attribute name is capitalized
+        prop = pds.get(StringUtil.lowerFirst(nc.getKey()));
 
       if(prop == null){
         if(opt.isErrorOnUnknownProperty())
-          throw new BeanCoderException("No such attribute:" + key + ",class:" + cls);
+          throw new BeanCoderException("No such attribute:" + nc.getKey() + ",class:" + cls);
         continue;
       }
 
       int mod = prop.getModifier();
       if(Modifier.isStatic(mod) || prop.isTransient()){
         if(opt.isErrorOnUnknownProperty())
-          throw new BeanCoderException("Field is static or transient:" + key + ",class:" + cls);
+          throw new BeanCoderException("Field is static or transient:" + nc.getKey() + ",class:" + cls);
         continue;  //None public, or static, transient
       }
 
@@ -151,16 +160,15 @@ public class CoderObject implements ICoder<Object> {
 
       if (childTargetObj == null && prop.isImmutable(true)) {  //In that case, the attribute has to be mutable.
         if(opt.isErrorOnUnknownProperty())
-          throw new BeanCoderException("Field is not mutable:" + key + ",class:" + cls);
+          throw new BeanCoderException("Field is not mutable:" + nc.getKey() + ",class:" + cls);
         continue;
       }
 
       Type childType = prop.getGenericType();
-      Object child = ctx.decode(map.get(key), childType, childTargetObj, key);
+      Object child = ctx.decode(nc, childType, childTargetObj, nc.getKey());
       if(childTargetObj != child)
         prop.set(result, child);
     }
     return result;
   }
-
 }

@@ -13,6 +13,8 @@ import com.ebay.jsoncoder.coder.CoderArray;
 import com.ebay.jsoncoder.coder.CoderCollection;
 import com.ebay.jsoncoder.coder.CoderMap;
 import com.ebay.jsoncoder.coder.CoderObject;
+import com.ebay.jsoncoder.treedoc.TDJSONWriter;
+import com.ebay.jsoncoder.treedoc.TDNode;
 import com.ebay.jsoncodercore.util.ClassUtil;
 import com.ebay.jsoncodercore.util.StringUtil;
 
@@ -39,25 +41,19 @@ public class BeanCoder {
   private final static int MAX_DEPTH = 50;
   public final static String HASH_KEY = "$hash";
   private final static String REF_PREFIX = "$ref:";
-  private final static JSONCoder jsonCoder;
-  static {
-    JSONCoderOption coderOption = new JSONCoderOption();
-    coderOption.getJsonOption().setAlwaysQuoteName(true);
-    jsonCoder = new JSONCoder(coderOption);
-  }
 
   // Convenient utility method
-  public static Object encode(Object obj) { return encode(obj, new BeanCoderContext(JSONCoderOption.global), null); }
-  public static Object encode(Object obj, BeanCoderContext context, Type type) { return _encode(obj, context.reset(), type); }
+  public static TDNode encode(Object obj) { return encode(obj, new BeanCoderContext(JSONCoderOption.global), null); }
+  public static TDNode encode(Object obj, BeanCoderContext context, Type type) { return _encode(obj, context.reset(), type, new TDNode()); }
 
-  public static Object decode(Object obj, Type type) { return decode(obj, type, null, "", new BeanCoderContext(JSONCoderOption.global)); }
-  public static <T> T decode(Object obj, T target) {
-    return (T)decode(encode(obj), target.getClass(), target, "", new BeanCoderContext(JSONCoderOption.global));
+  public static Object decode(TDNode obj, Type type) { return decode(obj, type, null, "", new BeanCoderContext(JSONCoderOption.global)); }
+  public static <T> T decode(TDNode obj, T target) {
+    return (T)decode(obj, target.getClass(), target, "", new BeanCoderContext(JSONCoderOption.global));
   }
 
   @SuppressWarnings("unchecked")
   public static <T> T deepClone(T src) { return src == null ? null : (T)decode(encode(src), src.getClass()); }
-  public static <T> T deepCopyTo(T src, T target) { return src == null ? null : decode(src, target); }
+  public static <T> T deepCopyTo(T src, T target) { return src == null ? null : decode(encode(src), target); }
 
   /**
    * This method should only be called internally during recursion, as it will not reset context
@@ -65,37 +61,33 @@ public class BeanCoder {
    * @return  the encoded object, can be either LinkedHashMap, ArrayList, String, primitive types or null
    */
   @SuppressWarnings("unchecked")
-  static Object _encode(Object obj, BeanCoderContext ctx, Type type)
+  static TDNode _encode(Object obj, BeanCoderContext ctx, Type type, TDNode target)
   {
     JSONCoderOption opt = ctx.getOption();
     int pathSize = ctx.objectPath.size();
     try {
       if (obj == null)
-        return null;
+        return target;
 
       // For reflection Objects, we will just dump it's string value, no deserialization is possible
-      if(obj.getClass().getName().startsWith("java.lang.reflect."))
-        return obj.toString();
-
       Class<?> cls = obj.getClass();  // Use the real object;
+      if(obj.getClass().getName().startsWith("java.lang.reflect.") ||
+          cls == Object.class || cls == BigDecimal.class)
+        return target.setValue(obj.toString());
 
       //Handle primitive types
       if (ClassUtil.isSimpleType(cls))
-        return obj;
+        return target.setValue(obj);
 
       // Filter ignored classes
       if (opt.isClassSkipped(cls))
-        return null;
-
+        return target;
 
       @SuppressWarnings("rawtypes")
       ICoder coder = opt.findCoder(cls);
       if (coder != null) {
-        return coder.encode(obj, type, ctx);
+        return coder.encode(obj, type, ctx, target);
       }
-
-      if(cls == Object.class || cls == BigDecimal.class)
-        return obj.toString();
 
       Object eqWrapper = opt.getEqualsWrapper(obj);
 
@@ -103,7 +95,7 @@ public class BeanCoder {
       try {
         int p = ctx.objectPath.indexOf(eqWrapper);
         if (p >= 0) {
-          return REF_PREFIX + StringUtil.appendRepeatedly(new StringBuilder(), "../", p + 1);
+          return target.setValue(REF_PREFIX + StringUtil.appendRepeatedly(new StringBuilder(), "../", p + 1));
         }
       } catch(ClassCastException e) {
         // Workaround for some class that breaks equals() contract by doing caste before type check
@@ -111,16 +103,16 @@ public class BeanCoder {
       }
 
       if (ctx.convertedObjects.size() > MAX_OBJECTS || ctx.objectPath.size() > MAX_DEPTH)
-        return "[TRIMMED_DUE_TO_TOO_MANY_OBJECT]";
+        return target.setValue("[TRIMMED_DUE_TO_TOO_MANY_OBJECT]");
 
-      Map<String, Object> orgResult = ctx.convertedObjects.get(eqWrapper);
+      TDNode orgResult = ctx.convertedObjects.get(eqWrapper);
       if(opt.dedupWithRef && orgResult != null) {
-        String hash = (String) orgResult.get(HASH_KEY);
+        String hash = (String) orgResult.getChildValue(HASH_KEY);
         if (hash == null) {  // This is the first reference. Only if there's a reference, the original map will display the hash value
           hash = Long.toHexString(abs(eqWrapper.hashCode()));
-          orgResult.put(HASH_KEY, hash);
+          orgResult.createChild(HASH_KEY).setValue(hash);
         }
-        return REF_PREFIX + "#" + hash;
+        return target.setValue(REF_PREFIX + "#" + hash);
       }
 
       //Don't put empty collection and map as the hashCode method is not implemented properly
@@ -129,20 +121,19 @@ public class BeanCoder {
         ctx.objectPath.push(eqWrapper);
       }
 
-      Object result;
       if (cls.isArray()) {   //Handle it as any array
-        result = CoderArray.getInstance().encode(obj, type, ctx);
+        CoderArray.getInstance().encode(obj, type, ctx, target);
       } else if (obj instanceof Collection) {  //Handle it as an Collection
-        result = CoderCollection.getInstance().encode((Collection<?>)obj, type, ctx);
+        CoderCollection.getInstance().encode((Collection<?>)obj, type, ctx, target);
       } else if (obj instanceof Map) {
-        result = CoderMap.getInstance().encode((Map<?,?>)obj, type, ctx);
+        CoderMap.getInstance().encode((Map<?,?>)obj, type, ctx, target);
       } else
-        result = (Map<String, Object>)CoderObject.getInstance().encode(obj, type, ctx);
+        CoderObject.getInstance().encode(obj, type, ctx, target);
 
-      if (result instanceof Map && !((Map)result).isEmpty())
-        ctx.convertedObjects.put(eqWrapper, (Map)result);
+      if (target.getType() == TDNode.Type.MAP && target.hasChildren())
+        ctx.convertedObjects.put(eqWrapper, target);
 
-      return result;
+      return target;
     } catch (Exception ex) {
       throw new BeanCoderException(ex);
     } finally{
@@ -154,23 +145,23 @@ public class BeanCoder {
 
   /**
    *
-   * @param obj  The object to decode, the o can be one of following type: LinkedHashMap, ArrayList, String, primitive types or null
+   * @param jsonNode  The json object to decode, the o can be one of following type:
    * @param type  The target type to decode to
    * @param targetObj The target object to decode to, if it's null, a new Object will be created
    * @param ctx  The decode context
    * @return The decoded Object
    */
   @SuppressWarnings({ "unchecked", "rawtypes" })
-  public static Object decode(Object obj, Type type, Object targetObj, String name, BeanCoderContext ctx)
+  public static Object decode(TDNode jsonNode, Type type, Object targetObj, String name, BeanCoderContext ctx)
   {
-    if(obj == null)
+    if(jsonNode == null)
       return null;
     Class<?> cls = ClassUtil.getGenericClass(type);
 
     int pathSize = ctx.objectPath.size();
     try{
-      if (obj instanceof String && cls != String.class) {  // handle $ref type
-        String s = (String) obj;
+      if (jsonNode.getValue() instanceof String && cls != String.class) {  // handle $ref type
+        String s = (String) jsonNode.getValue();
         if (s.startsWith(REF_PREFIX)) {
           String ref = s.substring(REF_PREFIX.length());
           if(ref.length() > 0 && ref.charAt(0) == '#')  // Reference to a hashcode
@@ -184,29 +175,31 @@ public class BeanCoder {
         }
       }
 
-      Object p = convertToSimpleType(obj, cls);
-      if (p != null)
-        return p;
+      if (jsonNode.getType() == TDNode.Type.SIMPLE) {
+        Object p = convertToSimpleType(jsonNode.getValue(), cls);
+        if (p != null)
+          return p;
+      }
 
       ICoder<?> coder = ctx.option.findCoder(cls);
       if(coder != null)
-        return coder.decode(obj, type, targetObj, ctx);
+        return coder.decode(jsonNode, type, targetObj, ctx);
 
       if (cls == String.class) {  // expect a string, but got non-string, just return serialized form of the the object
-        return jsonCoder.encode(obj);
+        return TDJSONWriter.getInstance().writeAsString(jsonNode);
       }
 
       if (cls.isArray())  // Handle the array type
-        return CoderArray.getInstance().decode(obj, type, targetObj, ctx);
+        return CoderArray.getInstance().decode(jsonNode, type, targetObj, ctx);
 
       if (Collection.class.isAssignableFrom(cls))  // Handle the collection type
-        return CoderCollection.getInstance().decode(obj, type, targetObj, ctx);
+        return CoderCollection.getInstance().decode(jsonNode, type, targetObj, ctx);
 
       if (Map.class.isAssignableFrom(cls))
-        return CoderMap.getInstance().decode(obj, type, targetObj, ctx);
+        return CoderMap.getInstance().decode(jsonNode, type, targetObj, ctx);
 
       //Handle bean type
-      return CoderObject.getInstance().decode(obj, type, targetObj, ctx);
+      return CoderObject.getInstance().decode(jsonNode, type, targetObj, ctx);
     } catch(Exception e) {
       throw new BeanCoderException("failed to decode:"+type + "; name=" + name, e);
     } finally {

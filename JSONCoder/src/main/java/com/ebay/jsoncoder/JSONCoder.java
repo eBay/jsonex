@@ -22,6 +22,9 @@ import com.ebay.jsoncoder.EncodeReq;
 import com.ebay.jsoncoder.JSONCoderOption;
 import com.ebay.jsoncoder.JSONConverter;
 import com.ebay.jsoncoder.JSONTokenerExt;
+import com.ebay.jsoncoder.treedoc.TDJSONParser;
+import com.ebay.jsoncoder.treedoc.TDJSONWriter;
+import com.ebay.jsoncoder.treedoc.TDNode;
 import org.json.JSONException;
 
 import lombok.Getter;
@@ -36,17 +39,15 @@ public class JSONCoder {
   @SuppressWarnings("unchecked")
   public static <T> T decode(DecodeReq<T> req, JSONCoderOption opt) {
     try {
-      Object json = req.json;
-      if (json == null && req.reader != null) {
-        JSONTokenerExt jsonTokener = new JSONTokenerExt(req.reader);
-        json = jsonTokener.nextValue(true);
+      TDNode jsonNode = req.jsonNode;
+      if (jsonNode == null && req.source != null) {
+        jsonNode = TDJSONParser.getInstance().parse(req.source);
       }
       
-      if (json == null)
+      if (jsonNode == null)
         return null;
 
-      Object map = JSONConverter.jsonObjectToMap(json);
-      return (T) BeanCoder.decode(map, req.getType(), req.target, "", new BeanCoderContext(opt));
+      return (T) BeanCoder.decode(jsonNode, req.getType(), req.target, "", new BeanCoderContext(opt));
     } catch (Exception e) {
       if (e instanceof BeanCoderException)
         throw (BeanCoderException)e;
@@ -55,12 +56,28 @@ public class JSONCoder {
   }
   
   @SuppressWarnings({"unchecked", "WeakerAccess"})
-  public static <T> T decode(String jsonStr, Class<T> type, JSONCoderOption opt) { return (T)decode(DecodeReq.of(type).setJsonString(jsonStr), opt); }
+  public static <T> T decode(String jsonStr, Class<T> type, JSONCoderOption opt) { return (T)decode(DecodeReq.of(type).setSource(jsonStr), opt); }
   @SuppressWarnings("unchecked")
-  public static <T> T decode(Reader reader, Class<T> type, JSONCoderOption opt) { return (T)decode(DecodeReq.of(type).setReader(reader), opt); }
+  public static <T> T decode(Reader reader, Class<T> type, JSONCoderOption opt) { return (T)decode(DecodeReq.of(type).setSource(reader), opt); }
   @SuppressWarnings("unchecked")
-  public static <T> T decode(Object json, Class<T> type, JSONCoderOption opt) { return (T)decode(DecodeReq.of(type).setJson(json), opt); }
-  
+  public static <T> T decode(TDNode treeDocNode, Class<T> type, JSONCoderOption opt) { return (T)decode(DecodeReq.of(type).setJsonNode(treeDocNode), opt); }
+
+  public <T> T decode(DecodeReq<T> req) { return decode(req, option); }
+  public <T> T decodeTo(String str, T target) {
+    return decode(DecodeReq.<T>of(target.getClass()).setSource(str).setTarget(target));
+  }
+  public <T> T decode(String str, Class<T> type) { return decode(str, type, option); }
+  @SuppressWarnings("unchecked")
+  public <T> T decode(Reader reader, Class<T> type) { return (T)decode(DecodeReq.of(type).setSource(reader), option); }
+  @SuppressWarnings("unchecked")
+  public <T> T decode(TDNode treeDocNode, Class<T> type) { return (T)decode(DecodeReq.of(type).setJsonNode(treeDocNode), option); }
+
+
+  /**
+   * @param req
+   * @param opt
+   * @return
+   */
   public static String encode(EncodeReq req, JSONCoderOption opt) {
     try {
       StringBuilder sWriter = null;
@@ -68,26 +85,15 @@ public class JSONCoder {
       if (writer == null) {
         writer = sWriter = new StringBuilder();
       }
-      Object map = BeanCoder.encode(req.object, new BeanCoderContext(opt), req.type);
-      JSONConverter.toJSONString(writer, map, opt.getJsonOption(), "");
+      TDNode jsonNode = BeanCoder.encode(req.object, new BeanCoderContext(opt), req.type);
+      TDJSONWriter.getInstance().write(writer, jsonNode, opt.getJsonOption());
       return sWriter == null ? null : sWriter.toString();
-    } catch (IOException e) {
+    } catch (Exception e) {
       throw new BeanCoderException(e);
     }
   }
   public static String encode(Object obj, JSONCoderOption opt) { return encode(EncodeReq.of(obj), opt); }
   public static void encode(Object obj, Writer writer, JSONCoderOption opt) { encode(EncodeReq.of(obj).setWriter(writer), opt); }
-
-  public <T> T decode(DecodeReq<T> req) { return decode(req, option); }
-  public <T> T decodeTo(String str, T target) {
-    return decode(DecodeReq.<T>of(target.getClass()).setJsonString(str).setTarget(target));
-  }
-  public <T> T decode(String str, Class<T> type) { return decode(str, type, option); }
-  @SuppressWarnings("unchecked")
-  public <T> T decode(Reader reader, Class<T> type) { return (T)decode(DecodeReq.of(type).setReader(reader), option); }
-  @SuppressWarnings("unchecked")
-  public <T> T decode(Object json, Class<T> type) { return (T)decode(DecodeReq.of(type).setJson(json), option); }
-  
 
   public String encode(EncodeReq req) { return encode(req, option); }
   public String encode(Object obj) { return encode(obj, option); }

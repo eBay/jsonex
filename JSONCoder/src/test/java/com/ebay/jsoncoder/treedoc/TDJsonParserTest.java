@@ -1,8 +1,6 @@
 package com.ebay.jsoncoder.treedoc;
 
-import com.ebay.jsoncoder.JSONCoder;
 import com.ebay.jsoncoder.treedoc.TDJSONWriter.JSONOption;
-import junit.framework.Assert;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 
@@ -17,10 +15,10 @@ public class TDJsonParserTest {
     TDNode node = TDJSONParser.getInstance().parse(reader);
 
     log.info("Node=" + TestUtil.toJSON(node));
-    assertEquals(10, node.getChild("limit").val);
-    assertEquals("100000000000000000000", node.getChild("total").val);
-    assertEquals("Some Name 1", node.getChildByPath("data/0/name").val);
-    assertEquals("2nd st", node.getChildByPath("data/1/address/streetLine").val);
+    assertEquals(10, node.getChild("limit").value);
+    assertEquals("100000000000000000000", node.getChild("total").value);
+    assertEquals("Some Name 1", node.getChildByPath("data/0/name").value);
+    assertEquals("2nd st", node.getChildByPath("data/1/address/streetLine").value);
 
     String json = TDJSONWriter.getInstance().writeAsString(node);
     log.info("json: " + json);

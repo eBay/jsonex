@@ -12,6 +12,7 @@ package com.ebay.jsoncoder.coder;
 import java.lang.reflect.Type;
 
 import com.ebay.jsoncoder.BeanCoderContext;
+import com.ebay.jsoncoder.treedoc.TDNode;
 import com.ebay.jsoncodercore.type.Identifiable;
 import com.ebay.jsoncodercore.util.ClassUtil;
 import com.ebay.jsoncodercore.util.EnumUtil;
@@ -19,9 +20,11 @@ import com.ebay.jsoncoder.ICoder;
 
 @SuppressWarnings("rawtypes")
 public class CoderEnum implements ICoder<Enum> {
-  public Class<Enum> getType() {return Enum.class;}
+  @Override public Class<Enum> getType() {return Enum.class;}
 
-  public Object encode(Enum obj, Type type, BeanCoderContext context) {
+  @Override public TDNode encode(Enum obj, Type type, BeanCoderContext context, TDNode target) { return target.setValue(encode(obj, context)); }
+
+  private Object encode(Enum obj, BeanCoderContext context) {
     if(obj instanceof Identifiable){
       Identifiable<?> id = (Identifiable<?>) obj;
       if(context.getOption().isShowEnumName()){
@@ -32,10 +35,13 @@ public class CoderEnum implements ICoder<Enum> {
       return obj.toString();
   }
 
-  public Enum decode(Object obj, Type type, Object targetObj, BeanCoderContext context) {
+
+
+  @Override public Enum decode(TDNode jsonNode, Type type, Object targetObj, BeanCoderContext context) {
     Integer intValue;
     String strValue = null;
-    
+
+    Object obj = jsonNode.getValue();
     if(obj instanceof Integer)
       intValue = (Integer) obj;
     else{

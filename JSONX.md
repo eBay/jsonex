@@ -23,7 +23,7 @@ To solve the above limitations, we propose **JSONX** with following extensions
 * Quote can use either ("), (') or (\`)
 * Multi-line String literal support with back quote (`).
 * comma allowed for last element (Make it merge friendly)  (Not yet supported by JSONCoder, will be added shortly)
-* Object 
+* Object attributes order matters
 
 ## Examples
 

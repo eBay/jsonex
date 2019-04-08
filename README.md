@@ -1,17 +1,20 @@
 # JSONCoder
 
 ## Description
-JSONCoder is a light weight generic object serialization / deserialization library similar to Jackson and FastJson.
-This library has been widely used in various eBay domain projects for many years. It does not mean to be a replacement 
-for other popular libraries. But it solves some specific problems which are not available or not well supported in other 
-alternatives. Following are some of the particular features which make this library useful for certain scenarios:
- 
-* Focuses on serialize arbitrary java objects by default by detecting cyclic object references
-* Makes sensible default over configuration, such as silently ignore unknown properties by default for forward compatibility 
-* Focuses on developer friendly APIs at the same time still provides flexible configurations.  
-* Provides options to generate compact JSON format (No-standard format, such as make quotes for key optional, 
-options to use single quote, thus avoid un-necessary escape)
-* Parses configuration friendly JSON variations. Such as optional quotes, multi-line string literal, (comments to be supported) etc
+JSONCoder is a light weight generic object serialization / deserialization library similar to Jackson or FastJson. This library has been widely used in various eBay domain projects for years. It does not mean to be a replacement for other popular libraries. But it solves some specific problems which are not available or not well supported in other alternatives. 
+
+## Why JSONCoder
+There are plenty of options for JSON serialization/deserialization libraries, why we need another one? If you are also a fan of JSON , but hate the limitation that JSON standards make it so hard to be used as a configuration language. But still don't give up JSON to YAML (JSON is nice, why need Yet Another Markup Language). You can have a try of this library. This library focused solving following problem well:  
+
+* Supports JSON extension proposal ([JSONX](./JSONX.md)) which will make it friendly for configuration, such as
+    * comments support
+    * quote of key is optional
+    * customize quote characters (Avoid un-necessary escapes by choosing different quote characters) 
+    * multiple string literal as in ES6
+    * Merge of config files (e.g. environment specific config override common config)
+* Supports serialization of arbitrary java objects out of box by detecting cyclic object references. You don't have to write serializer friendly classes. Whatever you have, it's supported.
+* Make sensible default over configuration. Minimize annotation or configuration usage. Such as it silently ignore unknown properties by default for forward compatibility
+* Focuses on developer friendly APIs at the same time still provides flexible configurations  
 
 ## Features
 * Auto-detect cyclic references and serialize the reference to avoid stack overflow
@@ -25,13 +28,10 @@ options to use single quote, thus avoid un-necessary escape)
 * Polymorphic types with "$type" attribute during deserialization
 * Generic types during deserialization
 * Deserialize and append to existing object (Incremental decoding, could be used to merge multiple config files)
-* Support nested JSON String within JSON as normal sub JSON Object instead of serialized json string to avoid un-necessary
- escape in String literal
-* Support Forward compatibility features: silently ignore unknown properties, use @DefaultEnum to annotate a default enum
-which be used if unknown enum value is encountered
-* Partially Support proposed json extension format ([JSONX](./JSONX.md))
-  * Certain compact JSON variations such as: quote with: ', ",`, and make quote for key optional 
-  * Multi-line string literal with back quote '`'  
+* Supports nested JSON String within JSON as normal sub JSON Object instead of serialized json string to avoid un-necessary escape in String literal
+* Supports Forward compatibility features: silently ignore unknown properties, use @DefaultEnum to annotate a default enum which be used if unknown enum value is encountered
+* Supports proposed json extension format ([JSONX](./JSONX.md))
+* JDK version: 1.7 or above 
 
 
 And many more, please refer the class [JSONCoderOption](JSONCoder/src/main/java/com/ebay/jsoncoder/JSONCoderOption.java)
@@ -61,11 +61,11 @@ Please refer the unit test class for more detailed usage patterns:
     ```java
    JSONCoderOption opt = new JSONCoderOption();
     // For SomeClass1 and it's sub-classes, only include field: "field1ForClass1", "field2ForClass1"
-    opt.getOrAddSimpleFilter(SomeClass1.class).setInclude(true).addProperties("field1ForClass1", "field2ForClass1");
+    opt.getSimpleFilterFor(SomeClass1.class).setInclude(true).addProperties("field1ForClass1", "field2ForClass1");
     // For SomeClass2, exclude field: "fieldForClass2"
-    opt.getOrAddSimpleFilter(SomeClass2.class).addProperties("fieldForClass2");
+    opt.getSimpleFilterFor(SomeClass2.class).addProperties("fieldForClass2");
     // For any class, exclude field: "fieldInAnyClass"
-    opt.getOrAddDefaultFilter().addProperties("fieldInAnyClass");
+    opt.getDefaultFilter().addProperties("fieldInAnyClass");
     // Exclude certain classes
     opt.addSkippedClasses(SomeExcludedClass.class);
     String result = JSONCoder.encode(bean, opt);
@@ -74,7 +74,7 @@ Please refer the unit test class for more detailed usage patterns:
 4. Deserialize with generic types
     ```java
     String str = "['str1', 'str2', 'str3']";
-    List<String> result = JSONCoder.global.decode(new DecodeReq<List<String>>(str){});
+    List<String> result = JSONCoder.global.decode(new DecodeReq<List<String>>(){}.setSource(str));
     ```
 5. Deserialize and merge to existing object (Incremental decode)
     ```java
@@ -92,25 +92,22 @@ Please refer the unit test class for more detailed usage patterns:
     public class CoderBigInteger implements ICoder<BigInteger>{
       public Class<BigInteger> getType() {return BigInteger.class;}
       
-      @Override public Object encode(BigInteger o, BeanCoderContext context) {
-        return o.toString();
+      @Override public TDNode encode(BigInteger o, BeanCoderContext context, TDNode target) {
+        return target.setValue(o.toString());
       }
     
-      @Override public BigInteger decode(Object o, Type type, BeanCoderContext context) {
-        return new BigInteger((String)o);
+      @Override public BigInteger decode(TDNode jsonNode, Type type, BeanCoderContext context) {
+        return new BigInteger((String)jsonNode.getValue());
       }
     }
     JSONCoderOption opt = new JSONCoderOption()
       .addCoder(new CoderBigInteger());
-    String jsonStr = JSONCoder.global.encode(new BigInteger("1234"), opt);  
+    String jsonStr = JSONCoder.global.encode(new BigInteger("1234"), opt); 
     ```
  
 ## Limitations and Future enhancements
-* Support comments "//", "/*.. */"
-* Currently for serialized JSON with "$ref", it can't be de-serialized due to the limitation of JSON parser
-in standard JSON library, Will implement custom JSON parser to decouple from standard JSON library to solve
-this issue.
 * Performance improvement
+
 
 ## License
  
