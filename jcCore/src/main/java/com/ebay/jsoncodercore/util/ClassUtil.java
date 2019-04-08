@@ -9,6 +9,7 @@
 
 package com.ebay.jsoncodercore.util;
 
+import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,35 +42,27 @@ public class ClassUtil {
 
 
   @Deprecated  //Used only for testing, don't use in production code
-  public static void setStaticField(String className, String fieldName, Object value) {
-    try{
-      Class<?> cls = Class.forName(className, true, ClassUtil.class.getClassLoader());
-      setPrivateField(cls, null, fieldName, value);
-    }catch(Exception e){
-      throw new RuntimeException(e);
-    }
+  @SneakyThrows
+  public static void setStaticPrivateField(String className, String fieldName, Object value) {
+    Class<?> cls = Class.forName(className, true, ClassUtil.class.getClassLoader());
+    setPrivateField(cls, null, fieldName, value);
   }
 
   @Deprecated  //Used only for testing, don't use in production code
-  public static void setPrivateField(Object obj, String fieldName, Object value){
-    setPrivateField(obj.getClass(), obj, fieldName, value);
-  }
+  public static void setPrivateField(Object obj, String fieldName, Object value) { setPrivateField(obj.getClass(), obj, fieldName, value); }
 
   @Deprecated  //Used only for testing, don't use in production code
+  @SneakyThrows
   public static void setPrivateField(Class<?> cls, Object obj, String fieldName, Object value){
-    try{
-      Field field = getDeclaredField(cls, fieldName);
+    Field field = getDeclaredField(cls, fieldName);
 
-      //Very Hacky
-      Field modifiersField = Field.class.getDeclaredField("modifiers");
-      modifiersField.setAccessible(true);
-      modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+    //Very Hacky
+    Field modifiersField = Field.class.getDeclaredField("modifiers");
+    modifiersField.setAccessible(true);
+    modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
 
-      field.setAccessible(true);
-      field.set(obj, value);
-    }catch(Exception e){
-      throw new RuntimeException(e);
-    }
+    field.setAccessible(true);
+    field.set(obj, value);
   }
 
   /**
@@ -195,6 +188,8 @@ public class ClassUtil {
    * <li>2. non-static getter method
    * <li>3. Static field.
    * <li>4. non-state field. (No matter it's public or private.)
+   *
+   * // TODO: support property name contains "." or "/"
    */
   public static Object getObjectByPath(String path) throws Exception {
     int p = path.indexOf('/');//NOPMD
@@ -237,10 +232,10 @@ public class ClassUtil {
 
     //Check if it's array
     try{
+      int idx = Integer.valueOf(propertyName);
       //it has to be a map, collection or array and Object can't be null
       if (obj == null)
         throw new IllegalArgumentException("obj can't be null when property name is a number: " + propertyName);
-      int idx = Integer.parseInt(propertyName);
       if (cls.isArray()) {
         return Array.get(obj, idx);
       } else if(Collection.class.isAssignableFrom(cls)) {
@@ -440,41 +435,6 @@ public class ClassUtil {
   }
 
   /**
-   * Caller should make sure input o is not null. Otherwise, it will through NPE.
-   * if the type is convertible, it will return a String, otherwise null be returned.
-   *
-   * @param obj
-   * @return null if it's not convertible.
-   */
-  public static String simpleObjectToString(Object obj, BeanConvertContext opt)
-  {
-    if(obj == null)
-      throw new NullPointerException();//NOPMD
-
-    Class<?> cls = obj.getClass();
-    if(cls == String.class)
-      return (String)obj;
-
-    if(cls == boolean.class || cls == Boolean.class ||
-      cls == byte.class || cls == Byte.class ||
-      cls == int.class || cls == Integer.class ||
-      cls == long.class || cls == Long.class ||
-      cls == float.class || cls == Float.class ||
-      cls == double.class || cls == Double.class ||
-      cls == char.class || cls == Character.class)
-      return String.valueOf(obj);
-
-    if(Enum.class.isAssignableFrom(cls)){
-      return String.valueOf(obj);
-    }
-
-    if(Date.class.isAssignableFrom(cls))
-      return new SimpleDateFormat(opt.dateFormat).format((Date)obj);
-
-    return null;
-  }
-
-  /**
    * Check if the cls is Simple type that can be directly mapped to JSON type
    */
   public static boolean isSimpleType(Class<?> cls){
@@ -494,7 +454,7 @@ public class ClassUtil {
    * Convert to a simple type from a matching Object
    * return null, if it's not able to convert
    */
-  public static Object convertToSimpleType(Object obj, Class<?> cls)
+  public static Object objectToSimpleType(Object obj, Class<?> cls)
   {
     if (cls == String.class && (obj == null || obj instanceof String))
       return obj;

@@ -1,10 +1,11 @@
 # JSONCoder
-
+[![Build Status](https://travis-ci.org/jianwu/JSONCoder.svg?branch=master)](https://travis-ci.org/jianwu/JSONCoder)
+[![codecov](https://codecov.io/gh/eBay/JSONCoder/branch/master/graph/badge.svg)](https://codecov.io/gh/eBay/JSONCoder)
 ## Description
 JSONCoder is a light weight generic object serialization / deserialization library similar to Jackson or FastJson. This library has been widely used in various eBay domain projects for years. It does not mean to be a replacement for other popular libraries. But it solves some specific problems which are not available or not well supported in other alternatives. 
 
 ## Why JSONCoder
-There are plenty of options for JSON serialization/deserialization libraries, why we need another one? If you are also a fan of JSON , but hate the limitation that JSON standards make it so hard to be used as a configuration language. But still don't give up JSON to YAML (JSON is nice, why need Yet Another Markup Language). You can have a try of this library. This library focused solving following problem well:  
+There are plenty of options for JSON serialization/deserialization libraries, why we need another one? If you are also a fan of JSON , but hate the limitation that JSON standards make it so hard to be used as a configuration language. But still don't give up JSON to YAML (JSON is nice, why need Yet Another Markup Language). You can have a try of this library. This library focuses on solving following problem well:  
 
 * Supports JSON extension proposal ([JSONX](./JSONX.md)) which will make it friendly for configuration, such as
     * comments support

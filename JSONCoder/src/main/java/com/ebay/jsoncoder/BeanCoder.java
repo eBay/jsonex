@@ -23,7 +23,7 @@ import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Map;
 
-import static com.ebay.jsoncodercore.util.ClassUtil.convertToSimpleType;
+import static com.ebay.jsoncodercore.util.ClassUtil.objectToSimpleType;
 
 /**
  * A coder to convert java class to a Map, List or String representation.
@@ -176,7 +176,7 @@ public class BeanCoder {
       }
 
       if (jsonNode.getType() == TDNode.Type.SIMPLE) {
-        Object p = convertToSimpleType(jsonNode.getValue(), cls);
+        Object p = objectToSimpleType(jsonNode.getValue(), cls);
         if (p != null)
           return p;
       }
