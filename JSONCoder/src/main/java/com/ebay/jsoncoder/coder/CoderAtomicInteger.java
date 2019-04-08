@@ -9,16 +9,19 @@
 
 package com.ebay.jsoncoder.coder;
 
+import com.ebay.jsoncoder.BeanCoderContext;
+import com.ebay.jsoncoder.ICoder;
+import com.ebay.jsoncoder.treedoc.TDNode;
+
 import java.lang.reflect.Type;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.ebay.jsoncoder.BeanCoderContext;
-import com.ebay.jsoncoder.ICoder;
-
 public class CoderAtomicInteger implements ICoder<AtomicInteger> {
-  public Class<AtomicInteger> getType() {return AtomicInteger.class;}
+  @Override public Class<AtomicInteger> getType() {return AtomicInteger.class;}
   
-  @Override public Object encode(AtomicInteger obj, Type type, BeanCoderContext context) { return obj.get(); }
+  @Override public TDNode encode(AtomicInteger obj, Type type, BeanCoderContext context, TDNode target) { return target.setValue(obj.get()); }
 
-  @Override public AtomicInteger decode(Object obj, Type type, Object targetObj, BeanCoderContext context) { return new AtomicInteger((int) obj); }
+  @Override public AtomicInteger decode(TDNode tdNode, Type type, Object targetObj, BeanCoderContext context) {
+    return new AtomicInteger((int)tdNode.getValue());
+  }
 }

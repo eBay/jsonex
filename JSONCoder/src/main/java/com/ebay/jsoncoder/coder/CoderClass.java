@@ -14,20 +14,21 @@ import java.lang.reflect.Type;
 import com.ebay.jsoncoder.BeanCoderContext;
 import com.ebay.jsoncoder.BeanCoderException;
 import com.ebay.jsoncoder.ICoder;
+import com.ebay.jsoncoder.treedoc.TDNode;
 
 @SuppressWarnings("rawtypes")
 public class CoderClass implements ICoder<Class> {
-  public Class<Class> getType() {return Class.class;}
+  @Override public Class<Class> getType() {return Class.class;}
   
-  @Override public Object encode(Class obj, Type type, BeanCoderContext context) {
-    return obj.getCanonicalName();
+  @Override public TDNode encode(Class obj, Type type, BeanCoderContext context, TDNode target) {
+    return target.setValue(obj.getCanonicalName());
   }
 
-  @Override public Class decode(Object obj, Type type, Object targetObj, BeanCoderContext context) {
+  @Override public Class decode(TDNode jsonNode, Type type, Object targetObj, BeanCoderContext context) {
     try {
-      return Class.forName((String) obj);
+      return Class.forName((String) jsonNode.getValue());
     } catch (Exception e) {
-      throw new BeanCoderException("Can't load class: " + obj, e);
+      throw new BeanCoderException("Can't load class: " + jsonNode.getValue(), e);
     }
   }
 }

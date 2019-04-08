@@ -11,6 +11,8 @@ package com.ebay.jsoncoder;
 
 import com.ebay.jsoncoder.TestBean2.Enum1;
 import com.ebay.jsoncoder.TestBean2.IdentifiableEnum;
+import com.ebay.jsoncoder.treedoc.TDNode;
+import com.ebay.jsoncoder.treedoc.TestUtil;
 import com.ebay.jsoncodercore.util.MapBuilder;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +22,7 @@ import org.junit.Test;
 import org.junit.rules.TestName;
 
 import javax.xml.datatype.DatatypeFactory;
+import java.io.Reader;
 import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -31,7 +34,6 @@ import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -40,6 +42,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -145,13 +148,8 @@ public class JSONCoderTest {
 
     assertTrue("Generate ref if dedupWithRef is set", str.contains("$ref"));
     TestBean tb1 = JSONCoder.global.decode(str, TestBean.class);
-    // assertNotSame(tb1.getBean2(), tb1.bean2List.get(0));
-    // TODO: Fix. currently reference object can't be de-serialized due to JSONObject
-    // uses HashMap which cause the Attributes out of order, so the referenced object may not be
-    // de-serialized before it's referenced.
-    // assertSame(tb1.getBean2(), tb1.bean2List.get(0));
+    assertSame(tb1.getBean2(), tb1.bean2List.get(0));
   }
-
 
   @Test public void testEnumNameOption() {
     JSONCoderOption codeOption = JSONCoderOption.create().setShowEnumName(true);
@@ -203,7 +201,7 @@ public class JSONCoderTest {
     codeOption.setIgnoreSubClassFields(true);
     str = toJSONString(tb, codeOption);
     log("With showType and ignoreSubClass=" + str);
-    assertTrue(str.contains("$type"));
+    assertTrue("jsonStr should contain $type if showType flag is set", str.contains("$type"));
 
     try {
       JSONCoder.global.decode(str, TestBean.class);
@@ -235,7 +233,7 @@ public class JSONCoderTest {
     // Map to Object
     String str1 = "{intField:1}";
     Object obj = JSONCoder.global.decode(str1, Object.class);
-    assertTrue("expect Map type, actually: " + obj.getClass() , obj instanceof Map);
+    assertTrue("expect TDNode type, actual: " + obj.getClass() , obj instanceof TDNode);
     String str2 = JSONCoder.getGlobal().encode(obj);
     log("testObjectType: str2=" + str2);
     TestBean obj1 = JSONCoder.global.decode(str2, TestBean.class);
@@ -292,7 +290,7 @@ public class JSONCoderTest {
 
   @Test public void testGenericType() {
     String str = "['str1', 'str2', 'str3']";
-    List<String> result = JSONCoder.global.decode(new DecodeReq<List<String>>(str){});
+    List<String> result = JSONCoder.global.decode(new DecodeReq<List<String>>(){}.setSource(str));
     assertArrayEquals(new String[]{"str1", "str2","str3"}, result.toArray());
   }
 
@@ -326,9 +324,9 @@ public class JSONCoderTest {
     bean.testBean.setStrField("str2");
     bean.testBean.publicStrField = "publicStr";
     JSONCoderOption opt = JSONCoderOption.create();
-    opt.getOrAddSimpleFilter(TestBean2.class).setInclude(true).addProperties("enumField2", "testBean");
-    opt.getOrAddSimpleFilter(TestBean.class).addProperties("publicStrField");
-    opt.getOrAddDefaultFilter().addProperties("fieldInAnyClass");
+    opt.getSimpleFilterFor(TestBean2.class).setInclude(true).addProperties("enumField2", "testBean");
+    opt.getSimpleFilterFor(TestBean.class).addProperties("publicStrField");
+    opt.getDefaultFilter().addProperties("fieldInAnyClass");
     String result = JSONCoder.encode(bean, opt);
     log("result=" + result);
     assertTrue("shouldn't contain 'str1'", !result.contains("str1"));
@@ -391,7 +389,7 @@ public class JSONCoderTest {
     TestBean from = new TestBean();
     from.setBean2(new TestBean2().setStrField("newStrValue"));
     BeanCoder.deepCopyTo(from, to);
-    assertNotSame("deep clone should have different sub-object", to.getBean2(), from.getBean2());
+    assertNotSame("deep copy should have different sub-object", to.getBean2(), from.getBean2());
     assertEquals(from.getBean2().getStrField(), to.getBean2().getStrField());
   }
 
@@ -441,6 +439,15 @@ public class JSONCoderTest {
     String str = sWriter.toString();
     log("str=" + str);
     assertTrue("Encode to writer should succeed", sWriter.toString().contains("intField"));
+  }
+
+  @Test public void testDecodeJsonx() {
+    Reader in = TestUtil.loadResource(this.getClass(), "jsonext.json");
+    TestBean testBean = JSONCoder.global.decode(in, TestBean.class);
+    assertEquals(100, testBean.getIntField());
+    assertEquals("This is multi-line text\n" +
+        "        Line1,\n" +
+        "        Line2", testBean.getStrField());
   }
 }
 

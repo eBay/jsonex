@@ -9,6 +9,8 @@
 
 package com.ebay.jsoncoder;
 
+import com.ebay.jsoncoder.treedoc.TDNode;
+
 import java.lang.reflect.Type;
 
 /**
@@ -26,16 +28,17 @@ public interface ICoder<T> {
    * Encode an Object
    * @param obj  The Object to encode
    * @param context  Encode context
-   * @return  Can only be Map, List, String, primitive types or null
+   * @param target  The target json node
+   * @return  The target passed as paramter
    */
-  Object encode(T obj, Type type, BeanCoderContext context);
+  TDNode encode(T obj, Type type, BeanCoderContext context, TDNode target);
   
   /**
    * Decode an Object
-   * @param obj Can only be Map, List, String, primitive types or null. It must matches the return type of encode method
+   * @param jsonNode The json node to be decoded
    * @param type  The target type
    * @param context  Decode context
    * @return The decoded Object
    */
-  T decode(Object obj, Type type, Object targetObj, BeanCoderContext context);
+  T decode(TDNode jsonNode, Type type, Object targetObj, BeanCoderContext context);
 }

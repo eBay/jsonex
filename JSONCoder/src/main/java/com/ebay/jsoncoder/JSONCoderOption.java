@@ -11,11 +11,11 @@ package com.ebay.jsoncoder;
 
 import com.ebay.jsoncoder.coder.CoderDate;
 import com.ebay.jsoncoder.coder.CoderXMLGregorianCalendar;
-import com.ebay.jsoncoder.JSONConverter.JSONOption;
 import com.ebay.jsoncoder.coder.CoderAtomicInteger;
 import com.ebay.jsoncoder.coder.CoderBigInteger;
 import com.ebay.jsoncoder.coder.CoderClass;
 import com.ebay.jsoncoder.coder.CoderEnum;
+import com.ebay.jsoncoder.treedoc.TDJSONWriter.JSONOption;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -54,7 +54,7 @@ public class JSONCoderOption {
     global.fallbackDateFormats.add("yyyy-MM-dd");
     global.fallbackDateFormats.add("HH:mm:ss");
     
-    global.getOrAddDefaultFilter().addProperties("copy");  // DAO class has a getCopy() method
+    global.getDefaultFilter().addProperties("copy");  // DAO class has a getCopy() method
   }
   private final JSONCoderOption parent;
   
@@ -189,8 +189,8 @@ public class JSONCoderOption {
     return parent != null && parent.isIgnoreSubClassFields(cls);
   }
   
-  public SimpleFilter getOrAddDefaultFilter() { return getOrAddSimpleFilter(Object.class); }
-  public SimpleFilter getOrAddSimpleFilter(Class<?> cls) {
+  public SimpleFilter getDefaultFilter() { return getSimpleFilterFor(Object.class); }
+  public SimpleFilter getSimpleFilterFor(Class<?> cls) {
     for (IFilter filter : filters) {
       if (!(filter instanceof SimpleFilter) || filter.getType() != cls)
         continue;

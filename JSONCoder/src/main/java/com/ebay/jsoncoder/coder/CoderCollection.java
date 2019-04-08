@@ -12,6 +12,7 @@ package com.ebay.jsoncoder.coder;
 import com.ebay.jsoncoder.BeanCoderContext;
 import com.ebay.jsoncoder.BeanCoderException;
 import com.ebay.jsoncoder.ICoder;
+import com.ebay.jsoncoder.treedoc.TDNode;
 import com.ebay.jsoncodercore.util.ClassUtil;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -30,11 +31,10 @@ import static com.ebay.jsoncodercore.util.StringUtil.toTrimmedStr;
 public class CoderCollection implements ICoder<Collection> {
   @Getter private static final CoderCollection instance = new CoderCollection();
 
-  public Class<Collection> getType() {return Collection.class;}
+  @Override public Class<Collection> getType() {return Collection.class;}
 
-  @Override
-  public Object encode(Collection obj, Type type, BeanCoderContext ctx) {
-    List<Object> result = new ArrayList<>();
+  @Override public TDNode encode(Collection obj, Type type, BeanCoderContext ctx, TDNode target) {
+    target.setType(TDNode.Type.ARRAY);
 
     Type[] actualTypeParameters = ClassUtil.getGenericTypeActualParams(type);
     Type childType = null;
@@ -42,15 +42,15 @@ public class CoderCollection implements ICoder<Collection> {
       childType = actualTypeParameters[0];
 
     for(Object o1 : (Collection<?>)obj)
-      result.add(ctx.encode(o1, childType));
+      ctx.encode(o1, childType, target.createChild(null));
 
-    return result;
+    return target;
   }
 
-  @Override @SneakyThrows
-  public Collection decode(Object obj, Type type, Object targetObj, BeanCoderContext ctx) {
-    if (!(obj instanceof List))
-      throw new BeanCoderException("Incorrect input, the input has to be an array:" + toTrimmedStr(obj, 500));
+  @SneakyThrows
+  @Override public Collection decode(TDNode jsonNode, Type type, Object targetObj, BeanCoderContext ctx) {
+    if (jsonNode.getType() != TDNode.Type.ARRAY)
+      throw new BeanCoderException("Incorrect input, the input has to be an array:" + toTrimmedStr(jsonNode, 500));
 
     Class<?> cls = ClassUtil.getGenericClass(type);
 
@@ -75,10 +75,9 @@ public class CoderCollection implements ICoder<Collection> {
         result = (Collection<Object>) cls.newInstance();
     }
 
-    List<?> list = (List<?>) obj;
     ctx.getObjectPath().push(result);
-    for (int i = 0; i < list.size(); i++)
-      result.add(ctx.decode(list.get(i), childType, null, Integer.toString(i)));
+    for (int i = 0; i < jsonNode.getChildrenSize(); i++)
+      result.add(ctx.decode(jsonNode.getChildren().get(i), childType, null, Integer.toString(i)));
     return result;
   }
 }

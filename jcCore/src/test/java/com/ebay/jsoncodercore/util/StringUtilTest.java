@@ -14,8 +14,7 @@ import static junit.framework.Assert.assertEquals;
 import org.junit.Test;
 
 public class StringUtilTest {
-  @Test
-  public void testCEscape() {
+  @Test public void testCEscape() {
     String org1 = "a\"\n\t";
     String dest = "a\\\"\\n\\t";
     assertEquals(dest, StringUtil.cEscape(org1));

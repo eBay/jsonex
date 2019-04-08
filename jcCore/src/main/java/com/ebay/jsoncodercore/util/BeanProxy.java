@@ -22,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * A simple factory to create a proxy for interfaces of data object. So that can simulate setter/getter method with
  * a Map as internal storage 
- * <p> It supports following setter methods: void setXXX(val), void setXXX(flag, val), and also chained style setters.
+ * <p> It supports following setter methods: void setXXX(value), void setXXX(flag, value), and also chained style setters.
  * <p> It supports following getter methods: Object getXXX(), Object isXXX(), Object hasXXX(), those getter methods could also 
  * optionally with one argument as sub-attribute.
  */

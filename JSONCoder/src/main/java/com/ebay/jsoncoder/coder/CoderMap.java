@@ -13,6 +13,9 @@ import com.ebay.jsoncoder.BeanCoderContext;
 import com.ebay.jsoncoder.BeanCoderException;
 import com.ebay.jsoncoder.ICoder;
 import com.ebay.jsoncoder.JSONCoderOption;
+import com.ebay.jsoncoder.treedoc.TDJSONWriter;
+import com.ebay.jsoncoder.treedoc.TDNode;
+import com.ebay.jsoncodercore.util.BeanConvertContext;
 import com.ebay.jsoncodercore.util.ClassUtil;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -25,16 +28,16 @@ import java.util.List;
 import java.util.Map;
 
 import static com.ebay.jsoncoder.BeanCoder.HASH_KEY;
+import static com.ebay.jsoncoder.BeanCoder.deepClone;
 import static com.ebay.jsoncodercore.util.ClassUtil.isSimpleType;
 import static com.ebay.jsoncodercore.util.StringUtil.toTrimmedStr;
 
 public class CoderMap implements ICoder<Map> {
   @Getter private static final CoderMap instance = new CoderMap();
 
-  public Class<Map> getType() {return Map.class;}
+  @Override public Class<Map> getType() {return Map.class;}
 
-  @Override
-  public Object encode(Map obj, Type type, BeanCoderContext ctx) {
+  @Override public TDNode encode(Map obj, Type type, BeanCoderContext ctx, TDNode target) {
     JSONCoderOption opt = ctx.getOption();
 
     Map<?,?> map = (Map<?,?>)obj;
@@ -51,37 +54,35 @@ public class CoderMap implements ICoder<Map> {
     if (childKeyCls == null)
       childKeyCls = Object.class;
     if(isSimpleType(childKeyCls) || Enum.class.isAssignableFrom(childKeyCls) || childKeyCls == Object.class || opt.isAlwaysMapKeyAsString()) {
+      target.setType(TDNode.Type.MAP);
       // Handle it as Map and put the key as String key
-      Map<String, Object> result = new LinkedHashMap<>();//NOPMD
       for(Map.Entry<?, ?> entry : map.entrySet()){
         String key = String.valueOf(entry.getKey());
-        if(Enum.class.isAssignableFrom(childKeyCls))
-          key = String.valueOf(ctx.encode(entry.getKey(), childKeyType));
-        result.put(key, ctx.encode(entry.getValue(), childValueType));
+        ctx.encode(entry.getValue(), childValueType, target.createChild(key));
       }
-      return result;
+      return target;
     }
 
     // Handle it as Map, put the Key, Value in a single list
     // Strange and broken implementation of Map.entrySet in class
     // com.ebay.dsf.dom.AttributeMap
     // it just return null which breaks the interface contract.
-    List<Object> result = new ArrayList<>();
     //noinspection ConstantConditions
     if(map.entrySet() != null){
+      target.setType(TDNode.Type.ARRAY);
+      TDNode child = target.createChild(null);
       for(Map.Entry<?, ?> entry : map.entrySet()){
         Map<String, Object> entryMap = new LinkedHashMap<>(2);//NOPMD
-        entryMap.put("key", ctx.encode(entry.getKey(), childKeyType));
-        entryMap.put("value", ctx.encode(entry.getValue(), childValueType));
-        result.add(entryMap);
+        ctx.encode(entry.getKey(), childKeyType, child.createChild("key"));
+        ctx.encode(entry.getValue(), childValueType, child.createChild("value"));
       }
     }
 
-    return result;
+    return target;
   }
 
-  @Override @SneakyThrows
-  public Map decode(Object obj, Type type, Object targetObj, BeanCoderContext ctx) {
+  @SneakyThrows
+  @Override public Map decode(TDNode jsonNode, Type type, Object targetObj, BeanCoderContext ctx) {
     Class<?> cls = ClassUtil.getGenericClass(type);
     // Get the key/value types
     // TODO: call ClassUtil.getGenericTypeActualParamsForInterface() instead to support MultiValueMap
@@ -105,33 +106,29 @@ public class CoderMap implements ICoder<Map> {
 
     ctx.getObjectPath().push(result);
 
-    if (obj instanceof Map) {
-      int i = 0;//NOPMD
-      Map<?, ?> map = (Map<?, ?>) obj;
+    switch (jsonNode.getType()) {
+      case MAP:
+        String hash = (String) jsonNode.getChildValue(HASH_KEY);
+        if (hash != null)
+          ctx.getHashToObjectMap().put(hash, result);
 
-      if (map.containsKey(HASH_KEY)) {
-        ctx.getHashToObjectMap().put((String) map.get(HASH_KEY), result);
-        map.remove(HASH_KEY);
-      }
-
-      for (Map.Entry<?, ?> entry : map.entrySet()) {
-        Object key = ctx.decode(entry.getKey(), childKeyType, null, i + ".key");
-        Object value = ctx.decode(entry.getValue(), childValueType, result.get(key), i + ".val");
-        result.put(key, value);
-        i++;
-      }
-      return result;
-    } else if (obj instanceof List) {
-      List<?> list = (List<?>) obj;
-      int i = 0;
-      for(Map<String, Object> entryMap : (List<Map<String, Object>>)list){
-        Object key = ctx.decode(entryMap.get("key"), childKeyType, null, i + ".key");
-        Object value = ctx.decode(entryMap.get("value"), childValueType, result.get(key), i + ".val");
-        result.put(key, value);
-        i++;
-      }
-      return result;
+        for (int i = 0; i < jsonNode.getChildrenSize(); i++) {
+          TDNode cn = jsonNode.getChild(i);
+          Object key = ClassUtil.stringToSimpleObject(cn.getKey(), ClassUtil.getGenericClass(childKeyType), new BeanConvertContext());
+          Object value = ctx.decode(cn, childValueType, result.get(key), i + ".value");
+          result.put(key, value);
+        }
+        return result;
+      case ARRAY:
+        for (int i = 0; i < jsonNode.getChildrenSize(); i++) {
+          TDNode cn = jsonNode.getChild(i);
+          Object key = ctx.decode(cn.getChild("key"), childKeyType, null, i + ".key");
+          Object value = ctx.decode(cn.getChild("value"), childValueType, result.get(key), i + ".value");
+          result.put(key, value);
+        }
+        return result;
     }
-    throw new BeanCoderException("Incorrect input, the input for type:" + cls + " has to be an array or map,  got" + toTrimmedStr(obj, 500));
+    throw new BeanCoderException("Incorrect input, the input for type:" + cls + " has to be an array or map,  got"
+        + toTrimmedStr(TDJSONWriter.getInstance().writeAsString(jsonNode), 500));
   }
 }
