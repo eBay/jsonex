@@ -9,23 +9,20 @@
 
 package com.ebay.jsoncodercore.util;
 
-import java.lang.reflect.Field;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
 import com.ebay.jsoncodercore.type.TypeRef;
-import com.ebay.jsoncodercore.util.ListUtilTest.TestCls;
 import com.ebay.jsoncodercore.util.TestClass.TestSubClass;
-import com.sun.istack.internal.NotNull;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assert;
 import org.junit.Test;
+
+import java.lang.reflect.Field;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
