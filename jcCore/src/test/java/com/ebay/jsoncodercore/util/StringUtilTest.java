@@ -9,9 +9,9 @@
 
 package com.ebay.jsoncodercore.util;
 
-import static junit.framework.Assert.assertEquals;
-
 import org.junit.Test;
+
+import static junit.framework.Assert.assertEquals;
 
 public class StringUtilTest {
   @Test public void testCEscape() {

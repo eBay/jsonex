@@ -9,18 +9,16 @@
 
 package com.ebay.jsoncodercore.util;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertSame;
+import com.ebay.jsoncodercore.annotation.DefaultEnum;
+import com.ebay.jsoncodercore.type.Identifiable;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import org.junit.Test;
 
 import java.util.EnumSet;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
-import org.junit.Test;
-
-import com.ebay.jsoncodercore.annotation.DefaultEnum;
-import com.ebay.jsoncodercore.type.Identifiable;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertSame;
 
 public class EnumUtilTest {
   @SuppressWarnings("WeakerAccess")
