@@ -12,6 +12,7 @@ package com.ebay.jsoncoder;
 import com.ebay.jsoncoder.TestBean2.Enum1;
 import com.ebay.jsoncoder.TestBean2.IdentifiableEnum;
 import com.ebay.jsoncoder.treedoc.TDNode;
+import com.ebay.jsoncoder.treedoc.TestUtil;
 import com.ebay.jsoncodercore.util.MapBuilder;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,7 @@ import org.junit.Test;
 import org.junit.rules.TestName;
 
 import javax.xml.datatype.DatatypeFactory;
+import java.io.Reader;
 import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -437,6 +439,15 @@ public class JSONCoderTest {
     String str = sWriter.toString();
     log("str=" + str);
     assertTrue("Encode to writer should succeed", sWriter.toString().contains("intField"));
+  }
+
+  @Test public void testDecodeJsonx() {
+    Reader in = TestUtil.loadResource(this.getClass(), "jsonext.json");
+    TestBean testBean = JSONCoder.global.decode(in, TestBean.class);
+    assertEquals(100, testBean.getIntField());
+    assertEquals("This is multi-line text\n" +
+        "        Line1,\n" +
+        "        Line2", testBean.getStrField());
   }
 }
 
