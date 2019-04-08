@@ -1,0 +1,11 @@
+// This file demonstrates the JSON extension (JSONX)
+
+{
+  /* Block comments*/
+  intField: 100,
+  ints: [1, 2, 3],
+  strField: `This is multi-line text
+        Line1,
+        Line2`,
+  publicStringSet: ['value1', "value2", `value3`],    // comma after Last attribute
+}
