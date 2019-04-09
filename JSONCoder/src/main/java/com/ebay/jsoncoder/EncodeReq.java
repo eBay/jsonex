@@ -9,12 +9,11 @@
 
 package com.ebay.jsoncoder;
 
-import java.io.Writer;
-import java.lang.reflect.Type;
-
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+
+import java.lang.reflect.Type;
 
 @Accessors(chain=true)
 public class EncodeReq {

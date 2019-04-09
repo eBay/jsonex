@@ -67,8 +67,7 @@ public class ReaderCharSource extends CharSource {
       if (getPos() == loadPos)
         throw new EOFRuntimeException();
     }
-    char c = bookmark.append(buf[getPos() % buf.length]);
-    return c;
+    return bookmark.append(buf[getPos() % buf.length]);
   }
 
   @Override public char peek(int i) {
@@ -81,7 +80,7 @@ public class ReaderCharSource extends CharSource {
 
   @Override public boolean isEof(int i) {
     if (i >= buf.length)
-      throw new IllegalArgumentException("can't peek ahead more than buffersize characters");
+      throw new IllegalArgumentException("can't peek ahead more than buffer size characters");
 
     int p = getPos() + i;
     if (p >= loadPos) {

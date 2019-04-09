@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import static com.ebay.jsoncodercore.util.StringUtil.toTrimmedStr;
@@ -47,6 +46,7 @@ public class CoderCollection implements ICoder<Collection> {
     return target;
   }
 
+  @SuppressWarnings("unchecked")
   @SneakyThrows
   @Override public Collection decode(TDNode jsonNode, Type type, Object targetObj, BeanCoderContext ctx) {
     if (jsonNode.getType() != TDNode.Type.ARRAY)

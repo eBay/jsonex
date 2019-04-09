@@ -426,7 +426,7 @@ public class JSONCoderTest {
     }
 
     try {
-      JSONCoder.decode("{transientField: 'somevalue'}", TestBean.class, JSONCoderOption.create().setErrorOnUnknownProperty(true));
+      JSONCoder.decode("{transientField: 'some value'}", TestBean.class, JSONCoderOption.create().setErrorOnUnknownProperty(true));
       fail("Should fail when errorOnUnknownProperty is set and unknownField is detected");
     } catch (BeanCoderException e) {
       assertEquals("Field is static or transient:transientField,class:class com.ebay.jsoncoder.TestBean", e.getCause().getMessage());

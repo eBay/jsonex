@@ -5,16 +5,16 @@
 JSONCoder is a light weight generic object serialization / deserialization library similar to Jackson or FastJson. This library has been widely used in various eBay domain projects for years. It does not mean to be a replacement for other popular libraries. But it solves some specific problems which are not available or not well supported in other alternatives. 
 
 ## Why JSONCoder
-There are plenty of options for JSON serialization/deserialization libraries, why we need another one? If you are also a fan of JSON , but hate the limitation that JSON standards make it so hard to be used as a configuration language. But still don't give up JSON to YAML (JSON is nice, why need Yet Another Markup Language). You can have a try of this library. This library focuses on solving following problem well:  
+There are plenty of options for JSON serialization/deserialization libraries, why we need another one? If you are also a fan of JSON , but hate the restrictions by JSON standards that make it so hard to be used as a configuration language, but still don't want to give up JSON to YAML (JSON is nice, why need Yet Another Markup Language). You can have a try of this library. This library focuses on solving following problems well:  
 
 * Supports JSON extension proposal ([JSONX](./JSONX.md)) which will make it friendly for configuration, such as
     * comments support
     * quote of key is optional
     * customize quote characters (Avoid un-necessary escapes by choosing different quote characters) 
-    * multiple string literal as in ES6
+    * multi-line string literal as in ES6
     * Merge of config files (e.g. environment specific config override common config)
 * Supports serialization of arbitrary java objects out of box by detecting cyclic object references. You don't have to write serializer friendly classes. Whatever you have, it's supported.
-* Make sensible default over configuration. Minimize annotation or configuration usage. Such as it silently ignore unknown properties by default for forward compatibility
+* Make sensible default over configuration. Minimize annotation or configuration usage. Such as it silently ignores unknown properties by default for forward compatibility
 * Focuses on developer friendly APIs at the same time still provides flexible configurations  
 
 ## Features
@@ -25,12 +25,12 @@ There are plenty of options for JSON serialization/deserialization libraries, wh
 * Options to skip certain classes
 * Options to skip sub-class fields
 * Options to filter fields based on certain attributes such as: private fields, enum names, readonly fields, etc
-* Custom Date format and fallback date format during deserialization
+* Custom date format and fallback date format during deserialization
 * Polymorphic types with "$type" attribute during deserialization
 * Generic types during deserialization
 * Deserialize and append to existing object (Incremental decoding, could be used to merge multiple config files)
 * Supports nested JSON String within JSON as normal sub JSON Object instead of serialized json string to avoid un-necessary escape in String literal
-* Supports Forward compatibility features: silently ignore unknown properties, use @DefaultEnum to annotate a default enum which be used if unknown enum value is encountered
+* Supports forward compatibility features: silently ignore unknown properties, use @DefaultEnum to annotate a default enum which be used if unknown enum value is encountered
 * Supports proposed json extension format ([JSONX](./JSONX.md)), [Example in test](JSONCoder/src/test/resources/com/ebay/jsoncoder/jsonext.json)
 * JDK version: 1.7 or above 
 

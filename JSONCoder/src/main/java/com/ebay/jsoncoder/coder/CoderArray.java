@@ -18,8 +18,6 @@ import lombok.Getter;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
 
 import static com.ebay.jsoncodercore.util.StringUtil.toTrimmedStr;
 

@@ -29,7 +29,7 @@ public interface ICoder<T> {
    * @param obj  The Object to encode
    * @param context  Encode context
    * @param target  The target json node
-   * @return  The target passed as paramter
+   * @return  The target passed as parameter
    */
   TDNode encode(T obj, Type type, BeanCoderContext context, TDNode target);
   

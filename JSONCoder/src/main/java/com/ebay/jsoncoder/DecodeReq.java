@@ -9,21 +9,17 @@
 
 package com.ebay.jsoncoder;
 
-import java.io.Reader;
-import java.io.StringReader;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-
 import com.ebay.jsoncoder.treedoc.ArrayCharSource;
 import com.ebay.jsoncoder.treedoc.CharSource;
 import com.ebay.jsoncoder.treedoc.ReaderCharSource;
 import com.ebay.jsoncoder.treedoc.TDNode;
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+
+import java.io.Reader;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 
 /**
  * Decode Request, the reason we use abstract class, is to force to create a sub-class so that it's possible to get
@@ -36,6 +32,7 @@ import lombok.experimental.Accessors;
 @Accessors(chain=true)
 public abstract class DecodeReq<T> {
   @Setter private Type type;
+  @SuppressWarnings("Lombok")
   @Getter @Setter CharSource source;
   @Getter @Setter TDNode jsonNode;
   @Getter @Setter T target;

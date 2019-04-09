@@ -47,9 +47,9 @@ public abstract class BasecharSourceTest {
   }
 
   @Test public void testReadQuotedString() {
-    CharSource cs = createCharSource("'It\\'s a quoted \\\"string\\\" with escapte \\n \\r \\f \\t \\u9829'");
+    CharSource cs = createCharSource("'It\\'s a quoted \\\"string\\\" with escape \\n \\r \\f \\t \\u9829'");
     char c = cs.read();  // skip first quote
-    assertEquals("It's a quoted \"string\" with escapte \n \r \f \t \u9829", cs.readQuotedString(c));
+    assertEquals("It's a quoted \"string\" with escape \n \r \f \t \u9829", cs.readQuotedString(c));
   }
 
   @Test public void testReadQuotedStringError() {

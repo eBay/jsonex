@@ -15,23 +15,17 @@ public class StringUtil {
   /**
    * checks a String for null and empty String
    */
-  public static boolean isEmpty(String str) {
-    return (str == null) || (str.length() == 0);
-  }
+  public static boolean isEmpty(String str) { return (str == null) || (str.length() == 0); }
 
   /**
    * Truncates the rightmost characters of a String to a desired length
    */
-  public static String getLeft(String src, int length) {
-    return src == null || length > src.length() ? src : src.substring(0, length);
-  }
+  public static String getLeft(String src, int length) { return src == null || length > src.length() ? src : src.substring(0, length); }
   
   /**
    * Truncates the leftmost characters of a String to a desired length
    */
-  public static String getRight(String src, int length) {
-    return src == null || src.length() < length ? src : src.substring(src.length() - length);
-  }
+  public static String getRight(String src, int length) { return src == null || src.length() < length ? src : src.substring(src.length() - length); }
 
   public static boolean isDigitOnly(String chkStr) {
     if(chkStr == null)
@@ -145,8 +139,8 @@ public class StringUtil {
       return false;
    
     for(int i=1; i<str.length(); i++){
-         if(!Character.isJavaIdentifierPart(str.charAt(i)))
-           return false;
+      if(!Character.isJavaIdentifierPart(str.charAt(i)))
+        return false;
     }
       
     return true;
@@ -162,7 +156,7 @@ public class StringUtil {
       result[i] = Integer.valueOf(strs[i]);
     return result;
   }
-  
+
   public static String join(byte[] items, String delimiter) {
     StringBuilder sb = new StringBuilder();
     for(byte b : items) {
@@ -172,7 +166,7 @@ public class StringUtil {
     }
     return sb.toString();
   }
-  
+
   public static StringBuilder appendRepeatedly(StringBuilder result, String str, int times) {
     for (int i=0; i<times; i++)
       result.append(str);
@@ -183,14 +177,6 @@ public class StringUtil {
     for (int i=0; i<times; i++)
       result.append(c);
     return result;
-  }
-
-  public static String left(String str, int len) {
-    if (str == null)
-      return null;
-    if (len < 0)
-      return EMPTY;
-    return str.length() <= len ? str : str.substring(0, len);
   }
 
   public static String toTrimmedStr(Object o, int len) { return StringUtil.getLeft(String.valueOf(o), len); }
