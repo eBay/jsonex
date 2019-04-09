@@ -7,12 +7,12 @@ JSON has become a popular format for data serialization and configuration, but d
 * **Mandatory quote for keys:** This is un-necessary redundant data just to waste spaces and bandwidth
 * **Only double quote (") can be used:** Not like javascript can use single quote (') or (`) as quote, with this flexibility, lots of escapes can be eliminated
 * **No comments Support:** That's the most complained issue as configuration
-* **Doesn't support multi-line String literal**: As configuration, we often need to embedded structure text
-* **No comma allowed at end of last element:**: This causes many of merge issues and make comment out a line different. In javascript, this is allowed
+* **Does not support multi-line String literal**: As configuration, we often need to embedded structured text
+* **No comma allowed at end of last element:**: This causes many of merge issues and make comment out a line difficult. In javascript, this is allowed
 
 ## Proposal
 To solve the above limitations, we propose **JSONX** with following extensions
-* Fully compatible with ES6 object literal syntax
+* Fully compatible with ES6 object literal syntax (So no need specific parser for Javascript)
 * Standard JSON is a validate JSONX
 * Support line/block comments as Javascript
 * Quote for Key is optional, only if key is not a valid javascript identifier, quote is mandatory

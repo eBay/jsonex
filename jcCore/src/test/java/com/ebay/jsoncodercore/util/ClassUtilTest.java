@@ -12,16 +12,22 @@ package com.ebay.jsoncodercore.util;
 import com.ebay.jsoncodercore.type.TypeRef;
 import com.ebay.jsoncodercore.util.TestClass.TestSubClass;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 
+import java.beans.Transient;
+import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -52,11 +58,12 @@ public class ClassUtilTest {
     public String fieldB3;
     public String fieldB4;
     public String fieldB5;
-    @NonNull
-    @Getter @Setter private boolean fieldB6;
+
+    @Getter(onMethod = @__({@Transient})) @Setter private boolean fieldB6;
     public String getFieldB1() { return fieldB1; }
   }
 
+  @SneakyThrows
   @Test public void testGetProperties() {
     Map<String, BeanProperty> properties = ClassUtil.getProperties(B.class);
     log.info("Properties.keySet():" + properties.keySet());
@@ -69,15 +76,23 @@ public class ClassUtilTest {
     B b = new B();
     prop.set(b, true);
     assertEquals(true, prop.get(b));
-    assertEquals(false, prop.isImmutable(false));
-    assertEquals(true, prop.isReadable(false));
+    assertFalse(prop.isImmutable(false));
+    assertTrue(prop.isReadable(false));
     assertEquals(Boolean.TYPE, prop.getType());
+    assertEquals(Boolean.TYPE, prop.getGenericType());
+    assertEquals(B.class.getMethod("setFieldB6", new Class[]{Boolean.TYPE}), prop.getSetter());
+
+    assertEquals(B.class.getMethod("isFieldB6", new Class[0]), prop.getGetter());
+    assertTrue(prop.isTransient());
+    assertFalse(prop.isFieldAccessible(false));
+    assertNotNull("Transient is annotated", prop.getAnnotation(Transient.class));
   }
 
   @Test public void testFindCallerStack() {
     assertEquals("testFindCallerStack", ClassUtil.findCallerStackTrace(ClassUtil.class).getMethodName());
   }
 
+  @SuppressWarnings("deprecation")
   @Test public void testSetPrivateField() {
     ClassUtil.setStaticPrivateField("com.ebay.jsoncodercore.util.TestClass", "privateStateField", "newValue");
     assertEquals("newValue", TestClass.getPrivateStateField());
@@ -101,9 +116,37 @@ public class ClassUtilTest {
     assertNotNull("get path should return value", val);
   }
 
-  @Test public void testGetGenericType() {
+  @Test public void testGetGenericClass() {
     assertEquals(List.class, ClassUtil.getGenericClass(List.class));
     assertEquals(List.class, ClassUtil.getGenericClass(new TypeRef<List<Integer>>() {}.getType()));
+  }
+
+  @SneakyThrows
+  @Test public void testGetGenericTypeActualParams() {
+    assertArrayEquals(new Type[]{ String.class, Integer.class },
+        ClassUtil.getGenericTypeActualParams(TestClass.class.getDeclaredField("stringIntMap").getGenericType()));
+  }
+
+  @Test public void testGetGenericTypeActualParamsForInterface() {
+    assertArrayEquals(new Type[]{TestClass.class},
+        ClassUtil.getGenericTypeActualParamsForInterface(TestClass.class, Comparable.class));
+  }
+
+  @Test public void testGetAllInterface() {
+    Set<Class<?>> intfs = new HashSet<>(ClassUtil.getAllInterface(TestClass.class));
+    log.info("intfs:" + intfs);
+    assertTrue(intfs.containsAll(Arrays.asList(Comparable.class, List.class, Collection.class, Cloneable.class, Serializable.class)));
+  }
+
+  @Test public void testFindInterface() {
+    assertEquals(List.class, ClassUtil.findInterface(TestClass.class, Collection.class));
+  }
+
+  @SneakyThrows
+  @Test public void testGetType() {
+    assertEquals(Integer.class, ClassUtil.getType("java.lang.Integer"));
+    assertEquals(Integer.TYPE, ClassUtil.getType("int"));
+    assertEquals(Double.TYPE, ClassUtil.getType("java.lang.Double/TYPE"));
   }
 
   @Test public void testStringToSimpleObject() {
@@ -123,8 +166,8 @@ public class ClassUtilTest {
   }
 
   @Test public void testObjectToSimpleType() {
-    assertEquals((Integer)100, ClassUtil.objectToSimpleType(Long.valueOf(100), Integer.class));
-    assertEquals((Float)(float)100.1, ClassUtil.objectToSimpleType(Double.valueOf(100.1), float.class));
+    assertEquals((Integer)100, ClassUtil.objectToSimpleType(100, Integer.class));
+    assertEquals((Float)(float)100.1, ClassUtil.objectToSimpleType(100.1, float.class));
   }
 
 }

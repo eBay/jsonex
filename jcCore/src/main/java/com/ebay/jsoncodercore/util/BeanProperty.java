@@ -11,6 +11,7 @@ package com.ebay.jsoncodercore.util;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -19,7 +20,7 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 
 @SuppressWarnings("WeakerAccess")
-@RequiredArgsConstructor
+@RequiredArgsConstructor @ToString
 public class BeanProperty {
   @Getter final String name;
   @Getter Method setter;
@@ -83,6 +84,7 @@ public class BeanProperty {
     }
     
     if(field != null) {
+
       result = field.getAnnotation(cls);
       if (result != null)
         return result;
@@ -120,10 +122,5 @@ public class BeanProperty {
       return field.getModifiers();
     else
       return setter.getModifiers();
-  }
-  
-
-  public String toString(){
-    return "name=" + name + ";getter=" + getter + ";setter=" + setter +";field=" + field;
   }
 }

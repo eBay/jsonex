@@ -40,9 +40,9 @@ public class TDJSONWriter {
     StringBuilder out = new StringBuilder();
     write(out, node, opt);
     return out.toString();
-  };
+  }
 
-  public void write(Appendable out, TDNode node, JSONOption opt) { write(out, node, opt, ""); };
+  public void write(Appendable out, TDNode node, JSONOption opt) { write(out, node, opt, ""); }
 
   @SneakyThrows
   public void write(Appendable out, TDNode node, JSONOption opt, String indentStr) {

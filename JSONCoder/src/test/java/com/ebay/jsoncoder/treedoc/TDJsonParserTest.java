@@ -27,6 +27,6 @@ public class TDJsonParserTest {
     assertEquals(node, node1);
 
     json = TDJSONWriter.getInstance().writeAsString(node, new JSONOption().setIndentFactor(2));
-    log.info("formated json: " + json);
+    log.info("formatted json: " + json);
   }
 }

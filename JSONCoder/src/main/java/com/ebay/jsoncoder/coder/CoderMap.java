@@ -22,13 +22,10 @@ import lombok.SneakyThrows;
 
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 import static com.ebay.jsoncoder.BeanCoder.HASH_KEY;
-import static com.ebay.jsoncoder.BeanCoder.deepClone;
 import static com.ebay.jsoncodercore.util.ClassUtil.isSimpleType;
 import static com.ebay.jsoncodercore.util.StringUtil.toTrimmedStr;
 
@@ -81,6 +78,7 @@ public class CoderMap implements ICoder<Map> {
     return target;
   }
 
+  @SuppressWarnings("unchecked")
   @SneakyThrows
   @Override public Map decode(TDNode jsonNode, Type type, Object targetObj, BeanCoderContext ctx) {
     Class<?> cls = ClassUtil.getGenericClass(type);
@@ -99,7 +97,7 @@ public class CoderMap implements ICoder<Map> {
       if (Modifier.isAbstract(modifier)||
           Modifier.isInterface(modifier)) {
         //Use the default implementation HashMap
-        result = new LinkedHashMap();
+        result = new LinkedHashMap<>();
       } else
         result = (Map<Object,Object>) cls.newInstance();
     }

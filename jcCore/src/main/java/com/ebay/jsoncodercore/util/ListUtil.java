@@ -99,7 +99,7 @@ public class ListUtil {
   }
 
   public static <V, C extends Collection<V>> List<V> filter(C source, Predicator<? super V> pred) {
-    List<V> dest = new ArrayList<V>();
+    List<V> dest = new ArrayList<>();
     filter(source, dest, pred);
     return dest;
   }
@@ -108,13 +108,13 @@ public class ListUtil {
     return orderBy(source, sortKey, false);
   }
 
-  public static <V, C extends Collection<V>> List<V> orderBy(C source, final Function<? super V, ? extends Comparable> sortKey, final boolean desc) {
-    List<V> dest = new ArrayList<V>(source.size());
+  public static <V, C extends Collection<V>, K extends Comparable<K>> List<V> orderBy(C source, final Function<? super V, K> sortKey, final boolean desc) {
+    List<V> dest = new ArrayList<>(source.size());
     dest.addAll(source);  // clone
     Collections.sort(dest, new Comparator<V>() {
       @Override public int compare(V o1, V o2) {
-        Comparable v1 = sortKey.apply(o1);
-        Comparable v2 = sortKey.apply(o2);
+        K v1 = sortKey.apply(o1);
+        K v2 = sortKey.apply(o2);
         int result = v1 == v2 ? 0 :
             ((v1 == null) ? -1 : v1.compareTo(v2));
         return desc ? - result : result;

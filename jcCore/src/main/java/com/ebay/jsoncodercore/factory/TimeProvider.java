@@ -15,7 +15,7 @@ import lombok.Setter;
 import java.util.Date;
 
 public abstract class TimeProvider {
-  static final InjectableInstance<TimeProvider> instance = InjectableInstance.of(Impl.class);
+  public static final InjectableInstance<TimeProvider> instance = InjectableInstance.of(Impl.class);
   public static TimeProvider getInstance() { return instance.get(); }
 
   class Impl extends TimeProvider {

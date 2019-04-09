@@ -12,11 +12,7 @@ package com.ebay.jsoncoder.treedoc;
 import com.ebay.jsoncodercore.factory.Function;
 import com.ebay.jsoncodercore.factory.InjectableFactory;
 import com.ebay.jsoncodercore.type.Predicator;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-
-import java.io.Reader;
 
 @RequiredArgsConstructor
 public class ArrayCharSource extends CharSource {

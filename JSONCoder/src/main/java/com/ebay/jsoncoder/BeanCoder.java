@@ -47,6 +47,7 @@ public class BeanCoder {
   public static TDNode encode(Object obj, BeanCoderContext context, Type type) { return _encode(obj, context.reset(), type, new TDNode()); }
 
   public static Object decode(TDNode obj, Type type) { return decode(obj, type, null, "", new BeanCoderContext(JSONCoderOption.global)); }
+  @SuppressWarnings("unchecked")
   public static <T> T decode(TDNode obj, T target) {
     return (T)decode(obj, target.getClass(), target, "", new BeanCoderContext(JSONCoderOption.global));
   }
@@ -151,7 +152,6 @@ public class BeanCoder {
    * @param ctx  The decode context
    * @return The decoded Object
    */
-  @SuppressWarnings({ "unchecked", "rawtypes" })
   public static Object decode(TDNode jsonNode, Type type, Object targetObj, String name, BeanCoderContext ctx)
   {
     if(jsonNode == null)

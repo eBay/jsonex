@@ -2,7 +2,6 @@ package com.ebay.jsoncoder.treedoc;
 
 import org.junit.Test;
 
-import java.io.CharArrayReader;
 import java.io.StringReader;
 
 import static junit.framework.Assert.assertEquals;

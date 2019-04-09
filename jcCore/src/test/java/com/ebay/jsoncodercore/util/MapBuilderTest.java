@@ -1,6 +1,5 @@
 package com.ebay.jsoncodercore.util;
 
-import junit.framework.Assert;
 import org.junit.Test;
 
 import java.util.Map;

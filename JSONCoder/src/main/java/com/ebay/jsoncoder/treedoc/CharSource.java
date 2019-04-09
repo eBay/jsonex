@@ -9,11 +9,9 @@
 
 package com.ebay.jsoncoder.treedoc;
 
-import com.ebay.jsoncoder.JSONCoder;
 import com.ebay.jsoncodercore.type.Predicator;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-
-import java.text.ParseException;
 
 @Slf4j
 public abstract class CharSource {
@@ -26,6 +24,7 @@ public abstract class CharSource {
   public abstract char peek(int i);
   public abstract boolean isEof(int i);
 
+  @SneakyThrows
   public Bookmark getBookmark() { return bookmark.clone(); }
   public int getPos() { return bookmark.pos; }
   public boolean isEof() { return isEof(0); }
@@ -38,8 +37,8 @@ public abstract class CharSource {
    * @return true The terminate condition matches. otherwise, could be EOF or length matches
    */
   public abstract boolean readUntil(int length, Predicator<CharSource> predicator, StringBuilder target);
-  public boolean readUntil(Predicator<CharSource> predicator, StringBuilder target) { return readUntil(MAX_STRING_LEN, predicator, target); };
-  public boolean skipUntil(Predicator<CharSource> predicator) { return readUntil(Integer.MAX_VALUE, predicator, null); };
+  public boolean readUntil(Predicator<CharSource> predicator, StringBuilder target) { return readUntil(MAX_STRING_LEN, predicator, target); }
+  public boolean skipUntil(Predicator<CharSource> predicator) { return readUntil(Integer.MAX_VALUE, predicator, null); }
 
   public boolean readUntil(int length, final String terminator, final boolean include, StringBuilder target) {
     return readUntil(length, new Predicator<CharSource>() {

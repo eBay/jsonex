@@ -28,7 +28,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class BeanCoderContext {
   // For performance reason, we need to cache SimpleDateFormat in the same thread
-  public static InjectableFactory<String, SimpleDateFormat> dateFormatCache =
+  public static final InjectableFactory<String, SimpleDateFormat> dateFormatCache =
       InjectableFactory.of(String.class, SimpleDateFormat.class, CachePolicy.THREAD_LOCAL);
 
   @Getter final JSONCoderOption option;
@@ -37,12 +37,12 @@ public class BeanCoderContext {
    * Used only for encoding, remember encoded objects to be used to dedupWithreference
    * Key is the Object to be encoded or EqualsWrapper or the object, the value of this map is the converted result
    */
-  @Getter final Map<Object, TDNode> convertedObjects = new HashMap<>();//NOPMD
+  @Getter final Map<Object, TDNode> convertedObjects = new HashMap<>();
 
   /**
    * Used only for decoding, remember decoded objects, key is the hash
    */
-  @Getter final Map<String, Object> hashToObjectMap = new HashMap<>();//NOPMD
+  @Getter final Map<String, Object> hashToObjectMap = new HashMap<>();
 
   /**
    * The current path of the encoding or decoding, mainly used as Deque (Stack), use LinkedList here as we also need random access

@@ -48,7 +48,7 @@ public class TDJSONParser {
             return node.setValue(parseNumber(str));
           }
           if (str.isEmpty())
-            str = in.read(1);  // At least read one to avoid infinit loop
+            str = in.read(1);  // At least read one to avoid infinite loop
           return node.setValue(str);
       }
     } finally {

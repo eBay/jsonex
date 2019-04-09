@@ -11,7 +11,6 @@ package com.ebay.jsoncoder.treedoc;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.ToString;
 
 /**
@@ -33,8 +32,10 @@ public class Bookmark implements Cloneable {
     return c;
   }
 
-  @Override @SneakyThrows
-  protected Bookmark clone() { return (Bookmark)super.clone(); }
+  @Override
+  protected Bookmark clone() throws CloneNotSupportedException {
+    return (Bookmark)super.clone();
+  }
 }
 
 

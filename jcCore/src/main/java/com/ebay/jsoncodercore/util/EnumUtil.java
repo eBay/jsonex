@@ -11,7 +11,6 @@ package com.ebay.jsoncodercore.util;
 
 import com.ebay.jsoncodercore.annotation.DefaultEnum;
 import com.ebay.jsoncodercore.type.Identifiable;
-import lombok.extern.slf4j.Slf4j;
 
 import java.lang.annotation.Annotation;
 import java.util.EnumSet;
