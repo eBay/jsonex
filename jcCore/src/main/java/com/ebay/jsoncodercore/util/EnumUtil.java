@@ -11,6 +11,7 @@ package com.ebay.jsoncodercore.util;
 
 import com.ebay.jsoncodercore.annotation.DefaultEnum;
 import com.ebay.jsoncodercore.type.Identifiable;
+import lombok.SneakyThrows;
 
 import java.lang.annotation.Annotation;
 import java.util.EnumSet;
@@ -39,7 +40,7 @@ public class EnumUtil {
     for (T v : cls.getEnumConstants())
       if (String.valueOf(v.getId()).equals(id))
         return v;
-    return null;
+    return (T)getDefaultValue((Class)cls);
   }
   
   /**
@@ -59,12 +60,9 @@ public class EnumUtil {
    * if the value is invalid.
    */
   @SuppressWarnings({ "rawtypes", "unchecked" })
-  public static <T extends Enum<T>> T valueOf(Class<T> cls, String name) {
-    return valueOf(cls, name,  (T)getDefaultValue((Class)cls));
-  }
+  public static <T extends Enum<T>> T valueOf(Class<T> cls, String name) { return valueOf(cls, name,  (T)getDefaultValue((Class)cls)); }
   
   public static Enum<?> getDefaultValue(Class<Enum<?>> cls) {
-
     Enum<?> result = defaultEnumValues.get(cls);
     if (result == null) {
       synchronized (defaultEnumValues) {
@@ -74,24 +72,21 @@ public class EnumUtil {
     }
     return result;
   }
-  
+
+  @SneakyThrows
   private static Enum<?> getDefaultValueNoCache(Class<Enum<?>> cls) {
     for (Enum<?> e : cls.getEnumConstants()) {
-      try {
-        for (Annotation anno : cls.getField(e.name()).getAnnotations()) {
-          if (anno.annotationType() == DefaultEnum.class ||
-              anno.annotationType().getName().equals("JsonEnumDefaultValue"))  // Jackson annotation 
-            return e;
-        }
-      } catch (Exception ex) { //NOPMD, Shouldn't happen, ignore
-        ex.printStackTrace();
+      for (Annotation anno : cls.getField(e.name()).getAnnotations()) {
+        if (anno.annotationType() == DefaultEnum.class ||
+            anno.annotationType().getName().equals("JsonEnumDefaultValue"))  // Jackson annotation
+          return e;
       }
     }
     return null;
   }
   
   /**
-   * Convert a long value to EnumSet, assume the id of the represented as bit location
+   * Convert a long value to EnumSet, assume the id is represented as bit location
    */
   public static <T extends Enum<T> & Identifiable<Long>> EnumSet<T> toEnumSet(long f, Class<T> cls) {
     EnumSet<T> result = EnumSet.noneOf(cls);
@@ -101,7 +96,10 @@ public class EnumUtil {
     }
     return result;
   }
-  
+
+  /**
+   * Convert enumset to long of bit array, assume the id is represented as bit location
+   */
   public static <T extends Enum<T> & Identifiable<Long>> long toLong(EnumSet<T> enums) {
     long f = 0;
     for (Identifiable<Long> flag : enums)

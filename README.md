@@ -7,7 +7,7 @@ JSONCoder is a light weight generic object serialization / deserialization libra
 ## Why JSONCoder
 There are plenty of options for JSON serialization/deserialization libraries, why we need another one? If you are also a fan of JSON , but hate the restrictions by JSON standards that make it so hard to be used as a configuration language, but still don't want to give up JSON to YAML (JSON is nice, why need Yet Another Markup Language). You can have a try of this library. This library focuses on solving following problems well:  
 
-* Supports JSON extension proposal ([JSONX](./JSONX.md)) which will make it friendly for configuration, such as
+* Supports JSON extension proposal ([JSONEX](./JSONEX.md)) which will make it friendly for configuration, such as
     * comments support
     * quote of key is optional
     * customize quote characters (Avoid un-necessary escapes by choosing different quote characters) 
@@ -31,7 +31,7 @@ There are plenty of options for JSON serialization/deserialization libraries, wh
 * Deserialize and append to existing object (Incremental decoding, could be used to merge multiple config files)
 * Supports nested JSON String within JSON as normal sub JSON Object instead of serialized json string to avoid un-necessary escape in String literal
 * Supports forward compatibility features: silently ignore unknown properties, use @DefaultEnum to annotate a default enum which be used if unknown enum value is encountered
-* Supports proposed json extension format ([JSONX](./JSONX.md)), [Example in test](JSONCoder/src/test/resources/com/ebay/jsoncoder/jsonext.json)
+* Supports proposed json extension format ([JSONEX](./JSONEX.md)), [Example in test](JSONCoder/src/test/resources/com/ebay/jsoncoder/jsonext.json)
 * JDK version: 1.7 or above 
 
 

@@ -32,8 +32,7 @@ public class Bookmark implements Cloneable {
     return c;
   }
 
-  @Override
-  protected Bookmark clone() throws CloneNotSupportedException {
+  @Override protected Bookmark clone() throws CloneNotSupportedException {
     return (Bookmark)super.clone();
   }
 }

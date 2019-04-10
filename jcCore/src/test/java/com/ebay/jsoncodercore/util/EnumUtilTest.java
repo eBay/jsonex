@@ -18,6 +18,7 @@ import org.junit.Test;
 import java.util.EnumSet;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertSame;
 
 public class EnumUtilTest {
@@ -38,12 +39,18 @@ public class EnumUtilTest {
     public static long toLong(EnumSet<TestEnum> enums) { return EnumUtil.toLong(enums); }
     public static EnumSet<TestEnum> toEnumSet(long val) { return EnumUtil.toEnumSet(val, TestEnum.class); }
   }
+
+  enum TestEnumWithoutDefault { value1, valu2 }
   
   @Test public void testGetEnumById() {
     assertSame(TestEnum.value1, TestEnum.get(1));
     assertSame(TestEnum.value4, TestEnum.get(8));
     assertSame(TestEnum.unknown, TestEnum.get(9));
     assertSame(TestEnum.value3, EnumUtil.getEnumByIdString(TestEnum.class, "4"));
+    assertSame(TestEnum.unknown, EnumUtil.getEnumByIdString(TestEnum.class, "100"));
+
+    assertNull("Should return null if no defaultEnum is annotated and name doesn't match a value",
+        EnumUtil.valueOf(TestEnumWithoutDefault.class, "unknown"));
   }
 
   @Test public void testValueOf() {

@@ -442,7 +442,7 @@ public class JSONCoderTest {
   }
 
   @Test public void testDecodeJsonx() {
-    Reader in = TestUtil.loadResource(this.getClass(), "jsonext.json");
+    Reader in = TestUtil.loadResource(this.getClass(), "jsonex.json");
     TestBean testBean = JSONCoder.global.decode(in, TestBean.class);
     assertEquals(100, testBean.getIntField());
     assertEquals("This is multi-line text\n" +

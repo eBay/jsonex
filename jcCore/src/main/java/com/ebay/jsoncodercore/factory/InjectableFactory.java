@@ -13,10 +13,11 @@ import java.lang.reflect.Modifier;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import lombok.SneakyThrows;
 import lombok.experimental.Accessors;
 
 /*
- * Injectable factory. Mainly for unit testing. provide a convenient method for testing code to
+ * Injectable factory. Mainly for testing. provide a convenient method for testing code to
  * replace object creation logic with mock implementation.
  * 
  * It supports different cache policies.
@@ -28,25 +29,31 @@ public class InjectableFactory<TP, TI> {
   public enum CachePolicy {
     NO_CACHE, THREAD_LOCAL, GLOBAL,
   }
-  // @VisibleForTesting 
-  Class<?> implClass;
-  // @VisibleForTesting
-  Function<TP, TI> objectCreator;
-  final CachePolicy cachePolicy;
+
+  private Class<? extends TI> implClass;
+  private Function<? super TP, ? extends TI> objectCreator;
+  private final CachePolicy cachePolicy;
   
   private Map<Object, TI> globalCache;
   private final ThreadLocal<Map<Object, TI>> threadLocalCache = new ThreadLocal<>();
-  
-  private InjectableFactory(Class<?> implCls, CachePolicy cachePolicy) {
-    this.implClass = implCls;
+  private final Object initialCreator;
+
+  private InjectableFactory(Object creator, CachePolicy cachePolicy) {
+    initialCreator = creator;
     this.cachePolicy = cachePolicy;
+    setCreator(creator);
   }
-  
-  private InjectableFactory(Function<TP, TI> objectCreator, CachePolicy cachePolicy) {
-    this.objectCreator = objectCreator;
-    this.cachePolicy = cachePolicy;
+
+  public InjectableFactory<TP, TI> setCreator(Object creator) {
+    implClass = null;
+    objectCreator = null;
+    if (creator instanceof Class)
+      implClass = (Class<? extends TI>)creator;
+    else
+      objectCreator = (Function<? super TP, ? extends TI>)creator;
+    return clearCache();
   }
-  
+
   public static <TI, TC extends TI> InjectableFactory<Void, TI> of(Class<TC> implCls) {
     return of(implCls, CachePolicy.NO_CACHE);
   }
@@ -109,19 +116,10 @@ public class InjectableFactory<TP, TI> {
     }
     return result;
   }
-  
-  @SuppressWarnings("UnusedReturnValue")
-  public <TC extends TI> InjectableFactory<TP, TI> setImplClass(Class<TC> implClass) {
-    this.implClass = implClass; 
-    this.objectCreator = null; 
-    return clearCache(); 
-  }
-  
-  public InjectableFactory<TP, TI> setObjectCreator(Function<TP, TI> objectCreator) {
-    this.objectCreator = objectCreator;
-    this.implClass = null;
-    return clearCache();
-  }
+
+  public <TC extends TI> InjectableFactory<TP, TI> setImplClass(Class<TC> implClass) { return setCreator(implClass); }
+  public InjectableFactory<TP, TI> setObjectCreator(Function<TP, TI> objectCreator) { return setCreator(objectCreator); }
+  public InjectableFactory<TP, TI> reset() { return setCreator(initialCreator); }
   
   public InjectableFactory<TP, TI> clearCache() {
     if (threadLocalCache.get() != null)
@@ -132,15 +130,12 @@ public class InjectableFactory<TP, TI> {
   }
   
   @SuppressWarnings("unchecked")
+  @SneakyThrows
   private TI create(TP param) {
-    try {
-      if (objectCreator != null)
-        return objectCreator.apply(param);
-      else
-        return param == null ? (TI) implClass.newInstance() :
-            (TI)(implClass.getConstructor(param.getClass()).newInstance(param));
-    } catch (Exception e) {
-      throw new RuntimeException("Error creating default instance: " + e.toString(), e);
-    }
+    if (objectCreator != null)
+      return objectCreator.apply(param);
+    else
+      return param == null ? (TI) implClass.newInstance() :
+          (TI)(implClass.getConstructor(param.getClass()).newInstance(param));
   }
 }
