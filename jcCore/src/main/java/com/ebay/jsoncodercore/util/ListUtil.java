@@ -115,8 +115,11 @@ public class ListUtil {
       @Override public int compare(V o1, V o2) {
         K v1 = sortKey.apply(o1);
         K v2 = sortKey.apply(o2);
-        int result = v1 == v2 ? 0 :
-            ((v1 == null) ? -1 : v1.compareTo(v2));
+        int result;
+        if (v1 == null)
+          result = v2 == null ? 0 : -1;
+        else
+          result = v1.compareTo(v2);
         return desc ? - result : result;
       }
     });

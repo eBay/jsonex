@@ -43,6 +43,7 @@ public class InjectableFactoryTest {
     
     i1Fact.setImplClass(C1.class);
     assertEquals(C1.class, i1Fact.get().getClass());
+    i1Fact.reset();
 
     InjectableFactory<P, I1>i2Fact = InjectableFactory.of(P.class, C3.class);
     assertEquals(C3.class, i2Fact.get(new P1()).getClass());

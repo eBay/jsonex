@@ -10,6 +10,7 @@
 package com.ebay.jsoncodercore.factory;
 
 import lombok.Setter;
+import lombok.SneakyThrows;
 import lombok.experimental.Accessors;
 
 import java.lang.reflect.Constructor;
@@ -25,50 +26,53 @@ import java.lang.reflect.Modifier;
  */
 @Accessors(chain = true)
 public class InjectableInstance<TI> {
-  Class<?> implClass;
-  Supplier<TI> objectCreator;
+  private Class<? extends TI> implClass;
+  private Supplier<? extends TI> objectCreator;
   // @VisibleForTesting
   @Setter private TI instance;
+  private final Object initialCreator;
+
+  private InjectableInstance(Object creator) {
+    this.initialCreator = creator;
+    setCreator(creator);
+  }
+
+  private InjectableInstance<TI>  setCreator(Object creator) {
+    this.implClass = null;
+    this.objectCreator = null;
+    instance = null;
+    if (creator instanceof Class<?>)
+      implClass = (Class<? extends TI>)creator;
+    else
+      objectCreator = (Supplier<TI>)creator;
+    return this;
+  }
     
   public static <TI, TC extends TI> InjectableInstance<TI> of(Class<TC> implCls) {
     if (implCls.isInterface() || Modifier.isAbstract(implCls.getModifiers()))
-      throw new IllegalArgumentException("Implementation class has to be concrete class");
-    return new InjectableInstance<TI>().setImplClass(implCls);
+      throw new IllegalArgumentException("Implementation class has to be a concrete class");
+    return new InjectableInstance<TI>(implCls);
   }
   
   public static <TI, TC extends TI> InjectableInstance<TI> of(Supplier<TI> objectCreator) {
-    return new InjectableInstance<TI>().setObjectCreator(objectCreator);
+    return new InjectableInstance<TI>(objectCreator);
   }
   
-  // @VisibleForTesting 
-  public <TC extends TI> InjectableInstance<TI> setImplClass(Class<TC> implClass) {
-    this.implClass = implClass;
-    this.objectCreator = null;
-    instance = null;
-    return this;
-  }
+  public InjectableInstance<TI> setImplClass(Class<? extends TI> implClass) { return setCreator(implClass); }
+  public InjectableInstance<TI> setObjectCreator(Supplier<? extends TI> objectCreator) { return setCreator(objectCreator); }
+  public InjectableInstance<TI> reset() { return setCreator(initialCreator); }
 
-  // @VisibleForTesting
-  public <TC extends TI> InjectableInstance<TI> setObjectCreator(Supplier<TI> objectCreator) {
-    this.implClass = null;
-    this.objectCreator = objectCreator;
-    instance = null;
-    return this;
-  }
 
   public TI get() {
-    if (instance == null)  // Do lazy load here as DAO class constructor do heavy DAL initialization which is not necessary of UT
-      createDefaultInstance();
+    if (instance == null)
+      createInstance();
     return instance;
   }
   
   @SuppressWarnings("unchecked")
-  private synchronized void createDefaultInstance() {//NOPMD
-    try {
-      instance = objectCreator != null ? objectCreator.get() : (TI)newInstance(implClass);
-    } catch (Exception e) {
-      throw new RuntimeException("Error creating instance", e);
-    }
+  @SneakyThrows
+  private synchronized void createInstance() {//NOPMD
+    instance = objectCreator != null ? objectCreator.get() : (TI)newInstance(implClass);
   }
   private static Object newInstance(Class<?> cls) throws Exception {
     Constructor<?> ctor = cls.getDeclaredConstructor();
