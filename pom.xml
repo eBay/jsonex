@@ -4,10 +4,11 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.ebay.jsoncoder</groupId>
   <artifactId>jcParent</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.1.0</version>
   <packaging>pom</packaging>
   <name>JSONCoder Parent</name>
   <description>JSONCoder Parent</description>
+  <url>https://github.com/eBay/JSONCoder.git</url>
 
   <modules>
     <module>jcCore</module>
@@ -164,7 +165,7 @@
             <executions>
               <execution>
                 <id>sign-artifacts</id>
-                <phase>verify123</phase>
+                <phase>verify</phase>
                 <goals>
                   <goal>sign</goal>
                 </goals>
