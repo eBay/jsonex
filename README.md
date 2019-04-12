@@ -51,6 +51,7 @@ Please refer the unit test class for more detailed usage patterns:
        <version>${jsonCoderVersion}</version>
      </dependency>
     ````
+    You can get current version by searching [maven central](https://search.maven.org/search?q=g:com.ebay.jsoncoder)
 2. Simple Serialization / Deserialization
     ```java
       // serialization

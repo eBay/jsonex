@@ -19,3 +19,4 @@ coverage
 **/*.iml
 build.xml
 nb-configuration.xml
+*.versionsBackup
