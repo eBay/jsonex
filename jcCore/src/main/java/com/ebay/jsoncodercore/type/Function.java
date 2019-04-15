@@ -9,6 +9,7 @@
 
 package com.ebay.jsoncodercore.type;
 
-public interface Predicator<T> {
-  boolean test(T obj);
+@SuppressWarnings("WeakerAccess")
+public interface Function<T, R> {
+  R apply(T param);
 }

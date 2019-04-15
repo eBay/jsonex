@@ -9,9 +9,9 @@
 
 package com.ebay.jsoncodercore.util;
 
-import com.ebay.jsoncodercore.factory.Function;
+import com.ebay.jsoncodercore.type.Function;
 import com.ebay.jsoncodercore.type.Identifiable;
-import com.ebay.jsoncodercore.type.Predicator;
+import com.ebay.jsoncodercore.type.Predicate;
 
 import java.util.*;
 
@@ -90,7 +90,7 @@ public class ListUtil {
     return map;
   }
 
-  public static <V, C extends Collection<V>> C filter(C source, C dest, Predicator<? super V> pred) {
+  public static <V, C extends Collection<V>> C filter(C source, C dest, Predicate<? super V> pred) {
     for (V s : source) {
       if (pred.test(s))
         dest.add(s);
@@ -98,7 +98,7 @@ public class ListUtil {
     return dest;
   }
 
-  public static <V, C extends Collection<V>> List<V> filter(C source, Predicator<? super V> pred) {
+  public static <V, C extends Collection<V>> List<V> filter(C source, Predicate<? super V> pred) {
     List<V> dest = new ArrayList<>();
     filter(source, dest, pred);
     return dest;
@@ -144,7 +144,7 @@ public class ListUtil {
     return sb.toString();
   }
 
-  public static <V, C extends Collection<V>> boolean exists(C source, Predicator<? super V> pred) {
+  public static <V, C extends Collection<V>> boolean exists(C source, Predicate<? super V> pred) {
     for (V s : source) {
       if (pred.test(s))
         return true;

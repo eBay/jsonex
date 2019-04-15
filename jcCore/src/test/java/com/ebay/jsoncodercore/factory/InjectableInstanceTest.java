@@ -11,9 +11,10 @@ package com.ebay.jsoncodercore.factory;
 
 import static junit.framework.Assert.assertEquals;
 
+import com.ebay.jsoncodercore.type.Supplier;
 import org.junit.Test;
 
-public class LazyInstanceTest {
+public class InjectableInstanceTest {
   public interface I1 {}
   public static class C1 implements I1 {}
   public static class C2 implements I1 {}

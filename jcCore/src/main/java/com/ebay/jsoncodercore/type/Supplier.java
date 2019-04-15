@@ -7,7 +7,7 @@
  https://opensource.org/licenses/MIT.
  ************************************************************/
 
-package com.ebay.jsoncodercore.factory;
+package com.ebay.jsoncodercore.type;
 
 public interface Supplier<T> {
   T get();

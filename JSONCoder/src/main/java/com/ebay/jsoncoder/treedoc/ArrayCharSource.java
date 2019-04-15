@@ -9,9 +9,9 @@
 
 package com.ebay.jsoncoder.treedoc;
 
-import com.ebay.jsoncodercore.factory.Function;
+import com.ebay.jsoncodercore.type.Function;
 import com.ebay.jsoncodercore.factory.InjectableFactory;
-import com.ebay.jsoncodercore.type.Predicator;
+import com.ebay.jsoncodercore.type.Predicate;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -40,12 +40,12 @@ public class ArrayCharSource extends CharSource {
 
   @Override public boolean isEof(int i) { return startIndex + bookmark.pos + i >= endIndex; }
 
-  @Override public boolean readUntil(int length, Predicator<CharSource> predicator, StringBuilder target) {
+  @Override public boolean readUntil(int length, Predicate<CharSource> predicate, StringBuilder target) {
     int startPos = bookmark.pos;
     int len = 0;
     boolean matched = false;
     for (; len < length && !(isEof(0)); len++) {
-      matched = predicator.test(this);
+      matched = predicate.test(this);
       if (matched)
         break;
       read();
