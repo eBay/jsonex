@@ -7,9 +7,8 @@
  https://opensource.org/licenses/MIT.
  ************************************************************/
 
-package com.ebay.jsoncodercore.factory;
+package com.ebay.jsoncodercore.type;
 
-@SuppressWarnings("WeakerAccess")
-public interface Function<T, R> {
-  R apply(T param);
+public interface Predicate<T> {
+  boolean test(T obj);
 }
