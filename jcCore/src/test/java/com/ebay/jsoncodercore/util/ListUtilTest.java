@@ -17,14 +17,17 @@ import com.ebay.jsoncodercore.type.Predicate;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 import lombok.experimental.ExtensionMethod;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import static com.ebay.jsoncodercore.type.Operator.eq;
 import static com.ebay.jsoncodercore.type.Operator.ge;
@@ -42,7 +45,7 @@ import static org.junit.Assert.assertTrue;
 
 @ExtensionMethod({Operator.class, ListUtil.class})
 public class ListUtilTest {
-  @RequiredArgsConstructor @Getter @EqualsAndHashCode
+  @RequiredArgsConstructor @Getter @EqualsAndHashCode @ToString
   public static class TestCls implements Identifiable<Integer> {
     final Integer id;
     final String name;
@@ -63,6 +66,7 @@ public class ListUtilTest {
 
   private List<TestCls> buildList() {
     return Arrays.asList(
+        new TestCls(0, null, 0),
         new TestCls(1, "name1", 1),
         new TestCls(2, "name2", 2),
         new TestCls(3, "name3", 2));
@@ -70,14 +74,14 @@ public class ListUtilTest {
 
   @Test public void testMap() {
     List<String> result = ListUtil.map(buildList(), F_NAME);
-    assertArrayEquals(new String[]{"name1", "name2", "name3"}, result.toArray());
+    assertArrayEquals(new String[]{null, "name1", "name2", "name3"}, result.toArray());
 
     assertNull("should be null if pass null", ListUtil.map(null, F_NAME));
   }
 
   @Test public void testGetIds() {
     List<Integer> result = ListUtil.getIds(buildList());
-    assertArrayEquals(new Integer[]{1, 2, 3}, result.toArray());
+    assertArrayEquals(new Integer[]{0, 1, 2, 3}, result.toArray());
   }
 
   @Test public void getGroupBy() {
@@ -117,9 +121,7 @@ public class ListUtilTest {
     List<TestCls> list = buildList();
     Map<Integer, TestCls> map = ListUtil.toMap(list, F_ID);
 
-    assertEquals(list.get(0), map.get(1));
-    assertEquals(list.get(1), map.get(2));
-    assertEquals(list.get(2), map.get(3));
+    assertArrayEquals(list.toArray(), new TreeMap(map).values().toArray());
   }
 
   @Test public void testFilter() {
@@ -135,19 +137,19 @@ public class ListUtilTest {
     result1 = ListUtil.filter(list, ge(F_TYPE, 2));
     assertEquals(result, result1);
 
-    result = ListUtil.filter(list, not(in(F_ID, 1, 2)));
+    result = ListUtil.filter(list, not(in(F_ID, 0, 1, 2)));
     assertEquals(1, result.size());
-    assertEquals(list.get(2), result.get(0));
+    assertEquals(list.get(3), result.get(0));
 
     // Use ExtensionMethod
     result = list.filter(F_ID.le(2).and(F_TYPE.eq(2)));
     assertEquals(1, result.size());
-    assertEquals(list.get(1), result.get(0));
+    assertEquals(list.get(2), result.get(0));
 
-    result = list.filter(F_TYPE.eq(null));
-    assertEquals(0, result.size());
+    result = list.filter(F_NAME.eq(null));
+    assertEquals(1, result.size());
 
-    result = list.filter(F_TYPE.lt(2));
+    result = list.filter(F_TYPE.lt(1));
     assertEquals(1, result.size());
     assertEquals(list.get(0), result.get(0));
   }
@@ -157,9 +159,10 @@ public class ListUtilTest {
     List<TestCls> result = ListUtil.orderBy(list, new Function<TestCls, Comparable>() {
       @Override public Comparable apply(TestCls param) { return param.getName(); }
     }, true);
-    assertEquals(list.get(0), result.get(2));
-    assertEquals(list.get(1), result.get(1));
-    assertEquals(list.get(2), result.get(0));
+    assertEquals(list.get(0), result.get(3));
+    assertEquals(list.get(1), result.get(2));
+    assertEquals(list.get(2), result.get(1));
+    assertEquals(list.get(3), result.get(0));
 
     result = ListUtil.orderBy(list, F_NAME);
     assertEquals(list, result);
@@ -183,9 +186,10 @@ public class ListUtilTest {
   @Test public void testFirstLast() {
     List<TestCls> list = buildList();
     assertEquals(list.get(0), ListUtil.first(list));
-    assertEquals(list.get(2), ListUtil.last(list));
+    assertEquals(list.get(3), ListUtil.last(list));
 
-    assertEquals(list.get(1), ListUtil.first(list, eq(F_TYPE, 2)));
+    assertEquals(list.get(2), ListUtil.first(list, eq(F_TYPE, 2)));
+    assertEquals(null, ListUtil.first(list, eq(F_TYPE, 3)));
   }
 
   @Test public void testJoin() {
@@ -196,5 +200,9 @@ public class ListUtilTest {
     List<Integer> list = new ArrayList<>(Arrays.asList(1,2,3));
     ListUtil.removeLast(list);
     assertArrayEquals(new Integer[]{1,2}, list.toArray());
+  }
+
+  @Test public void testSetof() {
+    assertTrue("set should contain all the elemtns", ListUtil.setOf(1,2,3).containsAll(Arrays.asList(1,2,3)));
   }
 }
