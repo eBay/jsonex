@@ -118,8 +118,9 @@ public class ListUtil {
         int result;
         if (v1 == null)
           result = v2 == null ? 0 : -1;
-        else
-          result = v1.compareTo(v2);
+        else {
+          result = v2 == null ? 1 : v1.compareTo(v2);
+        }
         return desc ? - result : result;
       }
     });
@@ -164,4 +165,6 @@ public class ListUtil {
   public static <T> T first(Collection<T> list) { return list == null || list.size() == 0 ? null : list.iterator().next(); }
 
   public static void removeLast(List<?> list) { list.remove(list.size() - 1); }
+
+  public static <T> Set<T> setOf(T... e) { return new HashSet<>(Arrays.asList(e)); }
 }
