@@ -152,6 +152,14 @@ public class ListUtil {
     return false;
   }
 
+  public static <V, C extends Collection<V>> V first(C source, Predicate<? super V> pred) {
+    for (V s : source) {
+      if (pred.test(s))
+        return s;
+    }
+    return null;
+  }
+
   public static <T> T last(List<T> list) { return list == null ? null : list.get(list.size() - 1); }
   public static <T> T first(Collection<T> list) { return list == null || list.size() == 0 ? null : list.iterator().next(); }
 

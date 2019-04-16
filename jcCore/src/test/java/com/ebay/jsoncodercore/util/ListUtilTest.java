@@ -17,6 +17,7 @@ import com.ebay.jsoncodercore.type.Predicate;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.ExtensionMethod;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -25,9 +26,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.ebay.jsoncodercore.type.Operator.*;
 import static com.ebay.jsoncodercore.type.Operator.eq;
 import static com.ebay.jsoncodercore.type.Operator.ge;
+import static com.ebay.jsoncodercore.type.Operator.in;
+import static com.ebay.jsoncodercore.type.Operator.not;
+import static com.ebay.jsoncodercore.util.ListUtilTest.TestCls.F_ID;
+import static com.ebay.jsoncodercore.util.ListUtilTest.TestCls.F_NAME;
+import static com.ebay.jsoncodercore.util.ListUtilTest.TestCls.F_TYPE;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -35,6 +40,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+@ExtensionMethod({Operator.class, ListUtil.class})
 public class ListUtilTest {
   @RequiredArgsConstructor @Getter @EqualsAndHashCode
   public static class TestCls implements Identifiable<Integer> {
@@ -63,10 +69,10 @@ public class ListUtilTest {
   }
 
   @Test public void testMap() {
-    List<String> result = ListUtil.map(buildList(), TestCls.F_NAME);
+    List<String> result = ListUtil.map(buildList(), F_NAME);
     assertArrayEquals(new String[]{"name1", "name2", "name3"}, result.toArray());
 
-    assertNull("should be null if pass null", ListUtil.map(null, TestCls.F_NAME));
+    assertNull("should be null if pass null", ListUtil.map(null, F_NAME));
   }
 
   @Test public void testGetIds() {
@@ -75,7 +81,7 @@ public class ListUtilTest {
   }
 
   @Test public void getGroupBy() {
-    Map<Integer, List<TestCls>> result = ListUtil.groupBy(buildList(), TestCls.F_TYPE);
+    Map<Integer, List<TestCls>> result = ListUtil.groupBy(buildList(), F_TYPE);
     assertEquals(1, result.get(1).size());
     assertEquals(2, result.get(2).size());
   }
@@ -100,7 +106,7 @@ public class ListUtilTest {
   }
 
   @Test public void testToMapWithKeyAndVal() {
-    Map<Integer, String> map = ListUtil.toMap(buildList(), TestCls.F_ID, TestCls.F_NAME);
+    Map<Integer, String> map = ListUtil.toMap(buildList(), F_ID, F_NAME);
 
     assertEquals("name1", map.get(1));
     assertEquals("name2", map.get(2));
@@ -109,7 +115,7 @@ public class ListUtilTest {
 
   @Test public void testToMapWithKey() {
     List<TestCls> list = buildList();
-    Map<Integer, TestCls> map = ListUtil.toMap(list, TestCls.F_ID);
+    Map<Integer, TestCls> map = ListUtil.toMap(list, F_ID);
 
     assertEquals(list.get(0), map.get(1));
     assertEquals(list.get(1), map.get(2));
@@ -117,31 +123,33 @@ public class ListUtilTest {
   }
 
   @Test public void testFilter() {
-    List<TestCls> result = ListUtil.filter(buildList(), new Predicate<TestCls>() {
+    List<TestCls> list = buildList();
+    List<TestCls> result = ListUtil.filter(list, new Predicate<TestCls>() {
       @Override public boolean test(TestCls obj) { return obj.getType() == 2; }
     });
     assertEquals(2, result.size());
 
-    List<TestCls> result1 = ListUtil.filter(buildList(), eq(TestCls.F_TYPE, 2));
+    List<TestCls> result1 = ListUtil.filter(list, eq(F_TYPE, 2));
     assertEquals(result, result1);
 
-    result1 = ListUtil.filter(buildList(), ge(TestCls.F_TYPE, 2));
+    result1 = ListUtil.filter(list, ge(F_TYPE, 2));
     assertEquals(result, result1);
 
-    result = ListUtil.filter(buildList(), not(in(TestCls.F_ID, 1, 2)));
+    result = ListUtil.filter(list, not(in(F_ID, 1, 2)));
     assertEquals(1, result.size());
-    assertEquals((Integer)3, result.get(0).getId());
+    assertEquals(list.get(2), result.get(0));
 
-    result = ListUtil.filter(buildList(), and(le(TestCls.F_ID, 2), eq(TestCls.F_TYPE, 2)));
+    // Use ExtensionMethod
+    result = list.filter(F_ID.le(2).and(F_TYPE.eq(2)));
     assertEquals(1, result.size());
-    assertEquals((Integer)2, result.get(0).getId());
+    assertEquals(list.get(1), result.get(0));
 
-    result = ListUtil.filter(buildList(), eq(TestCls.F_TYPE, null));
+    result = list.filter(F_TYPE.eq(null));
     assertEquals(0, result.size());
 
-    result = ListUtil.filter(buildList(), lt(TestCls.F_TYPE, 2));
+    result = list.filter(F_TYPE.lt(2));
     assertEquals(1, result.size());
-    assertEquals((Integer)1, result.get(0).getId());
+    assertEquals(list.get(0), result.get(0));
   }
 
   @Test public void testOrderBy() {
@@ -153,9 +161,7 @@ public class ListUtilTest {
     assertEquals(list.get(1), result.get(1));
     assertEquals(list.get(2), result.get(0));
 
-    result = ListUtil.orderBy(list, new Function<TestCls, Comparable>() {
-      @Override public Comparable apply(TestCls param) { return param.getName(); }
-    });
+    result = ListUtil.orderBy(list, F_NAME);
     assertEquals(list, result);
   }
 
@@ -178,6 +184,8 @@ public class ListUtilTest {
     List<TestCls> list = buildList();
     assertEquals(list.get(0), ListUtil.first(list));
     assertEquals(list.get(2), ListUtil.last(list));
+
+    assertEquals(list.get(1), ListUtil.first(list, eq(F_TYPE, 2)));
   }
 
   @Test public void testJoin() {
