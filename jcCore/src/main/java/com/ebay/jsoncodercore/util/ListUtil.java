@@ -9,9 +9,9 @@
 
 package com.ebay.jsoncodercore.util;
 
-import com.ebay.jsoncodercore.factory.Function;
+import com.ebay.jsoncodercore.type.Function;
 import com.ebay.jsoncodercore.type.Identifiable;
-import com.ebay.jsoncodercore.type.Predicator;
+import com.ebay.jsoncodercore.type.Predicate;
 
 import java.util.*;
 
@@ -90,7 +90,7 @@ public class ListUtil {
     return map;
   }
 
-  public static <V, C extends Collection<V>> C filter(C source, C dest, Predicator<? super V> pred) {
+  public static <V, C extends Collection<V>> C filter(C source, C dest, Predicate<? super V> pred) {
     for (V s : source) {
       if (pred.test(s))
         dest.add(s);
@@ -98,7 +98,7 @@ public class ListUtil {
     return dest;
   }
 
-  public static <V, C extends Collection<V>> List<V> filter(C source, Predicator<? super V> pred) {
+  public static <V, C extends Collection<V>> List<V> filter(C source, Predicate<? super V> pred) {
     List<V> dest = new ArrayList<>();
     filter(source, dest, pred);
     return dest;
@@ -118,8 +118,9 @@ public class ListUtil {
         int result;
         if (v1 == null)
           result = v2 == null ? 0 : -1;
-        else
-          result = v1.compareTo(v2);
+        else {
+          result = v2 == null ? 1 : v1.compareTo(v2);
+        }
         return desc ? - result : result;
       }
     });
@@ -144,7 +145,7 @@ public class ListUtil {
     return sb.toString();
   }
 
-  public static <V, C extends Collection<V>> boolean exists(C source, Predicator<? super V> pred) {
+  public static <V, C extends Collection<V>> boolean exists(C source, Predicate<? super V> pred) {
     for (V s : source) {
       if (pred.test(s))
         return true;
@@ -152,8 +153,18 @@ public class ListUtil {
     return false;
   }
 
+  public static <V, C extends Collection<V>> V first(C source, Predicate<? super V> pred) {
+    for (V s : source) {
+      if (pred.test(s))
+        return s;
+    }
+    return null;
+  }
+
   public static <T> T last(List<T> list) { return list == null ? null : list.get(list.size() - 1); }
   public static <T> T first(Collection<T> list) { return list == null || list.size() == 0 ? null : list.iterator().next(); }
 
   public static void removeLast(List<?> list) { list.remove(list.size() - 1); }
+
+  public static <T> Set<T> setOf(T... e) { return new HashSet<>(Arrays.asList(e)); }
 }

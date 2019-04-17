@@ -9,9 +9,9 @@
 
 package com.ebay.jsoncoder.treedoc;
 
-import com.ebay.jsoncodercore.factory.Function;
+import com.ebay.jsoncodercore.type.Function;
 import com.ebay.jsoncodercore.factory.InjectableFactory;
-import com.ebay.jsoncodercore.type.Predicator;
+import com.ebay.jsoncodercore.type.Predicate;
 import lombok.SneakyThrows;
 
 import java.io.Reader;
@@ -89,7 +89,7 @@ public class ReaderCharSource extends CharSource {
     return p >= loadPos;
   }
 
-  @Override public boolean readUntil(int length, Predicator<CharSource> predicator, StringBuilder target) {
+  @Override public boolean readUntil(int length, Predicate<CharSource> predicate, StringBuilder target) {
     if (target != null) {
       backupTarget = target;
       backupMark = getPos();
@@ -97,7 +97,7 @@ public class ReaderCharSource extends CharSource {
     try {
       boolean matched = false;
       for (int len = 0; len < length && !(isEof(0)); len++) {
-        matched = predicator.test(this);
+        matched = predicate.test(this);
         if (matched)
           break;
         read();

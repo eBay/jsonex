@@ -9,7 +9,7 @@
 
 package com.ebay.jsoncoder.treedoc;
 
-import com.ebay.jsoncodercore.type.Predicator;
+import com.ebay.jsoncodercore.type.Predicate;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -31,17 +31,17 @@ public abstract class CharSource {
   public char peek() { return peek(0); }
 
   /**
-   * Skip chars until eof or length or predicator condition matches
+   * Skip chars until eof or length or predicate condition matches
    * If target is set, the skipped the chars will be saved in the target
    *
    * @return true The terminate condition matches. otherwise, could be EOF or length matches
    */
-  public abstract boolean readUntil(int length, Predicator<CharSource> predicator, StringBuilder target);
-  public boolean readUntil(Predicator<CharSource> predicator, StringBuilder target) { return readUntil(MAX_STRING_LEN, predicator, target); }
-  public boolean skipUntil(Predicator<CharSource> predicator) { return readUntil(Integer.MAX_VALUE, predicator, null); }
+  public abstract boolean readUntil(int length, Predicate<CharSource> predicate, StringBuilder target);
+  public boolean readUntil(Predicate<CharSource> predicate, StringBuilder target) { return readUntil(MAX_STRING_LEN, predicate, target); }
+  public boolean skipUntil(Predicate<CharSource> predicate) { return readUntil(Integer.MAX_VALUE, predicate, null); }
 
   public boolean readUntil(int length, final String terminator, final boolean include, StringBuilder target) {
-    return readUntil(length, new Predicator<CharSource>() {
+    return readUntil(length, new Predicate<CharSource>() {
       @Override public boolean test(CharSource THIS) { return terminator.indexOf(THIS.peek(0)) >= 0 == include; }
     }, target);
   }
@@ -58,7 +58,7 @@ public abstract class CharSource {
   public boolean skipSpaces() { return skipUntil(SPACE_CHARS, false); }
 
   public boolean read(int length, StringBuilder target) {
-    return readUntil(length, new Predicator<CharSource>() {
+    return readUntil(length, new Predicate<CharSource>() {
       @Override public boolean test(CharSource THIS) { return false; }
     }, target);
   }
@@ -72,7 +72,7 @@ public abstract class CharSource {
 
 
   public boolean readUntilMatch(int length, final String str, final boolean skipStr, StringBuilder target) {
-    boolean matches = readUntil(length, new Predicator<CharSource>() {
+    boolean matches = readUntil(length, new Predicate<CharSource>() {
       @Override public boolean test(CharSource THIS) { return startsWidth(str); }
     }, target);
     if (matches && skipStr)

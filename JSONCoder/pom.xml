@@ -6,7 +6,7 @@
   <parent>
     <groupId>com.ebay.jsoncoder</groupId>
     <artifactId>jcParent</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.1</version>
     <relativePath>..</relativePath>
   </parent>
   <artifactId>JSONCoder</artifactId>

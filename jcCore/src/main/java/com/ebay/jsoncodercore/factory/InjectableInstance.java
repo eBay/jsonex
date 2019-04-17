@@ -9,6 +9,7 @@
 
 package com.ebay.jsoncodercore.factory;
 
+import com.ebay.jsoncodercore.type.Supplier;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.experimental.Accessors;
@@ -28,7 +29,6 @@ import java.lang.reflect.Modifier;
 public class InjectableInstance<TI> {
   private Class<? extends TI> implClass;
   private Supplier<? extends TI> objectCreator;
-  // @VisibleForTesting
   @Setter private TI instance;
   private final Object initialCreator;
 
