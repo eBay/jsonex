@@ -10,6 +10,7 @@
 package com.ebay.jsoncodercore.factory;
 
 import com.ebay.jsoncodercore.factory.InjectableFactory.CachePolicy;
+import com.ebay.jsoncodercore.type.Function;
 import junit.framework.Assert;
 import org.junit.Test;
 

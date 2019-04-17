@@ -14,9 +14,7 @@ import com.ebay.jsoncoder.treedoc.TDNode;
 import java.lang.reflect.Type;
 
 /**
- * Used for specific BeanCoder for certain types, such as Money, Date
- * This coder will convert between an Object and a Map representation
- * The Map Representation should only contains Array, List and String
+ * Used for specific BeanCoder for certain types, such as Money, Date. This coder will convert between an Object and a TDNode representation
  */
 public interface ICoder<T> {
   /**
@@ -26,16 +24,18 @@ public interface ICoder<T> {
    
   /**
    * Encode an Object
+   *
    * @param obj  The Object to encode
    * @param context  Encode context
-   * @param target  The target json node
+   * @param target  The target json TDNode
    * @return  The target passed as parameter
    */
   TDNode encode(T obj, Type type, BeanCoderContext context, TDNode target);
   
   /**
    * Decode an Object
-   * @param jsonNode The json node to be decoded
+   *
+   * @param jsonNode The json TDNode to be decoded
    * @param type  The target type
    * @param context  Decode context
    * @return The decoded Object

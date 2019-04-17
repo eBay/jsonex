@@ -13,6 +13,7 @@ import java.lang.reflect.Modifier;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.ebay.jsoncodercore.type.Function;
 import lombok.SneakyThrows;
 import lombok.experimental.Accessors;
 

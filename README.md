@@ -31,7 +31,7 @@ There are plenty of options for JSON serialization/deserialization libraries, wh
 * Deserialize and append to existing object (Incremental decoding, could be used to merge multiple config files)
 * Supports nested JSON String within JSON as normal sub JSON Object instead of serialized json string to avoid un-necessary escape in String literal
 * Supports forward compatibility features: silently ignore unknown properties, use @DefaultEnum to annotate a default enum which be used if unknown enum value is encountered
-* Supports proposed json extension format ([JSONEX](./JSONEX.md)), [Example in test](JSONCoder/src/test/resources/com/ebay/jsoncoder/jsonext.json)
+* Supports proposed json extension format ([JSONEX](./JSONEX.md)), [Example in test](JSONCoder/src/test/resources/com/ebay/jsoncoder/jsonex.json)
 * JDK version: 1.7 or above 
 
 
@@ -109,6 +109,7 @@ Please refer the unit test class for more detailed usage patterns:
  
 ## Limitations and Future enhancements
 * Performance improvement
+* Support of variable placeholder in JSON doc
 
 
 ## License

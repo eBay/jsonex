@@ -27,7 +27,7 @@ import java.util.Map;
  */
 @RequiredArgsConstructor
 public class BeanCoderContext {
-  // For performance reason, we need to cache SimpleDateFormat in the same thread
+  // For performance reason, we need to cache SimpleDateFormat in the same thread as SimpleDateFormat is not threadsafe
   public static final InjectableFactory<String, SimpleDateFormat> dateFormatCache =
       InjectableFactory.of(String.class, SimpleDateFormat.class, CachePolicy.THREAD_LOCAL);
 

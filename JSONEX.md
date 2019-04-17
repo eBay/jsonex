@@ -18,7 +18,7 @@ To solve the above limitations, we propose **JSONEX** with following extensions
 * Quote for Key is optional, only if key is not a valid javascript identifier, quote is mandatory
 * Quote can use either ("), (') or (\`)
 * Multi-line String literal support with back quote (`).
-* comma allowed for last element (Make it merge friendly)
+* Commas are allowed for last element (Make it merge friendly)
 * Object attributes order matters, those order will be persisted
 
 ## Examples

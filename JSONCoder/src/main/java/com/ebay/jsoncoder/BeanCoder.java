@@ -26,14 +26,15 @@ import java.util.Map;
 import static com.ebay.jsoncodercore.util.ClassUtil.objectToSimpleType;
 
 /**
- * A coder to convert java class to a Map, List or String representation.
+ * A coder to convert java class to a TDNode
  *
- * <p>For an array or collection object, it will be encoded as List
- * <p>For Java Beans, it will be converted into Map, the key is of String type (The property name)
- * <p>For some simple types such as Date, int, it will be converted into a String.
+ * <p>For an array or collection object, it will be encoded as TDNode of type ARRAY
+ * <p>For Java Beans, it will be converted into TDNode of type MAP
+ * <p>For some simple types such as Date, int, it will be converted TDNode of type SIMPLE
  *
  * <p>As this encoder won't store any type information, it will only infer the type from the class.
- * For collections fields, the element type information has to be specified with generic type.
+ * For collections fields, the element type information has to be specified with generic type. If not specified, the $type attribute
+ * need to be provided. Otherwise
  */
 @SuppressWarnings({"WeakerAccess"})
 public class BeanCoder {
@@ -58,8 +59,6 @@ public class BeanCoder {
 
   /**
    * This method should only be called internally during recursion, as it will not reset context
-   *
-   * @return  the encoded object, can be either LinkedHashMap, ArrayList, String, primitive types or null
    */
   @SuppressWarnings("unchecked")
   static TDNode _encode(Object obj, BeanCoderContext ctx, Type type, TDNode target)
@@ -146,7 +145,7 @@ public class BeanCoder {
 
   /**
    *
-   * @param jsonNode  The json object to decode, the o can be one of following type:
+   * @param jsonNode  The json object to decode
    * @param type  The target type to decode to
    * @param targetObj The target object to decode to, if it's null, a new Object will be created
    * @param ctx  The decode context
