@@ -109,6 +109,7 @@ Please refer the unit test class for more detailed usage patterns:
  
 ## Limitations and Future enhancements
 * Performance improvement
+* Support of variable placeholder in JSON doc
 
 
 ## License

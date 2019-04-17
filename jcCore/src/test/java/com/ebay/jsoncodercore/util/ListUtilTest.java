@@ -68,13 +68,15 @@ public class ListUtilTest {
     return Arrays.asList(
         new TestCls(0, null, 0),
         new TestCls(1, "name1", 1),
-        new TestCls(2, "name2", 2),
-        new TestCls(3, "name3", 2));
+        new TestCls(2, null, 2),
+        new TestCls(3, "name3", 2)
+    );
+
   }
 
   @Test public void testMap() {
     List<String> result = ListUtil.map(buildList(), F_NAME);
-    assertArrayEquals(new String[]{null, "name1", "name2", "name3"}, result.toArray());
+    assertArrayEquals(new String[]{null, "name1", null, "name3"}, result.toArray());
 
     assertNull("should be null if pass null", ListUtil.map(null, F_NAME));
   }
@@ -111,10 +113,7 @@ public class ListUtilTest {
 
   @Test public void testToMapWithKeyAndVal() {
     Map<Integer, String> map = ListUtil.toMap(buildList(), F_ID, F_NAME);
-
-    assertEquals("name1", map.get(1));
-    assertEquals("name2", map.get(2));
-    assertEquals("name3", map.get(3));
+    assertArrayEquals(new String[]{null, "name1", null, "name3"}, new TreeMap(map).values().toArray());
   }
 
   @Test public void testToMapWithKey() {
@@ -147,7 +146,7 @@ public class ListUtilTest {
     assertEquals(list.get(2), result.get(0));
 
     result = list.filter(F_NAME.eq(null));
-    assertEquals(1, result.size());
+    assertEquals(2, result.size());
 
     result = list.filter(F_TYPE.lt(1));
     assertEquals(1, result.size());
@@ -159,13 +158,10 @@ public class ListUtilTest {
     List<TestCls> result = ListUtil.orderBy(list, new Function<TestCls, Comparable>() {
       @Override public Comparable apply(TestCls param) { return param.getName(); }
     }, true);
-    assertEquals(list.get(0), result.get(3));
-    assertEquals(list.get(1), result.get(2));
-    assertEquals(list.get(2), result.get(1));
-    assertEquals(list.get(3), result.get(0));
+    assertArrayEquals(new TestCls[] {list.get(3), list.get(1), list.get(0), list.get(2)}, result.toArray());
 
     result = ListUtil.orderBy(list, F_NAME);
-    assertEquals(list, result);
+    assertArrayEquals(new TestCls[] {list.get(0), list.get(2), list.get(1), list.get(3)}, result.toArray());
   }
 
   @Test public void testContains() {
