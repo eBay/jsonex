@@ -33,6 +33,8 @@ import static com.ebay.jsoncodercore.type.Operator.eq;
 import static com.ebay.jsoncodercore.type.Operator.ge;
 import static com.ebay.jsoncodercore.type.Operator.in;
 import static com.ebay.jsoncodercore.type.Operator.not;
+import static com.ebay.jsoncodercore.util.ListUtil.containsAny;
+import static com.ebay.jsoncodercore.util.ListUtil.setOf;
 import static com.ebay.jsoncodercore.util.ListUtilTest.TestCls.F_ID;
 import static com.ebay.jsoncodercore.util.ListUtilTest.TestCls.F_NAME;
 import static com.ebay.jsoncodercore.util.ListUtilTest.TestCls.F_TYPE;
@@ -199,6 +201,11 @@ public class ListUtilTest {
   }
 
   @Test public void testSetof() {
-    assertTrue("set should contain all the elemtns", ListUtil.setOf(1,2,3).containsAll(Arrays.asList(1,2,3)));
+    assertTrue("set should contain all the elemtns", setOf(1,2,3).containsAll(Arrays.asList(1,2,3)));
+  }
+
+  @Test public void testContainsAny() {
+    assertTrue("containsAny should return true: ", containsAny(setOf(1,2,3), 1, 2));
+    assertFalse("containsAny should return false: ", containsAny(setOf(1,2,3), 4, 5));
   }
 }

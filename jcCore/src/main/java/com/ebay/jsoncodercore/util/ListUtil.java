@@ -164,6 +164,14 @@ public class ListUtil {
   public static <T> T last(List<T> list) { return list == null ? null : list.get(list.size() - 1); }
   public static <T> T first(Collection<T> list) { return list == null || list.size() == 0 ? null : list.iterator().next(); }
 
+  public static <T> boolean containsAny(Collection<T> list, T... elements) {
+    for (T e : elements) {
+      if (list.contains(e))
+        return true;
+    }
+    return false;
+  }
+
   public static void removeLast(List<?> list) { list.remove(list.size() - 1); }
 
   public static <T> Set<T> setOf(T... e) { return new HashSet<>(Arrays.asList(e)); }
