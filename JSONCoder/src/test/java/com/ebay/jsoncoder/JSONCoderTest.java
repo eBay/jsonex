@@ -11,6 +11,7 @@ package com.ebay.jsoncoder;
 
 import com.ebay.jsoncoder.TestBean2.Enum1;
 import com.ebay.jsoncoder.TestBean2.IdentifiableEnum;
+import com.ebay.jsoncoder.treedoc.TDJSONParser;
 import com.ebay.jsoncoder.treedoc.TDNode;
 import com.ebay.jsoncoder.treedoc.TestUtil;
 import com.ebay.jsoncodercore.util.MapBuilder;
@@ -441,13 +442,20 @@ public class JSONCoderTest {
     assertTrue("Encode to writer should succeed", sWriter.toString().contains("intField"));
   }
 
-  @Test public void testDecodeJsonx() {
+  @Test public void testDecodeJsonex() {
     Reader in = TestUtil.loadResource(this.getClass(), "jsonex.json");
     TestBean testBean = JSONCoder.global.decode(in, TestBean.class);
     assertEquals(100, testBean.getIntField());
     assertEquals("This is multi-line text\n" +
         "        Line1,\n" +
         "        Line2", testBean.getStrField());
+  }
+
+  @Test public void testDecodeChildNode() {
+    String jsonStr = "{response: {data: {floatField: 2.0, publicStrField: 'publicStrVal'}}}";
+    TestBean testBean = JSONCoder.global.decode(DecodeReq.of(TestBean.class).setSource(jsonStr).setNodePath("response/data"));
+    assertEquals(2.0, testBean.getFloatField(), 0.0001);
+    assertEquals("publicStrVal", testBean.publicStrField);
   }
 }
 

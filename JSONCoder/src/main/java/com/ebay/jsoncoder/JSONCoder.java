@@ -27,10 +27,13 @@ public class JSONCoder {
   @SuppressWarnings("unchecked")
   public static <T> T decode(DecodeReq<T> req, JSONCoderOption opt) {
     try {
-      TDNode jsonNode = req.jsonNode;
+      TDNode jsonNode = req.tdNode;
       if (jsonNode == null && req.source != null) {
         jsonNode = TDJSONParser.getInstance().parse(req.source);
       }
+
+      if (req.nodePath != null)
+        jsonNode = jsonNode.getChildByPath(req.nodePath);
       
       if (jsonNode == null)
         return null;
@@ -48,7 +51,7 @@ public class JSONCoder {
   @SuppressWarnings("unchecked")
   public static <T> T decode(Reader reader, Class<T> type, JSONCoderOption opt) { return (T)decode(DecodeReq.of(type).setSource(reader), opt); }
   @SuppressWarnings("unchecked")
-  public static <T> T decode(TDNode treeDocNode, Class<T> type, JSONCoderOption opt) { return (T)decode(DecodeReq.of(type).setJsonNode(treeDocNode), opt); }
+  public static <T> T decode(TDNode treeDocNode, Class<T> type, JSONCoderOption opt) { return (T)decode(DecodeReq.of(type).setTdNode(treeDocNode), opt); }
 
   public <T> T decode(DecodeReq<T> req) { return decode(req, option); }
   public <T> T decodeTo(String str, T target) {
@@ -58,7 +61,7 @@ public class JSONCoder {
   @SuppressWarnings("unchecked")
   public <T> T decode(Reader reader, Class<T> type) { return (T)decode(DecodeReq.of(type).setSource(reader), option); }
   @SuppressWarnings("unchecked")
-  public <T> T decode(TDNode treeDocNode, Class<T> type) { return (T)decode(DecodeReq.of(type).setJsonNode(treeDocNode), option); }
+  public <T> T decode(TDNode treeDocNode, Class<T> type) { return (T)decode(DecodeReq.of(type).setTdNode(treeDocNode), option); }
 
 
   /**

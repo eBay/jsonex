@@ -9,11 +9,7 @@
 
 package com.ebay.jsoncodercore.util;
 
-import com.ebay.jsoncodercore.type.Field;
-import com.ebay.jsoncodercore.type.Function;
-import com.ebay.jsoncodercore.type.Identifiable;
-import com.ebay.jsoncodercore.type.Operator;
-import com.ebay.jsoncodercore.type.Predicate;
+import com.ebay.jsoncodercore.type.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -21,29 +17,13 @@ import lombok.ToString;
 import lombok.experimental.ExtensionMethod;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
-import static com.ebay.jsoncodercore.type.Operator.eq;
-import static com.ebay.jsoncodercore.type.Operator.ge;
-import static com.ebay.jsoncodercore.type.Operator.in;
-import static com.ebay.jsoncodercore.type.Operator.not;
+import static com.ebay.jsoncodercore.type.Operator.*;
 import static com.ebay.jsoncodercore.util.ListUtil.containsAny;
 import static com.ebay.jsoncodercore.util.ListUtil.setOf;
-import static com.ebay.jsoncodercore.util.ListUtilTest.TestCls.F_ID;
-import static com.ebay.jsoncodercore.util.ListUtilTest.TestCls.F_NAME;
-import static com.ebay.jsoncodercore.util.ListUtilTest.TestCls.F_TYPE;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static com.ebay.jsoncodercore.util.ListUtilTest.TestCls.*;
+import static org.junit.Assert.*;
 
 @ExtensionMethod({Operator.class, ListUtil.class})
 public class ListUtilTest {
@@ -53,15 +33,15 @@ public class ListUtilTest {
     final String name;
     final int type;
 
-    public final static Function<TestCls, String> F_NAME = new Field<TestCls, String>("name") {
+    public final static Field<TestCls, String> F_NAME = new Field<TestCls, String>("name") {
       @Override public String apply(TestCls param) { return param.getName(); }
     };
 
-    public final static Function<TestCls, Integer> F_ID = new Field<TestCls, Integer>("id") {
+    public final static Field<TestCls, Integer> F_ID = new Field<TestCls, Integer>("id") {
       @Override public Integer apply(TestCls param) { return param.getId(); }
     };
 
-    public final static Function<TestCls, Integer> F_TYPE = new Field<TestCls, Integer>("type") {
+    public final static Field<TestCls, Integer> F_TYPE = new Field<TestCls, Integer>("type") {
       @Override public Integer apply(TestCls param) { return param.getType(); }
     };
   }

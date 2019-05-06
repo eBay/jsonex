@@ -23,7 +23,7 @@ import java.lang.reflect.Type;
 
 /**
  * Decode Request, the reason we use abstract class, is to force to create a sub-class so that it's possible to get
- * the getActualTypeArguments. If generic type is of the concern, use factory method "of".
+ * the getActualTypeArguments. If generic type is not of the concern, use factory method "of".
  *
  * <p> It can be used to specify source of the JSON document, either through a String, Reader, or a a wrapped CharSource. As
  *
@@ -31,16 +31,42 @@ import java.lang.reflect.Type;
 @SuppressWarnings("WeakerAccess")
 @Accessors(chain=true)
 public abstract class DecodeReq<T> {
+  /**
+   * The target type
+   */
   @Setter private Type type;
-  @SuppressWarnings("Lombok")
+
+  /**
+   * The source of the JSON string
+   */
   @Getter @Setter CharSource source;
-  @Getter @Setter TDNode jsonNode;
+
+  /**
+   * The TreeDoc node, if it's provided, this attribute will override source attribute
+   */
+  @Getter @Setter TDNode tdNode;
+
+  /**
+   * Optional node path, if it's provided, it will decode the children node with the specified path
+   */
+  @Getter @Setter String nodePath;
+
+  /**
+   * Optional target Object, if it's provide, it will incremental decode to the target object
+   */
   @Getter @Setter T target;
 
+  /**
+   * Set source with a reader
+   */
   public DecodeReq<T> setSource(Reader reader) {
     source = reader == null ? null : new ReaderCharSource(reader);
     return this;
   }
+
+  /**
+   * Set source of a json string
+   */
   public DecodeReq<T> setSource(String jsonStr) {
     source = jsonStr == null ? null : new ArrayCharSource(jsonStr.toCharArray());
     return this;
@@ -57,4 +83,5 @@ public abstract class DecodeReq<T> {
   public DecodeReq(Type type) { this.type = type;}
   public DecodeReq() { }
   public static <T> DecodeReq<T> of(Type type) { return new DecodeReq<T>(type){}; }
+  public static <T> DecodeReq<T> of(Class<T> cls) { return new DecodeReq<T>(cls){}; }
 }
