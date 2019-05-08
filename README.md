@@ -46,7 +46,7 @@ Please refer the unit test class for more detailed usage patterns:
 1. Maven Dependencies
     ```xml
      <dependency>
-       <groupId>com.jsonex.jsoncoder</groupId>
+       <groupId>com.jsonex</groupId>
        <artifactId>JSONCoder</artifactId>
        <version>${jsonCoderVersion}</version>
      </dependency>
