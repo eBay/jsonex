@@ -46,12 +46,12 @@ Please refer the unit test class for more detailed usage patterns:
 1. Maven Dependencies
     ```xml
      <dependency>
-       <groupId>com.ebay.jsoncoder</groupId>
+       <groupId>com.jsonex.jsoncoder</groupId>
        <artifactId>JSONCoder</artifactId>
        <version>${jsonCoderVersion}</version>
      </dependency>
     ````
-    You can get current version by searching [maven central](https://search.maven.org/search?q=g:com.ebay.jsoncoder)
+    You can get current version by searching [maven central](https://search.maven.org/search?q=g:com.jsonex.jsoncoder)
 2. Simple Serialization / Deserialization
     ```java
       // serialization
