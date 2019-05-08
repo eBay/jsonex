@@ -4,7 +4,7 @@
   xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>com.ebay.jsoncoder</groupId>
+    <groupId>com.jsonex</groupId>
     <artifactId>jcParent</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <relativePath>..</relativePath>
@@ -18,7 +18,7 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>jcCore</artifactId>
+      <artifactId>core</artifactId>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
