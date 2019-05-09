@@ -8,7 +8,7 @@
   <packaging>pom</packaging>
   <name>JSONCoder Parent</name>
   <description>JSONCoder Parent</description>
-  <url>https://github.com/eBay/JSONCoder.git</url>
+  <url>https://github.com/eBay/jsonex.git</url>
 
   <modules>
     <module>core</module>
@@ -28,10 +28,10 @@
   </licenses>
 
   <scm>
-    <connection>https://github.com/eBay/JSONCoder.git</connection>
-    <developerConnection>https://github.com/eBay/JSONCoder.git</developerConnection>
+    <connection>https://github.com/eBay/jsonex.git</connection>
+    <developerConnection>https://github.com/eBay/jsonex.git</developerConnection>
     <tag>master</tag>
-    <url>https://github.com/eBay/JSONCoder.git</url>
+    <url>https://github.com/eBay/jsonex.git</url>
   </scm>
 
   <developers>
