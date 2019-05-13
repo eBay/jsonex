@@ -9,15 +9,19 @@
 
 package com.jsonex.core.util;
 
-import com.jsonex.core.type.*;
+import com.jsonex.core.type.Field;
+import com.jsonex.core.type.Identifiable;
+import com.jsonex.core.type.Operator;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.ExtensionMethod;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 import static com.jsonex.core.type.Operator.*;
 import static com.jsonex.core.util.ListUtil.containsAny;
@@ -33,17 +37,9 @@ public class ListUtilTest {
     final String name;
     final int type;
 
-    public final static Field<TestCls, String> F_NAME = new Field<TestCls, String>("name") {
-      @Override public String apply(TestCls param) { return param.getName(); }
-    };
-
-    public final static Field<TestCls, Integer> F_ID = new Field<TestCls, Integer>("id") {
-      @Override public Integer apply(TestCls param) { return param.getId(); }
-    };
-
-    public final static Field<TestCls, Integer> F_TYPE = new Field<TestCls, Integer>("type") {
-      @Override public Integer apply(TestCls param) { return param.getType(); }
-    };
+    public final static Field<TestCls, String> F_NAME = new Field<>("name", TestCls::getName);
+    public final static Field<TestCls, Integer> F_ID = new Field<>("id", TestCls::getId);
+    public final static Field<TestCls, Integer> F_TYPE = new Field<>("type", TestCls::getType);
   }
 
   private List<TestCls> buildList() {
@@ -53,7 +49,6 @@ public class ListUtilTest {
         new TestCls(2, null, 2),
         new TestCls(3, "name3", 2)
     );
-
   }
 
   @Test public void testMap() {
@@ -79,9 +74,7 @@ public class ListUtilTest {
     map.put("key1", Arrays.asList(1, 2, 3));
     map.put("key2", Arrays.asList(1, 2));
 
-    Map<String, Integer> result = ListUtil.mapValues(map, new Function<List<Integer>, Integer>() {
-      @Override public Integer apply(List<Integer> v) { return v.size(); }
-    });
+    Map<String, Integer> result = ListUtil.mapValues(map, (v) -> v.size());
 
     assertSame(3, result.get("key1"));
     assertSame(2, result.get("key2"));
@@ -107,15 +100,14 @@ public class ListUtilTest {
 
   @Test public void testFilter() {
     List<TestCls> list = buildList();
-    List<TestCls> result = ListUtil.filter(list, new Predicate<TestCls>() {
-      @Override public boolean test(TestCls obj) { return obj.getType() == 2; }
-    });
+
+    // !!! For Jdk11,12 Following statement with @ExtensionMethod will cause exception of
+    // java.lang.ClassCastException: class com.sun.tools.javac.code.Symbol$ClassSymbol cannot be cast to class com.sun.tools.javac.code.Symbol$MethodSymbol (com.sun.tools.javac.code.Symbol$ClassSymbol and com.sun.tools.javac.code.Symbol$MethodSymbol are in module jdk.compiler of loader 'app')
+    //List<TestCls> result = ListUtil.filter(list, it -> it.getType() == 2);
+    List<TestCls> result = ListUtil.filter(list, eq(TestCls::getType, 2));
     assertEquals(2, result.size());
 
-    List<TestCls> result1 = ListUtil.filter(list, eq(F_TYPE, 2));
-    assertEquals(result, result1);
-
-    result1 = ListUtil.filter(list, ge(F_TYPE, 2));
+    List<TestCls> result1 = ListUtil.filter(list, ge(F_TYPE, 2));
     assertEquals(result, result1);
 
     result = ListUtil.filter(list, not(in(F_ID, 0, 1, 2)));
@@ -133,13 +125,14 @@ public class ListUtilTest {
     result = list.filter(F_TYPE.lt(1));
     assertEquals(1, result.size());
     assertEquals(list.get(0), result.get(0));
+
+    result = list.filter(F_TYPE.le(1));
+    assertEquals(2, result.size());
   }
 
   @Test public void testOrderBy() {
     List<TestCls> list = buildList();
-    List<TestCls> result = ListUtil.orderBy(list, new Function<TestCls, Comparable>() {
-      @Override public Comparable apply(TestCls param) { return param.getName(); }
-    }, true);
+    List<TestCls> result = ListUtil.orderBy(list, TestCls::getName, true);
     assertArrayEquals(new TestCls[] {list.get(3), list.get(1), list.get(0), list.get(2)}, result.toArray());
 
     result = ListUtil.orderBy(list, F_NAME);
@@ -152,13 +145,14 @@ public class ListUtilTest {
   }
 
   @Test public void testExits() {
-    assertTrue("should contains type of 1", ListUtil.exists(buildList(), new Predicate<TestCls>() {
-      @Override public boolean test(TestCls obj) { return obj.getType() == 1; }
-    }));
-
-    assertFalse("should contains type of 1", ListUtil.exists(buildList(), new Predicate<TestCls>() {
-      @Override public boolean test(TestCls obj) { return obj.getType() == 3; }
-    }));
+    // !!!! Following two commented out statements cause Java compiler throws StackOverflowError for JDK1.8
+    // Under following conditions:
+    //   1. Use @ExtensionMethod and use lambada
+    //   2. User static import for asserXXX or multiple lines of statement with lambada
+    //Assert.assertTrue("should contains type of 1", ListUtil.exists(buildList(), obj -> obj.getType() == 1));
+    //Assert.assertFalse("shouldn't contains type of 3", ListUtil.exists(buildList(), obj -> obj.getType() == 3));
+    assertTrue("should contains type of 1", ListUtil.exists(buildList(), eq(F_TYPE, 1)));
+    assertFalse("shouldn't contains type of 3", ListUtil.exists(buildList(), eq(F_TYPE, 3)));
   }
 
   @Test public void testFirstLast() {
@@ -170,9 +164,7 @@ public class ListUtilTest {
     assertEquals(null, ListUtil.first(list, eq(F_TYPE, 3)));
   }
 
-  @Test public void testJoin() {
-    assertEquals("1,2,3", ListUtil.join(new Integer[]{1,2,3}, ","));
-  }
+  @Test public void testJoin() { assertEquals("1,2,3", ListUtil.join(new Integer[]{1,2,3}, ",")); }
 
   @Test public void testRemoveLast() {
     List<Integer> list = new ArrayList<>(Arrays.asList(1,2,3));
@@ -180,9 +172,7 @@ public class ListUtilTest {
     assertArrayEquals(new Integer[]{1,2}, list.toArray());
   }
 
-  @Test public void testSetof() {
-    assertTrue("set should contain all the elemtns", setOf(1,2,3).containsAll(Arrays.asList(1,2,3)));
-  }
+  @Test public void testSetOf() { assertTrue("set should contain all the elemtns", setOf(1,2,3).containsAll(Arrays.asList(1,2,3))); }
 
   @Test public void testContainsAny() {
     assertTrue("containsAny should return true: ", containsAny(setOf(1,2,3), 1, 2));

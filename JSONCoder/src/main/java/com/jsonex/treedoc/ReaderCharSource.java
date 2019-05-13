@@ -9,17 +9,15 @@
 
 package com.jsonex.treedoc;
 
-import com.jsonex.core.type.Function;
 import com.jsonex.core.factory.InjectableFactory;
-import com.jsonex.core.type.Predicate;
 import lombok.SneakyThrows;
 
 import java.io.Reader;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class ReaderCharSource extends CharSource {
-  public final static InjectableFactory<Reader, ReaderCharSource> factory = InjectableFactory.of(new Function<Reader, ReaderCharSource>() {
-    @Override public ReaderCharSource apply(Reader param) { return new ReaderCharSource(param); }
-  });
+  public final static InjectableFactory<Reader, ReaderCharSource> factory = InjectableFactory.of(param -> new ReaderCharSource(param));
 
   final Reader reader;
   final char[] buf;

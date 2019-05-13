@@ -10,7 +10,6 @@
 package com.jsonex.core.factory;
 
 import com.jsonex.core.factory.InjectableFactory.CachePolicy;
-import com.jsonex.core.type.Function;
 import junit.framework.Assert;
 import org.junit.Test;
 
@@ -35,10 +34,7 @@ public class InjectableFactoryTest {
     assertEquals(C1.class, i1Fact.get().getClass());
     assertNotSame(i1Fact.get(), i1Fact.get());
 
-    i1Fact = InjectableFactory.of(new Function<Void, I1>() {
-      @Override public I1 apply(Void param) { return new C2(); }
-      
-    }, CachePolicy.GLOBAL);
+    i1Fact = InjectableFactory.of((p) -> new C2(), CachePolicy.GLOBAL);
     assertEquals(C2.class, i1Fact.get().getClass());
     Assert.assertSame(i1Fact.get(), i1Fact.get());
     

@@ -57,9 +57,9 @@ public class ClassUtil {
     Field field = getDeclaredField(cls, fieldName);
 
     //Very Hacky
-    Field modifiersField = Field.class.getDeclaredField("modifiers");
-    modifiersField.setAccessible(true);
-    modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+//    Field modifiersField = Field.class.getDeclaredField("modifiers");
+//    modifiersField.setAccessible(true);
+//    modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
 
     field.setAccessible(true);
     field.set(obj, value);

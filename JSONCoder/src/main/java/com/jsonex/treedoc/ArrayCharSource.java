@@ -9,16 +9,15 @@
 
 package com.jsonex.treedoc;
 
-import com.jsonex.core.type.Function;
 import com.jsonex.core.factory.InjectableFactory;
-import com.jsonex.core.type.Predicate;
 import lombok.RequiredArgsConstructor;
+
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 @RequiredArgsConstructor
 public class ArrayCharSource extends CharSource {
-  public final static InjectableFactory<char[], ArrayCharSource> factory = InjectableFactory.of(new Function<char[], ArrayCharSource>() {
-    @Override public ArrayCharSource apply(char[] param) { return new ArrayCharSource(param); }
-  });
+  public final static InjectableFactory<char[], ArrayCharSource> factory = InjectableFactory.of(param -> new ArrayCharSource(param));
 
   final char[] buf;
   final int startIndex;

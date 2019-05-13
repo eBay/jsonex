@@ -9,9 +9,10 @@
 
 package com.jsonex.treedoc;
 
-import com.jsonex.core.type.Predicate;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.function.Predicate;
 
 @Slf4j
 public abstract class CharSource {

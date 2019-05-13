@@ -59,7 +59,7 @@ public abstract class DecodeReq<T> {
   /**
    * Set source with a reader
    */
-  public DecodeReq<T> setSource(Reader reader) {
+  public DecodeReq<T> setReader(Reader reader) {
     source = reader == null ? null : new ReaderCharSource(reader);
     return this;
   }
@@ -67,7 +67,7 @@ public abstract class DecodeReq<T> {
   /**
    * Set source of a json string
    */
-  public DecodeReq<T> setSource(String jsonStr) {
+  public DecodeReq<T> setJson(String jsonStr) {
     source = jsonStr == null ? null : new ArrayCharSource(jsonStr.toCharArray());
     return this;
   }

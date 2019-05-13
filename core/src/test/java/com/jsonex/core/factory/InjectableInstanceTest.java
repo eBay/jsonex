@@ -11,7 +11,6 @@ package com.jsonex.core.factory;
 
 import static junit.framework.Assert.assertEquals;
 
-import com.jsonex.core.type.Supplier;
 import org.junit.Test;
 
 public class InjectableInstanceTest {
@@ -29,14 +28,10 @@ public class InjectableInstanceTest {
     i1Instance.setInstance(new C1());
     assertEquals(C1.class, i1Instance.get().getClass());
     
-    i1Instance.setObjectCreator(new Supplier<I1>() {
-      @Override public I1 get() { return new C2(); }
-    });
+    i1Instance.setObjectCreator(C2::new);
     assertEquals(C2.class, i1Instance.get().getClass());
     
-    i1Instance = InjectableInstance.of(new Supplier<I1>() {
-      @Override public I1 get() { return new C1(); }
-    });
+    i1Instance = InjectableInstance.of(C1::new);
     assertEquals(C1.class, i1Instance.get().getClass());
   }
 }

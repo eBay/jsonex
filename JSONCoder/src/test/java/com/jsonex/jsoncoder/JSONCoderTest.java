@@ -290,7 +290,7 @@ public class JSONCoderTest {
 
   @Test public void testGenericType() {
     String str = "['str1', 'str2', 'str3']";
-    List<String> result = JSONCoder.global.decode(new DecodeReq<List<String>>(){}.setSource(str));
+    List<String> result = JSONCoder.global.decode(new DecodeReq<List<String>>(){}.setJson(str));
     assertArrayEquals(new String[]{"str1", "str2","str3"}, result.toArray());
   }
 
@@ -452,7 +452,7 @@ public class JSONCoderTest {
 
   @Test public void testDecodeChildNode() {
     String jsonStr = "{response: {data: {floatField: 2.0, publicStrField: 'publicStrVal'}}}";
-    TestBean testBean = JSONCoder.global.decode(DecodeReq.of(TestBean.class).setSource(jsonStr).setNodePath("response/data"));
+    TestBean testBean = JSONCoder.global.decode(DecodeReq.of(TestBean.class).setJson(jsonStr).setNodePath("response/data"));
     assertEquals(2.0, testBean.getFloatField(), 0.0001);
     assertEquals("publicStrVal", testBean.publicStrField);
   }
