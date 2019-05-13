@@ -16,8 +16,8 @@
   </modules>
 
   <properties>
-    <compile.version>1.7</compile.version>
-    <additionalparam>-Xdoclint:none</additionalparam>
+    <compile.version>1.8</compile.version>
+    <additionalJOption>-Xdoclint:none</additionalJOption>
   </properties>
 
   <licenses>
@@ -60,7 +60,7 @@
       <dependency>
         <groupId>org.projectlombok</groupId>
         <artifactId>lombok</artifactId>
-        <version>1.18.2</version>
+        <version>1.18.8</version>
         <scope>provided</scope>
       </dependency>
       <dependency>
@@ -176,7 +176,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
-            <version>2.10.4</version>
+            <version>3.1.0</version>
             <executions>
               <execution>
                 <id>attach-javadocs</id>

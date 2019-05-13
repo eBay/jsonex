@@ -9,11 +9,11 @@
 
 package com.jsonex.core.util;
 
-import com.jsonex.core.type.Function;
 import com.jsonex.core.type.Identifiable;
-import com.jsonex.core.type.Predicate;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class ListUtil {
   public static <T extends Collection<TDest>, TSrc, TDest> T map(Collection<? extends TSrc> source, Function<? super TSrc, ? extends TDest> func, T dest) {
@@ -25,7 +25,7 @@ public class ListUtil {
   }
 
   public static <TSrc, TDest> List<TDest> map(Collection<? extends TSrc> source, Function<? super TSrc, ? extends TDest> func) {
-    return map(source, func, new ArrayList<TDest>());
+    return map(source, func, new ArrayList<>());
   }
 
   public static <TId> List<TId> getIds(Collection<? extends Identifiable<TId>> identifiables) {
@@ -104,25 +104,23 @@ public class ListUtil {
     return dest;
   }
 
-  public static <V, C extends Collection<V>> List<V> orderBy(C source, final Function<? super V, ? extends Comparable> sortKey) {
-    return orderBy(source, sortKey, false);
+  public static <V, C extends Collection<V>> List<V> orderBy(C source, final Function<? super V, ? extends Comparable> by) {
+    return orderBy(source, by, false);
   }
 
-  public static <V, C extends Collection<V>, K extends Comparable<K>> List<V> orderBy(C source, final Function<? super V, K> sortKey, final boolean desc) {
-    List<V> dest = new ArrayList<>(source.size());
-    dest.addAll(source);  // clone
-    Collections.sort(dest, new Comparator<V>() {
-      @Override public int compare(V o1, V o2) {
-        K v1 = sortKey.apply(o1);
-        K v2 = sortKey.apply(o2);
-        int result;
-        if (v1 == null)
-          result = v2 == null ? 0 : -1;
-        else {
-          result = v2 == null ? 1 : v1.compareTo(v2);
-        }
-        return desc ? - result : result;
+  public static <V, C extends Collection<V>, K extends Comparable<K>> List<V> orderBy(C src, final Function<? super V, K> by, final boolean desc) {
+    List<V> dest = new ArrayList<>(src.size());
+    dest.addAll(src);  // clone
+    Collections.sort(dest, (o1, o2) -> {
+      K v1 = by.apply(o1);
+      K v2 = by.apply(o2);
+      int result;
+      if (v1 == null)
+        result = v2 == null ? 0 : -1;
+      else {
+        result = v2 == null ? 1 : v1.compareTo(v2);
       }
+      return desc ? - result : result;
     });
     return dest;
   }

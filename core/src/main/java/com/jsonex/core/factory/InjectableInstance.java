@@ -9,19 +9,17 @@
 
 package com.jsonex.core.factory;
 
-import com.jsonex.core.type.Supplier;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.experimental.Accessors;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
+import java.util.function.Supplier;
 
 /**
  * An injectable singleton. Mainly used for interface. It also supports lazy initialization
  * of default implementation that could prevent initialization cause failure in unit test
- * 
- * @author jianchen
  *
  * @param <TI>  The interface for the type
  */

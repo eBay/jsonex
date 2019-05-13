@@ -47,19 +47,19 @@ public class JSONCoder {
   }
   
   @SuppressWarnings({"unchecked", "WeakerAccess"})
-  public static <T> T decode(String jsonStr, Class<T> type, JSONCoderOption opt) { return (T)decode(DecodeReq.of(type).setSource(jsonStr), opt); }
+  public static <T> T decode(String jsonStr, Class<T> type, JSONCoderOption opt) { return (T)decode(DecodeReq.of(type).setJson(jsonStr), opt); }
   @SuppressWarnings("unchecked")
-  public static <T> T decode(Reader reader, Class<T> type, JSONCoderOption opt) { return (T)decode(DecodeReq.of(type).setSource(reader), opt); }
+  public static <T> T decode(Reader reader, Class<T> type, JSONCoderOption opt) { return (T)decode(DecodeReq.of(type).setReader(reader), opt); }
   @SuppressWarnings("unchecked")
   public static <T> T decode(TDNode treeDocNode, Class<T> type, JSONCoderOption opt) { return (T)decode(DecodeReq.of(type).setTdNode(treeDocNode), opt); }
 
   public <T> T decode(DecodeReq<T> req) { return decode(req, option); }
   public <T> T decodeTo(String str, T target) {
-    return decode(DecodeReq.<T>of(target.getClass()).setSource(str).setTarget(target));
+    return decode(DecodeReq.<T>of(target.getClass()).setJson(str).setTarget(target));
   }
   public <T> T decode(String str, Class<T> type) { return decode(str, type, option); }
   @SuppressWarnings("unchecked")
-  public <T> T decode(Reader reader, Class<T> type) { return (T)decode(DecodeReq.of(type).setSource(reader), option); }
+  public <T> T decode(Reader reader, Class<T> type) { return (T)decode(DecodeReq.of(type).setReader(reader), option); }
   @SuppressWarnings("unchecked")
   public <T> T decode(TDNode treeDocNode, Class<T> type) { return (T)decode(DecodeReq.of(type).setTdNode(treeDocNode), option); }
 

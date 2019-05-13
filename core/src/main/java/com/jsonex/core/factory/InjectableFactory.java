@@ -9,21 +9,19 @@
 
 package com.jsonex.core.factory;
 
-import java.lang.reflect.Modifier;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import com.jsonex.core.type.Function;
 import lombok.SneakyThrows;
 import lombok.experimental.Accessors;
 
+import java.lang.reflect.Modifier;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+
 /*
- * Injectable factory. Mainly for testing. provide a convenient method for testing code to
+ * Injectable factory. Mainly for testing. it provides a convenient method for testing code to
  * replace object creation logic with mock implementation.
  * 
  * It supports different cache policies.
- * 
- * @author jianwu chen
  */
 @Accessors(chain = true)
 public class InjectableFactory<TP, TI> {
