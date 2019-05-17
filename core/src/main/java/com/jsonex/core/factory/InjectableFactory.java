@@ -34,7 +34,8 @@ public class InjectableFactory<TP, TI> {
   private final CachePolicy cachePolicy;
   
   private Map<Object, TI> globalCache;
-  private final ThreadLocal<Map<Object, TI>> threadLocalCache = new ThreadLocal<>();
+  // Seems ThreadLocal.withInitial() is not synchronized when create initial, so potentially it could be called multiple times in race condition
+  private final ThreadLocal<Map<Object, TI>> threadLocalCache = ThreadLocal.withInitial(ConcurrentHashMap::new);
   private final Object initialCreator;
 
   private InjectableFactory(Object creator, CachePolicy cachePolicy) {
@@ -87,16 +88,14 @@ public class InjectableFactory<TP, TI> {
     switch(cachePolicy) { 
     case GLOBAL:
       if (globalCache == null) {
-        globalCache = new ConcurrentHashMap<>();
+        synchronized (this) {
+          if (globalCache == null)  // Double check in sync block
+            globalCache = new ConcurrentHashMap<>();
+        }
       }
       return globalCache;
     case THREAD_LOCAL:
-      Map<Object, TI> cache = threadLocalCache.get();
-      if (cache == null) {
-        cache = new ConcurrentHashMap<>();
-        threadLocalCache.set(cache);
-      }
-      return cache;
+      return threadLocalCache.get();
     default:
       return null;
     }
@@ -105,16 +104,12 @@ public class InjectableFactory<TP, TI> {
   public TI get(TP param) {
     Map<Object, TI> cache = getCache();
     if (cache == null)
-      return create(param);
+      return create(param);  // Not cached, create everytime
     
-    Object cacheKey = param == null ? Void.TYPE : param;  // Have to use a placeholder for null for ConcurrentHashmap unfortunately
-    TI result = cache.get(cacheKey);
-    if (result == null) {
-      result = create(param);
-      cache.put(cacheKey, result);
-    }
-    return result;
+    Object cacheKey = param == null ? Void.TYPE : param;  // Have to use a placeholder for null for ConcurrentHashMap unfortunately
+    return cache.computeIfAbsent(cacheKey, (key) -> create(param));
   }
+
 
   public <TC extends TI> InjectableFactory<TP, TI> setImplClass(Class<TC> implClass) { return setCreator(implClass); }
   public InjectableFactory<TP, TI> setObjectCreator(Function<TP, TI> objectCreator) { return setCreator(objectCreator); }

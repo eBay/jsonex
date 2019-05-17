@@ -70,8 +70,10 @@ public class InjectableInstance<TI> {
   @SuppressWarnings("unchecked")
   @SneakyThrows
   private synchronized void createInstance() {//NOPMD
-    instance = objectCreator != null ? objectCreator.get() : (TI)newInstance(implClass);
+    if (instance == null)  // Double null check
+      instance = objectCreator != null ? objectCreator.get() : (TI)newInstance(implClass);
   }
+
   private static Object newInstance(Class<?> cls) throws Exception {
     Constructor<?> ctor = cls.getDeclaredConstructor();
     ctor.setAccessible(true);

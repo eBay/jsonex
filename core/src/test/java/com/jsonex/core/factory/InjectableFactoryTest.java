@@ -49,14 +49,12 @@ public class InjectableFactoryTest {
   @Test public void testThreadLocalCache() throws InterruptedException {
     final InjectableFactory<Void, I1> fact = InjectableFactory.of(Void.class, C1.class, CachePolicy.THREAD_LOCAL);
     final I1 i1 = fact.get();
-    Thread thread = new Thread() {//NOPMD
-      public void run() {
-        I1 i2 = fact.get();
-        assertNotSame(i1,  i2);
-        I1 i3 = fact.get();
-        Assert.assertSame(i2, i3);
-      }
-    };
+    Thread thread = new Thread(() -> {
+      I1 i2 = fact.get();
+      assertNotSame(i1,  i2);
+      I1 i3 = fact.get();
+      Assert.assertSame(i2, i3);
+    });
     thread.start();
     thread.join();
   }
