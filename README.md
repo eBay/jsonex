@@ -1,5 +1,5 @@
 # JSONCoder
-[![Build Status](https://travis-ci.org/ebay/jsonex.svg?branch=master)](https://travis-ci.org/ebay/jsonex)
+[![Build Status](https://travis-ci.org/eBay/jsonex.svg?branch=master)](https://travis-ci.org/eBay/jsonex)
 [![codecov](https://codecov.io/gh/eBay/jsonex/branch/master/graph/badge.svg)](https://codecov.io/gh/eBay/jsonex)
 ## Description
 JSONCoder is a light weight generic object serialization / deserialization library similar to Jackson or FastJson. This library has been widely used in various eBay domain projects for years. It does not mean to be a replacement for other popular libraries. But it solves some specific problems which are not available or not well supported in other alternatives. 
