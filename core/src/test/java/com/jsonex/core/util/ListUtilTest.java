@@ -63,7 +63,7 @@ public class ListUtilTest {
     assertArrayEquals(new Integer[]{0, 1, 2, 3}, result.toArray());
   }
 
-  @Test public void getGroupBy() {
+  @Test public void testGroupBy() {
     Map<Integer, List<TestCls>> result = ListUtil.groupBy(buildList(), F_TYPE);
     assertEquals(1, result.get(1).size());
     assertEquals(2, result.get(2).size());
@@ -81,7 +81,7 @@ public class ListUtilTest {
   }
 
   @SuppressWarnings("unchecked")
-  @Test public void toLongArray() {
+  @Test public void testToLongArray() {
     List list = Arrays.asList("1", 2, null);
     assertArrayEquals(new long[]{1, 2, 0}, ListUtil.toLongArray(list));
   }
