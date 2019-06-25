@@ -18,20 +18,20 @@ import static junit.framework.Assert.assertEquals;
 
 public class TimeProviderTest {
   @Test public void testTimeProvider() {
-    TimeProvider.getInstance().getDate();  // Warm up, so that following test could pass
-    assertEquals(new Date(), TimeProvider.getInstance().getDate());
-    assertEquals(System.currentTimeMillis(), TimeProvider.getInstance().getTimeMillis());
+    TimeProvider.get().getDate();  // Warm up, so that following test could pass
+    assertEquals(new Date(), TimeProvider.get().getDate());
+    assertEquals(System.currentTimeMillis(), TimeProvider.get().getTimeMillis());
   }
 
   @Test public void testMock() {
     TimeProvider.Mock mock = new TimeProvider.Mock();
     TimeProvider.instance.setInstance(mock);
     mock.setTimeMillis(1000);
-    assertEquals(1000, TimeProvider.getInstance().getTimeMillis());
+    assertEquals(1000, TimeProvider.get().getTimeMillis());
 
     mock.add(1000);
-    assertEquals(2000, TimeProvider.getInstance().getTimeMillis());
-    assertEquals(2000, TimeProvider.getInstance().getDate().getTime());
+    assertEquals(2000, TimeProvider.get().getTimeMillis());
+    assertEquals(2000, TimeProvider.get().getDate().getTime());
     TimeProvider.instance.reset();
   }
 }

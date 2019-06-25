@@ -9,7 +9,7 @@
 
 package com.jsonex.core.factory;
 
-import com.jsonex.core.factory.InjectableFactory.CachePolicy;
+import com.jsonex.core.factory.InjectableFactory.CacheScope;
 import junit.framework.Assert;
 import org.junit.Test;
 
@@ -29,33 +29,40 @@ public class InjectableFactoryTest {
   public static class P1 implements P {}
 
 
-  @Test public void testGet() {  
+  @Test public void testGet() {
     InjectableFactory<Void, I1> i1Fact = InjectableFactory.of(Void.class, C1.class);
     assertEquals(C1.class, i1Fact.get().getClass());
     assertNotSame(i1Fact.get(), i1Fact.get());
 
-    i1Fact = InjectableFactory.of((p) -> new C2(), CachePolicy.GLOBAL);
+    i1Fact = InjectableFactory.of((p) -> new C2(), CacheScope.GLOBAL);
     assertEquals(C2.class, i1Fact.get().getClass());
     Assert.assertSame(i1Fact.get(), i1Fact.get());
-    
+
     i1Fact.setImplClass(C1.class);
     assertEquals(C1.class, i1Fact.get().getClass());
     i1Fact.reset();
 
-    InjectableFactory<P, I1>i2Fact = InjectableFactory.of(P.class, C3.class);
+    InjectableFactory<P, I1> i2Fact = InjectableFactory.of(P.class, C3.class);
     assertEquals(C3.class, i2Fact.get(new P1()).getClass());
   }
-  
+
   @Test public void testThreadLocalCache() throws InterruptedException {
-    final InjectableFactory<Void, I1> fact = InjectableFactory.of(Void.class, C1.class, CachePolicy.THREAD_LOCAL);
+    final InjectableFactory<Void, I1> fact = InjectableFactory.of(Void.class, C1.class, CacheScope.THREAD_LOCAL);
     final I1 i1 = fact.get();
     Thread thread = new Thread(() -> {
       I1 i2 = fact.get();
-      assertNotSame(i1,  i2);
+      assertNotSame(i1, i2);
       I1 i3 = fact.get();
       Assert.assertSame(i2, i3);
     });
     thread.start();
     thread.join();
+  }
+
+  @Test public void testSetInstance() {
+    InjectableFactory<Void, I1> i1Fact = InjectableFactory.of((p) -> new C2(), InjectableFactory.CacheScope.GLOBAL);
+    I1 inst = new I1() {};
+    i1Fact.setInstance(inst);
+    assertEquals(inst, i1Fact.get());
   }
 }
