@@ -11,6 +11,7 @@ package com.jsonex.core.factory;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 
 import java.util.Date;
 
@@ -20,13 +21,14 @@ import java.util.Date;
  */
 public interface TimeProvider {
   InjectableInstance<TimeProvider> instance = InjectableInstance.of(Impl.class);
-  static TimeProvider getInstance() { return instance.get(); }
+  static TimeProvider get() { return instance.get(); }
 
   class Impl implements TimeProvider {
     @Override public Date getDate() { return new Date(); }
     @Override public long getTimeMillis() { return System.currentTimeMillis(); }
   }
 
+  @Accessors(chain = true)
   class Mock implements TimeProvider {
     @Setter @Getter long timeMillis = System.currentTimeMillis();
     @Override public Date getDate() { return new Date(timeMillis); }
