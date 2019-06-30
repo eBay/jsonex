@@ -108,14 +108,14 @@
             <format>xml</format>
           </formats>
           <check />
+          <reportSets>
+            <reportSet>
+               <reports>
+                   <report>cobertura</report>
+               </reports>
+            </reportSet>
+          </reportSets>
         </configuration>
-        <reportSets>
-          <reportSet>
-            <reports>
-              <report>cobertura</report>
-            </reports>
-          </reportSet>
-        </reportSets>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
