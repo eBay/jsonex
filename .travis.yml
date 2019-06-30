@@ -1,8 +1,5 @@
 language: java
 
-jdk:
-  - openjdk9
-
 script: "mvn cobertura:cobertura"
 
 after_success:
