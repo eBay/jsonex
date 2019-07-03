@@ -112,7 +112,7 @@ Please refer the unit test class for more detailed usage patterns:
 * Support of variable placeholder in JSON doc
 
 ## Tech blogs
-[Dependency Indirection with Injectable Factory] (https://medium.com/@jianwu_23512/dependency-indirection-with-injectable-factory-d6f2f60cced1)
+[Dependency Indirection with Injectable Factory](https://medium.com/@jianwu_23512/dependency-indirection-with-injectable-factory-d6f2f60cced1)
 
 ## License
  
