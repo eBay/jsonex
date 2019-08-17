@@ -25,8 +25,8 @@ import java.util.function.Supplier;
  */
 @Accessors(chain = true)
 public class InjectableInstance<TI> {
-  private Class<? extends TI> implClass;
-  private Supplier<? extends TI> objectCreator;
+  private volatile Class<? extends TI> implClass;
+  private volatile Supplier<? extends TI> objectCreator;
   @Setter private TI instance;
   private final Object initialCreator;
 
@@ -35,7 +35,7 @@ public class InjectableInstance<TI> {
     setCreator(creator);
   }
 
-  private InjectableInstance<TI>  setCreator(Object creator) {
+  private InjectableInstance<TI> setCreator(Object creator) {
     this.implClass = null;
     this.objectCreator = null;
     instance = null;
