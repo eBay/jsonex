@@ -101,22 +101,17 @@
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.8.3</version>
-        <configuration>
-          <destFile>${sonar.jacoco.reportPath}</destFile>
-          <append>true</append>
-          <propertyName>surefireargs</propertyName>
-        </configuration>
+        <version>0.8.4</version>
         <executions>
           <execution>
-            <id>pre-unit-test</id>
+            <id>default-prepare-agent</id>
             <goals>
               <goal>prepare-agent</goal>
             </goals>
           </execution>
           <execution>
-            <id>post-unit-test</id>
-            <phase>test</phase>
+            <id>jacoco-site</id>
+            <phase>post-integration-test</phase>
             <goals>
               <goal>report</goal>
             </goals>
