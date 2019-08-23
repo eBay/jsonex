@@ -78,7 +78,7 @@ public class EnumUtil {
     for (Enum<?> e : cls.getEnumConstants()) {
       for (Annotation anno : cls.getField(e.name()).getAnnotations()) {
         if (anno.annotationType() == DefaultEnum.class ||
-            anno.annotationType().getName().equals("JsonEnumDefaultValue"))  // Jackson annotation
+            anno.annotationType().getSimpleName().equals("JsonEnumDefaultValue"))  // Jackson annotation
           return e;
       }
     }

@@ -9,6 +9,7 @@
 
 package com.jsonex.core.util;
 
+import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
 import com.jsonex.core.annotation.DefaultEnum;
 import com.jsonex.core.type.Identifiable;
 import lombok.Getter;
@@ -40,8 +41,10 @@ public class EnumUtilTest {
     public static EnumSet<TestEnum> toEnumSet(long val) { return EnumUtil.toEnumSet(val, TestEnum.class); }
   }
 
-  enum TestEnumWithoutDefault { value1, valu2 }
-  
+  enum TestEnumWithoutDefault { value1, value2 }
+
+  enum TestEnumWithJacksonAnnotation { value0, @JsonEnumDefaultValue  value1, value2 }
+
   @Test public void testGetEnumById() {
     assertSame(TestEnum.value1, TestEnum.get(1));
     assertSame(TestEnum.value4, TestEnum.get(8));
@@ -51,6 +54,10 @@ public class EnumUtilTest {
 
     assertNull("Should return null if no defaultEnum is annotated and name doesn't match a value",
         EnumUtil.valueOf(TestEnumWithoutDefault.class, "unknown"));
+
+    assertEquals("Should return default value annotated by JsonEnumDefaultValue if value doesn't match anyone",
+        TestEnumWithJacksonAnnotation.value1,
+        EnumUtil.valueOf(TestEnumWithJacksonAnnotation.class, "unknown"));
   }
 
   @Test public void testValueOf() {
