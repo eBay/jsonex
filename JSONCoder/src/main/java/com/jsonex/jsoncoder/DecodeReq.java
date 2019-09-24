@@ -31,44 +31,30 @@ import java.lang.reflect.Type;
 @SuppressWarnings("WeakerAccess")
 @Accessors(chain=true)
 public abstract class DecodeReq<T> {
-  /**
-   * The target type
-   */
+  /** The target type */
   @Setter private Type type;
 
-  /**
-   * The source of the JSON string
-   */
+  /** The source of the JSON string */
   @Getter @Setter CharSource source;
 
-  /**
-   * The TreeDoc node, if it's provided, this attribute will override source attribute
-   */
+  /** The TreeDoc node, if it's provided, this attribute will override source attribute */
   @Getter @Setter TDNode tdNode;
 
-  /**
-   * Optional node path, if it's provided, it will decode the children node with the specified path
-   */
+  /** Optional node path, if it's provided, it will decode the children node with the specified path */
   @Getter @Setter String nodePath;
 
-  /**
-   * Optional target Object, if it's provide, it will incremental decode to the target object
-   */
+  /** Optional target Object, if it's provide, it will incremental decode to the target object */
   @Getter @Setter T target;
 
-  /**
-   * Set source with a reader
-   */
+  /** Set source with a reader */
   public DecodeReq<T> setReader(Reader reader) {
     source = reader == null ? null : new ReaderCharSource(reader);
     return this;
   }
 
-  /**
-   * Set source of a json string
-   */
+  /** Set source of a json string */
   public DecodeReq<T> setJson(String jsonStr) {
-    source = jsonStr == null ? null : new ArrayCharSource(jsonStr.toCharArray());
+    source = jsonStr == null ? null : new ArrayCharSource(jsonStr);
     return this;
   }
 

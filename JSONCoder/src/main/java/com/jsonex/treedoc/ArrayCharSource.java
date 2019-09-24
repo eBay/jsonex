@@ -9,21 +9,18 @@
 
 package com.jsonex.treedoc;
 
-import com.jsonex.core.factory.InjectableFactory;
 import lombok.RequiredArgsConstructor;
 
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 @RequiredArgsConstructor
 public class ArrayCharSource extends CharSource {
-  public final static InjectableFactory<char[], ArrayCharSource> factory = InjectableFactory.of(param -> new ArrayCharSource(param));
-
   final char[] buf;
   final int startIndex;
   final int endIndex;
 
   public ArrayCharSource(char[] buff) { this(buff, 0, buff.length); }
+  public ArrayCharSource(String str) { this(str.toCharArray(), 0, str.length()); }
 
   @Override public char read() {
     if (isEof(0))

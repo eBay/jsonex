@@ -89,7 +89,7 @@ public abstract class CharSource {
     return readUntilMatch(Integer.MAX_VALUE, str, skipStr, null);
   }
 
-  public String peak(int len) {
+  public String peekString(int len) {
     StringBuilder sb = new StringBuilder();
     for (int i = 0; i < len; i++) {
       if (isEof(i))
@@ -120,7 +120,10 @@ public abstract class CharSource {
   }
 
   public String readQuotedString(char quote) {
-    StringBuilder sb = new StringBuilder();
+    return readQuotedString(quote, new StringBuilder()).toString();
+  }
+
+  public StringBuilder readQuotedString(char quote, StringBuilder sb) {
     String terminator = getTermStrWithQuoteAndEscape(quote);
     int pos = getPos();
     while(true) {
@@ -153,7 +156,7 @@ public abstract class CharSource {
           try {
             sb.append((char)Integer.parseInt(code, 16));
           } catch (NumberFormatException e) {
-            throw new ParseRuntimeException("escaped unicode with invalid number: " + code, getBookmark(), peak(5));
+            throw new ParseRuntimeException("escaped unicode with invalid number: " + code, this);
           }
           break;
         case '"':
@@ -164,16 +167,16 @@ public abstract class CharSource {
           sb.append(c);
           break;
         default:
-          throw new ParseRuntimeException("invalid escape sequence:" + c, getBookmark(), peak(5));
+          throw new ParseRuntimeException("invalid escape sequence:" + c, this);
       }
     }
 
-    return sb.toString();
+    return sb;
   }
 
   public String dump() {
     StringBuilder result = new StringBuilder();
-    result.append("," + bookmark + ": string=" + peak(5));
+    result.append("," + bookmark + ": string=" + peek(5));
     return result.toString();
   }
 }

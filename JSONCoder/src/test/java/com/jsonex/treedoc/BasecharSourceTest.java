@@ -59,7 +59,8 @@ public abstract class BasecharSourceTest {
       cs.readQuotedString(c);
       fail("Should throw error");
     } catch(EOFRuntimeException e) {
-      e.printStackTrace();
+      assertEquals("Can't find matching quote at position:1", e.getMessage());
+      // e.printStackTrace();
     }
 
     cs = createCharSource("`Invalid escape \\p abcdefg`");
@@ -68,7 +69,9 @@ public abstract class BasecharSourceTest {
       cs.readQuotedString(c);
       fail("Should throw error when parsing invalid escape");
     } catch(ParseRuntimeException e) {
-      e.printStackTrace();
+      assertEquals("invalid escape sequence:p, Bookmark(line=0, col=18, pos=18), digest: abcd", e.getMessage());
+
+      // e.printStackTrace();
     }
 
   }

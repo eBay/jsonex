@@ -16,7 +16,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class ListUtil {
-  public static <T extends Collection<TDest>, TSrc, TDest> T map(Collection<? extends TSrc> source, Function<? super TSrc, ? extends TDest> func, T dest) {
+  public static <C extends Collection<TDest>, TSrc, TDest> C map(Collection<? extends TSrc> source, Function<? super TSrc, ? extends TDest> func, C dest) {
     if (source == null)
       return null;
     for (TSrc src : source)
@@ -29,9 +29,7 @@ public class ListUtil {
   }
 
   public static <TId> List<TId> getIds(Collection<? extends Identifiable<TId>> identifiables) {
-    return map(identifiables, new Function<Identifiable<TId>, TId>() {
-      @Override public TId apply(Identifiable<TId> param) { return param.getId(); }
-    });
+    return map(identifiables, param -> param.getId());
   }
 
   public static <K, E> Map<K, List<E>> groupBy(Collection<? extends E> source, Function<? super E, ? extends K> classifier) {
@@ -90,7 +88,7 @@ public class ListUtil {
     return map;
   }
 
-  public static <V, C extends Collection<V>> C filter(C source, C dest, Predicate<? super V> pred) {
+  public static <V, C extends Collection<V>> C filter(C source, Predicate<? super V> pred, C dest) {
     for (V s : source) {
       if (pred.test(s))
         dest.add(s);
@@ -100,7 +98,7 @@ public class ListUtil {
 
   public static <V, C extends Collection<V>> List<V> filter(C source, Predicate<? super V> pred) {
     List<V> dest = new ArrayList<>();
-    filter(source, dest, pred);
+    filter(source, pred, dest);
     return dest;
   }
 

@@ -9,7 +9,9 @@
 
 package com.jsonex.jsoncoder;
 
+import com.jsonex.treedoc.CharSource;
 import com.jsonex.treedoc.TDJSONParser;
+import com.jsonex.treedoc.TDJSONParserOption;
 import com.jsonex.treedoc.TDJSONWriter;
 import com.jsonex.treedoc.TDNode;
 import lombok.Getter;
@@ -27,18 +29,18 @@ public class JSONCoder {
   @SuppressWarnings("unchecked")
   public static <T> T decode(DecodeReq<T> req, JSONCoderOption opt) {
     try {
-      TDNode jsonNode = req.tdNode;
-      if (jsonNode == null && req.source != null) {
-        jsonNode = TDJSONParser.getInstance().parse(req.source);
+      TDNode tdNode = req.tdNode;
+      if (tdNode == null && req.source != null) {
+        tdNode = TDJSONParser.get().parse(TDJSONParserOption.of(req.source));
       }
 
       if (req.nodePath != null)
-        jsonNode = jsonNode.getChildByPath(req.nodePath);
+        tdNode = tdNode.getChildByPath(req.nodePath);
       
-      if (jsonNode == null)
+      if (tdNode == null)
         return null;
 
-      return (T) BeanCoder.decode(jsonNode, req.getType(), req.target, "", new BeanCoderContext(opt));
+      return (T) BeanCoder.decode(tdNode, req.getType(), req.target, "", new BeanCoderContext(opt));
     } catch (Exception e) {
       if (e instanceof BeanCoderException)
         throw (BeanCoderException)e;
@@ -50,6 +52,7 @@ public class JSONCoder {
   public static <T> T decode(String jsonStr, Class<T> type, JSONCoderOption opt) { return (T)decode(DecodeReq.of(type).setJson(jsonStr), opt); }
   @SuppressWarnings("unchecked")
   public static <T> T decode(Reader reader, Class<T> type, JSONCoderOption opt) { return (T)decode(DecodeReq.of(type).setReader(reader), opt); }
+  public static <T> T decode(CharSource source, Class<T> type, JSONCoderOption opt) { return (T)decode(DecodeReq.of(type).setSource(source), opt); }
   @SuppressWarnings("unchecked")
   public static <T> T decode(TDNode treeDocNode, Class<T> type, JSONCoderOption opt) { return (T)decode(DecodeReq.of(type).setTdNode(treeDocNode), opt); }
 
@@ -60,8 +63,10 @@ public class JSONCoder {
   public <T> T decode(String str, Class<T> type) { return decode(str, type, option); }
   @SuppressWarnings("unchecked")
   public <T> T decode(Reader reader, Class<T> type) { return (T)decode(DecodeReq.of(type).setReader(reader), option); }
+  public <T> T decode(CharSource source, Class<T> type) { return (T)decode(DecodeReq.of(type).setSource(source), option); }
   @SuppressWarnings("unchecked")
   public <T> T decode(TDNode treeDocNode, Class<T> type) { return (T)decode(DecodeReq.of(type).setTdNode(treeDocNode), option); }
+
 
 
   /**
