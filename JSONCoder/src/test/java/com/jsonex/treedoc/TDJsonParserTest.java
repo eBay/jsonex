@@ -44,8 +44,8 @@ public class TDJsonParserTest {
     log.info("formatted json: " + json);
   }
 
-  @Test public void testTextProto() {
-    Reader reader = TestUtil.loadResource(this.getClass(), "testdata.textproto");
+  @Test public void testParseJson5() {
+    Reader reader = TestUtil.loadResource(this.getClass(), "testdata.json5");
     TDNode node = TDJSONParser.get().parse(TDJSONParserOption.of(reader).setDefaultRootType(MAP));
 
     log.info("Node=" + TestUtil.toJSON(node));

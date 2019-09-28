@@ -11,11 +11,8 @@ package com.jsonex.treedoc;
 
 import com.jsonex.treedoc.TDNode.Type;
 import com.jsonex.core.factory.InjectableInstance;
-import lombok.experimental.Accessors;
 
-@Accessors(chain = true)
 public class TDJSONParser {
-
   public final static InjectableInstance<TDJSONParser> instance = InjectableInstance.of(TDJSONParser.class);
   public static TDJSONParser get() { return instance.get(); }
 
@@ -57,9 +54,10 @@ public class TDJSONParser {
             return node.setValue(true);
           if ("false".equals(str))
             return node.setValue(false);
-          if (c == '-' || (c >= '0' && c <= '9')) {
-            return node.setValue(parseNumber(str));
-          }
+          if (str.startsWith("0x") || str.startsWith(("0X")))
+            return node.setValue(parseNumber(str.substring(2), true));
+          if (c == '-' || (c >= '0' && c <= '9'))
+            return node.setValue(parseNumber(str, false));
           if (str.isEmpty())
             str = in.read(1);  // At least read one to avoid infinite loop
           return node.setValue(str);
@@ -182,22 +180,22 @@ public class TDJSONParser {
     return node;
   }
 
-  private Object parseNumber(String str) {
-    if (str.indexOf('.') >= 0) {
+  private Object parseNumber(String str, boolean isHex) {
+    if (!isHex && str.indexOf('.') >= 0) {
       try {
         return Double.parseDouble(str);
       } catch(NumberFormatException e) {
         return str;
       }
-    } else {
-      try {
-        long value = Long.parseLong(str);
-        if (value < Integer.MAX_VALUE)   // Can't use Ternary here, as the type will be automatically upper casted to long
-          return (int) value;
-        return value;
-      } catch (NumberFormatException e) {
-        return str;
-      }
+    }
+
+    try {
+      long value = Long.parseLong(str, isHex ? 16 : 10);
+      if (value < Integer.MAX_VALUE)   // Can't use Ternary here, as the type will be automatically upper casted to long
+        return (int) value;
+      return value;
+    } catch (NumberFormatException e) {
+      return str;
     }
   }
 }

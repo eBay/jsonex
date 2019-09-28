@@ -30,7 +30,7 @@ public class CoderArray implements ICoder<Object> {
   public TDNode encode(Object obj, Type type, BeanCoderContext ctx, TDNode target) {
     target.setType(TDNode.Type.ARRAY);
     Class<?> cls = ClassUtil.getGenericClass(type);
-    for(int i = 0; i< Array.getLength(obj); i++)
+    for(int i = 0; i < Array.getLength(obj); i++)
       ctx.encode(Array.get(obj, i), cls.getComponentType(), target.createChild(null));
     return target;
   }
@@ -42,7 +42,7 @@ public class CoderArray implements ICoder<Object> {
     Class<?> cls = ClassUtil.getGenericClass(type);
     Object array = Array.newInstance(cls.getComponentType(), jsonNode.getChildren().size());
     ctx.getObjectPath().push(array);
-    for (int i=0; i<jsonNode.getChildrenSize(); i++)
+    for (int i=0; i < jsonNode.getChildrenSize(); i++)
       Array.set(array, i, ctx.decode(jsonNode.getChild(i), cls.getComponentType(), null, Integer.toString(i)));
     return array;
   }

@@ -42,9 +42,7 @@ public abstract class CharSource {
   public boolean skipUntil(Predicate<CharSource> predicate) { return readUntil(Integer.MAX_VALUE, predicate, null); }
 
   public boolean readUntil(int length, final String terminator, final boolean include, StringBuilder target) {
-    return readUntil(length, new Predicate<CharSource>() {
-      @Override public boolean test(CharSource THIS) { return terminator.indexOf(THIS.peek(0)) >= 0 == include; }
-    }, target);
+    return readUntil(length, s -> terminator.indexOf(s.peek(0)) >= 0 == include, target);
   }
   public boolean readUntil(final String terminator, StringBuilder target) { return readUntil(MAX_STRING_LEN, terminator, true, target); }
   public String readUntil(final String terminator) {
@@ -59,9 +57,7 @@ public abstract class CharSource {
   public boolean skipSpaces() { return skipUntil(SPACE_CHARS, false); }
 
   public boolean read(int length, StringBuilder target) {
-    return readUntil(length, new Predicate<CharSource>() {
-      @Override public boolean test(CharSource THIS) { return false; }
-    }, target);
+    return readUntil(length, s -> false, target);
   }
   public String read(int length) {
     StringBuilder sb = new StringBuilder();
@@ -73,9 +69,7 @@ public abstract class CharSource {
 
 
   public boolean readUntilMatch(int length, final String str, final boolean skipStr, StringBuilder target) {
-    boolean matches = readUntil(length, new Predicate<CharSource>() {
-      @Override public boolean test(CharSource THIS) { return startsWidth(str); }
-    }, target);
+    boolean matches = readUntil(length, s -> startsWidth(str), target);
     if (matches && skipStr)
       read(str.length(), null);
     return matches;
@@ -159,6 +153,9 @@ public abstract class CharSource {
             throw new ParseRuntimeException("escaped unicode with invalid number: " + code, this);
           }
           break;
+        case '\n':
+        case '\r':
+          break;   // Assume it's a line continuation
         case '"':
         case '\'':
         case '\\':

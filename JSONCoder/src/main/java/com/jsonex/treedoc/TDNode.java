@@ -27,7 +27,7 @@ import static java.lang.Integer.parseInt;
 @RequiredArgsConstructor @Getter @Setter @Accessors(chain = true)
 @EqualsAndHashCode(exclude = {"parent", "start", "length"}) @ToString(exclude = "parent")
 public class TDNode {
-  public enum Type {MAP, ARRAY, SIMPLE}
+  public enum Type { MAP, ARRAY, SIMPLE }
   TDNode parent;
   Type type = Type.SIMPLE;
   /** The key of the node, null for root or array element */
