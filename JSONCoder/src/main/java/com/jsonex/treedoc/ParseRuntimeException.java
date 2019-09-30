@@ -13,7 +13,6 @@ public class ParseRuntimeException extends RuntimeException {
   final Bookmark bookmark;
   final String digest;
 
-  public ParseRuntimeException(String message, CharSource in) { this(message, in.getBookmark(), in.peekString(5)); }
   public ParseRuntimeException(String message, Bookmark bookmark, String digest) {
     super(message);
     this.bookmark = bookmark;

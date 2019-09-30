@@ -115,7 +115,7 @@ public class TDJSONParser {
     while (true) {
       if (!skipSpaceAndComments(in)) {
         if (withStartBracket)
-          throw new ParseRuntimeException("EOF encountered while expecting matching '}'", in);
+          throw in.createParseRuntimeException("EOF encountered while expecting matching '}'");
         break;
       }
 
@@ -138,11 +138,11 @@ public class TDJSONParser {
           break;
         c = in.peek();
         if (c != ':' && c != '{' && c != '[')
-          throw new ParseRuntimeException("No ':' after key:" + key, in);
+          throw in.createParseRuntimeException("No ':' after key:" + key);
       } else {
         key = in.readUntil(":{[").trim();
         if (in.isEof())
-          throw new ParseRuntimeException("No ':' after key:" + key, in);
+          throw in.createParseRuntimeException("No ':' after key:" + key);
         c = in.peek();
       }
       if (c == ':')
@@ -160,7 +160,7 @@ public class TDJSONParser {
     while (true) {
       if (!skipSpaceAndComments(in)) {
         if (withStartBracket)
-          throw new ParseRuntimeException("EOF encountered while expecting matching ']'", in);
+          throw in.createParseRuntimeException("EOF encountered while expecting matching ']'");
         break;
       }
 

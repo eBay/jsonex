@@ -71,7 +71,7 @@ public abstract class CharSource {
   public boolean readUntilMatch(int length, final String str, final boolean skipStr, StringBuilder target) {
     boolean matches = readUntil(length, s -> startsWidth(str), target);
     if (matches && skipStr)
-      read(str.length(), null);
+      skip(str.length());
     return matches;
   }
 
@@ -150,7 +150,7 @@ public abstract class CharSource {
           try {
             sb.append((char)Integer.parseInt(code, 16));
           } catch (NumberFormatException e) {
-            throw new ParseRuntimeException("escaped unicode with invalid number: " + code, this);
+            throw createParseRuntimeException("escaped unicode with invalid number: " + code);
           }
           break;
         case '\n':
@@ -164,7 +164,7 @@ public abstract class CharSource {
           sb.append(c);
           break;
         default:
-          throw new ParseRuntimeException("invalid escape sequence:" + c, this);
+          throw createParseRuntimeException("invalid escape sequence:" + c);
       }
     }
 
@@ -175,5 +175,9 @@ public abstract class CharSource {
     StringBuilder result = new StringBuilder();
     result.append("," + bookmark + ": string=" + peek(5));
     return result.toString();
+  }
+
+  public ParseRuntimeException createParseRuntimeException(String message) {
+    return new ParseRuntimeException(message, this.getBookmark(), this.peekString(5));
   }
 }

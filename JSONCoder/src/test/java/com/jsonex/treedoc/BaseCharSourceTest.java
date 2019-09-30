@@ -7,7 +7,7 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
-public abstract class BasecharSourceTest {
+public abstract class BaseCharSourceTest {
   protected abstract CharSource createCharSource(String str, int startIndex, int endIndex);
   protected CharSource createCharSource(String str) { return createCharSource(str, 0, str.length()); }
 
@@ -43,7 +43,7 @@ public abstract class BasecharSourceTest {
     assertEquals(" some comments ", target.toString());
 
     target = new StringBuilder();
-    assertTrue("should match with */", cs.readUntilMatch(1000, "*/", false, target));
+    assertTrue("should match with */", cs.readUntilMatch("*/", false, target));
   }
 
   @Test public void testReadQuotedString() {
@@ -70,9 +70,7 @@ public abstract class BasecharSourceTest {
       fail("Should throw error when parsing invalid escape");
     } catch(ParseRuntimeException e) {
       assertEquals("invalid escape sequence:p, Bookmark(line=0, col=18, pos=18), digest: abcd", e.getMessage());
-
       // e.printStackTrace();
     }
-
   }
 }
