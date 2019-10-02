@@ -3,7 +3,6 @@ package com.jsonex.jsoncoder;
 import com.jsonex.treedoc.CharSource;
 import com.jsonex.treedoc.ReaderCharSource;
 import com.jsonex.treedoc.TestUtil;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Rule;

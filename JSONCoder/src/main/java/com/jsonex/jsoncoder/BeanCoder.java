@@ -185,7 +185,7 @@ public class BeanCoder {
         return coder.decode(jsonNode, type, targetObj, ctx);
 
       if (cls == String.class) {  // expect a string, but got non-string, just return serialized form of the the object
-        return TDJSONWriter.getInstance().writeAsString(jsonNode);
+        return TDJSONWriter.get().writeAsString(jsonNode);
       }
 
       if (cls.isArray())  // Handle the array type

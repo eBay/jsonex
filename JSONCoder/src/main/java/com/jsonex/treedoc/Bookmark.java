@@ -23,11 +23,11 @@ public class Bookmark implements Cloneable {
   int pos;
 
   public char append(char c) {
-    pos ++;
+    pos++;
     col++;
-    if(c=='\n'){
+    if (c == '\n') {
       line++;
-      col =0;
+      col = 0;
     }
     return c;
   }

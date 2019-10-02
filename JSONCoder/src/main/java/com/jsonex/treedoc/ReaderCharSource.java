@@ -83,15 +83,15 @@ public class ReaderCharSource extends CharSource {
     return p >= loadPos;
   }
 
-  @Override public boolean readUntil(int length, Predicate<CharSource> predicate, StringBuilder target) {
+  @Override public boolean readUntil(Predicate<CharSource> predicate, StringBuilder target, int minLen, int maxLen) {
     if (target != null) {
       backupTarget = target;
       backupMark = getPos();
     }
     try {
       boolean matched = false;
-      for (int len = 0; len < length && !(isEof(0)); len++) {
-        matched = predicate.test(this);
+      for (int len = 0; len < maxLen && !(isEof(0)); len++) {
+        matched = len >= minLen && predicate.test(this);
         if (matched)
           break;
         read();

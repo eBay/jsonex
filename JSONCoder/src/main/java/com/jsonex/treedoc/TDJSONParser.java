@@ -9,8 +9,8 @@
 
 package com.jsonex.treedoc;
 
-import com.jsonex.treedoc.TDNode.Type;
 import com.jsonex.core.factory.InjectableInstance;
+import com.jsonex.treedoc.TDNode.Type;
 
 public class TDJSONParser {
   public final static InjectableInstance<TDJSONParser> instance = InjectableInstance.of(TDJSONParser.class);
@@ -47,7 +47,7 @@ public class TDJSONParser {
                 return parseArray(in, opt, node, false);
             }
           }
-          String str = in.readUntil(",}]\n\r\t").trim();
+          String str = in.readUntil(",}]\n\r\t", 1, Integer.MAX_VALUE).trim();
           if ("null".equals(str))
             return node.setValue(null);
           if ("true".equals(str))
@@ -56,10 +56,8 @@ public class TDJSONParser {
             return node.setValue(false);
           if (str.startsWith("0x") || str.startsWith(("0X")))
             return node.setValue(parseNumber(str.substring(2), true));
-          if (c == '-' || (c >= '0' && c <= '9'))
+          if (c == '-' || c == '+' || c == '.' || (c >= '0' && c <= '9'))
             return node.setValue(parseNumber(str, false));
-          if (str.isEmpty())
-            str = in.read(1);  // At least read one to avoid infinite loop
           return node.setValue(str);
       }
     } finally {
@@ -89,15 +87,15 @@ public class TDJSONParser {
         continue;
       }
 
-      if (c!='/' || in.isEof(1))
+      if (c != '/' || in.isEof(1))
         return true;
       char c1 = in.peek(1);
       switch (c1) {
-        case '/':   //   line comments
+        case '/':   // line comments
           if (in.skipUntil("\n"))
             in.skip(1);
           break;
-        case '*':   //	 block comments
+        case '*':   // block comments
           in.skip(2);
           in.skipUntilMatch("*/", true);
           break;
@@ -140,7 +138,7 @@ public class TDJSONParser {
         if (c != ':' && c != '{' && c != '[')
           throw in.createParseRuntimeException("No ':' after key:" + key);
       } else {
-        key = in.readUntil(":{[").trim();
+        key = in.readUntil(":{[", 1, Integer.MAX_VALUE).trim();
         if (in.isEof())
           throw in.createParseRuntimeException("No ':' after key:" + key);
         c = in.peek();

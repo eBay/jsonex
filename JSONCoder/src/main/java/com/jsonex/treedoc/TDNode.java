@@ -78,13 +78,8 @@ public class TDNode {
   }
 
   public TDNode getChild(String name) {
-    if (children == null)
-      return null;
-    for (TDNode cn : children) {
-      if (name.equals(cn.getKey()))
-        return cn;
-    }
-    return null;
+    int idx = indexOf(name);
+    return idx < 0 ? null : children.get(idx);
   }
 
   int indexOf(String name) {

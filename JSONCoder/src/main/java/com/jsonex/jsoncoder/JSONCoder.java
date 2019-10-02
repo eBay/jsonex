@@ -31,7 +31,7 @@ public class JSONCoder {
     try {
       TDNode tdNode = req.tdNode;
       if (tdNode == null && req.source != null) {
-        tdNode = TDJSONParser.get().parse(TDJSONParserOption.of(req.source));
+        tdNode = TDJSONParser.get().parse(new TDJSONParserOption(req.source));
       }
 
       if (req.nodePath != null)
@@ -82,7 +82,7 @@ public class JSONCoder {
         writer = sWriter = new StringBuilder();
       }
       TDNode jsonNode = BeanCoder.encode(req.object, new BeanCoderContext(opt), req.type);
-      TDJSONWriter.getInstance().write(writer, jsonNode, opt.getJsonOption());
+      TDJSONWriter.get().write(writer, jsonNode, opt.getJsonOption());
       return sWriter == null ? null : sWriter.toString();
     } catch (Exception e) {
       throw new BeanCoderException(e);

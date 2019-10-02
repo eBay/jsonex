@@ -11,41 +11,26 @@ package com.jsonex.treedoc;
 
 import com.jsonex.core.factory.InjectableInstance;
 import com.jsonex.core.util.StringUtil;
-import lombok.Getter;
-import lombok.Setter;
 import lombok.SneakyThrows;
-import lombok.experimental.Accessors;
 
 import java.io.IOException;
 
 public class TDJSONWriter {
-  @Accessors(chain = true)
-  public static class JSONOption {
-    @Getter private int indentFactor;
-    @Getter @Setter boolean alwaysQuoteName = true;
-    @Getter @Setter char quoteChar = '"';
-    @Getter private String indentStr = "";  //Used internally
-    public JSONOption setIndentFactor(int _indentFactor) {
-      this.indentFactor = _indentFactor;
-      indentStr = StringUtil.appendRepeatedly(new StringBuilder(), ' ', indentFactor).toString();
-      return this;
-    }
-  }
 
   public final static InjectableInstance<TDJSONWriter> instance = InjectableInstance.of(TDJSONWriter.class);
-  public static TDJSONWriter getInstance() { return instance.get(); }
+  public static TDJSONWriter get() { return instance.get(); }
 
-  public String writeAsString(TDNode node) { return writeAsString(node, new JSONOption()); }
-  public String writeAsString(TDNode node, JSONOption opt) {
+  public String writeAsString(TDNode node) { return writeAsString(node, new TDJSONWriterOption()); }
+  public String writeAsString(TDNode node, TDJSONWriterOption opt) {
     StringBuilder out = new StringBuilder();
     write(out, node, opt);
     return out.toString();
   }
 
-  public void write(Appendable out, TDNode node, JSONOption opt) { write(out, node, opt, ""); }
+  public void write(Appendable out, TDNode node, TDJSONWriterOption opt) { write(out, node, opt, ""); }
 
   @SneakyThrows
-  public void write(Appendable out, TDNode node, JSONOption opt, String indentStr) {
+  public void write(Appendable out, TDNode node, TDJSONWriterOption opt, String indentStr) {
     if (node == null) {
       out.append("null");
       return;
@@ -69,7 +54,7 @@ public class TDJSONWriter {
   }
 
   @SneakyThrows
-  private void writeMap(Appendable out, TDNode node, JSONOption opt, String indentStr, String childIndentStr) {
+  private void writeMap(Appendable out, TDNode node, TDJSONWriterOption opt, String indentStr, String childIndentStr) {
     out.append('{');
     if (node.children != null) {
       for (int i = 0; i < node.children.size(); i++){
@@ -98,7 +83,7 @@ public class TDJSONWriter {
   }
 
   @SneakyThrows
-  private void writeArray(Appendable out, TDNode node, JSONOption opt, String indentStr, String childIndentStr) {
+  private void writeArray(Appendable out, TDNode node, TDJSONWriterOption opt, String indentStr, String childIndentStr) {
     out.append('[');
     if (node.children != null) {
       for (int i = 0; i < node.children.size(); i++) {
@@ -122,7 +107,7 @@ public class TDJSONWriter {
   }
 
   @SneakyThrows
-  private void writeSimple(Appendable out, TDNode node, JSONOption opt) {
+  private void writeSimple(Appendable out, TDNode node, TDJSONWriterOption opt) {
     if (node.value instanceof String) {
       writeQuotedString(out, (String)node.value, opt.quoteChar);
       return;
