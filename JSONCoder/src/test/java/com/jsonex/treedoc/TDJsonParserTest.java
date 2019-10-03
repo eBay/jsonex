@@ -32,9 +32,9 @@ public class TDJsonParserTest {
 
     log.info("Node=" + TestUtil.toJSON(node));
     assertEquals(10, node.getChild("limit").value);
-    assertEquals("100000000000000000000", node.getChild("total").value);
-    assertEquals("Some Name 1", node.getChildByPath("data/0/name").value);
-    assertEquals("2nd st", node.getChildByPath("data/1/address/streetLine").value);
+    assertEquals("100000000000000000000", node.getChildValue("total"));
+    assertEquals("Some Name 1", node.getValueByPath("data/0/name"));
+    assertEquals("2nd st", node.getValueByPath("data/1/address/streetLine"));
 
     String json = TDJSONWriter.get().writeAsString(node);
     log.info("json: " + json);
@@ -52,9 +52,9 @@ public class TDJsonParserTest {
     log.info("testParseProto: Node=" + TestUtil.toJSON(node));
     String json = TDJSONWriter.get().writeAsString(node, new TDJSONWriterOption().setIndentFactor(2));
     log.info("testParseProto: formatted json: " + json);
-    assertEquals(Boolean.FALSE, node.getChildByPath("n/n1/0/n11/1/n111").getValue());
-    assertEquals(4, node.getChildByPath("n/n1/1/[d.e.f]").getValue());
-    assertEquals(6, node.getChildByPath("n/n3/0").getValue());
+    assertEquals(Boolean.FALSE, node.getValueByPath("n/n1/0/n11/1/n111"));
+    assertEquals(4, node.getValueByPath("n/n1/1/[d.e.f]"));
+    assertEquals(6, node.getValueByPath("n/n3/0"));
   }
 
 
@@ -64,10 +64,14 @@ public class TDJsonParserTest {
     log.info("testParseJson5: Node=" + TestUtil.toJSON(node));
     String json = TDJSONWriter.get().writeAsString(node, new TDJSONWriterOption().setIndentFactor(2));
     log.info("testParseJson5: formatted json: " + json);
-    assertEquals("and you can quote me on that", node.getChildByPath("unquoted").getValue());
-    assertEquals(912559, node.getChildByPath("hexadecimal").getValue());
-    assertEquals(0.8675309, node.getChildByPath("leadingDecimalPoint").getValue());
-    assertEquals(1, node.getChildByPath("positiveSign").getValue());
+    assertEquals("and you can quote me on that", node.getValueByPath("unquoted"));
+    assertEquals(912559, node.getValueByPath("hexadecimal"));
+    assertEquals(0.8675309, node.getValueByPath("leadingDecimalPoint"));
+    assertEquals(1, node.getValueByPath("positiveSign"));
+
+    node = TDJSONParser.get().parse(new TDJSONParserOption("'a':1\nb:2").setDefaultRootType(MAP));
+    assertEquals(1, node.getValueByPath("a"));
+    assertEquals(2, node.getValueByPath("b"));
   }
 
   @Test public void testRootArray() {
@@ -77,8 +81,8 @@ public class TDJsonParserTest {
     String json = TDJSONWriter.get().writeAsString(node, new TDJSONWriterOption().setIndentFactor(2));
     log.info("testParseJson5: formatted json: " + json);
     assertEquals(4, node.getChildrenSize());
-    assertEquals(2, node.getChildByPath("1").getValue());
-    assertEquals(3, node.getChildByPath("2/v").getValue());
+    assertEquals(2, node.getValueByPath("1"));
+    assertEquals(3, node.getValueByPath("2/v"));
   }
 
   @Test public void testInvalid() {

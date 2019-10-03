@@ -121,8 +121,8 @@ public abstract class CharSource {
   public StringBuilder readQuotedString(char quote, StringBuilder sb) {
     String terminator = getTermStrWithQuoteAndEscape(quote);
     int pos = getPos();
-    while(true) {
-      if(!readUntil(terminator, sb))
+    while (true) {
+      if (!readUntil(terminator, sb))
         throw new EOFRuntimeException("Can't find matching quote at position:" + pos);
       char c = read();
       if (c == quote) {

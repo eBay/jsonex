@@ -104,6 +104,10 @@ public class TDNode {
   }
 
   public TDNode getChildByPath(String path) { return getChildByPath(path.split("/"), 0); }
+  public Object getValueByPath(String path) {
+    TDNode cn = getChildByPath(path);
+    return cn == null ? null : cn.getValue();
+  }
 
   public TDNode getChildByPath(String[] path, int idx) {
     if (idx == path.length)
