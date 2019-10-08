@@ -7,18 +7,21 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
-public abstract class BasecharSourceTest {
+public abstract class BaseCharSourceTest {
   protected abstract CharSource createCharSource(String str, int startIndex, int endIndex);
   protected CharSource createCharSource(String str) { return createCharSource(str, 0, str.length()); }
 
   @Test public void testCharArraySource() {
-    CharSource cs = createCharSource("--0123--", 2, 6);
+    CharSource cs = createCharSource("--0123\n--", 2, 7);
     assertEquals('0', cs.read());
     assertEquals('1', cs.read());
     assertEquals('2', cs.peek(0));
     assertEquals('3', cs.peek(1));
     assertEquals('2', cs.read());
     assertEquals('3', cs.read());
+    assertEquals("Bookmark(line=0, col=4, pos=4)", cs.getBookmark().toString());
+    assertEquals('\n', cs.read());
+    assertEquals("Bookmark(line=1, col=0, pos=5)", cs.getBookmark().toString());
     assertTrue("should eof", cs.isEof(0));
     try {
       cs.read();
@@ -33,17 +36,17 @@ public abstract class BasecharSourceTest {
     assertEquals(2, cs.getPos());
 
     StringBuilder target = new StringBuilder();
-    assertTrue("should match /*", cs.readUntilMatch(1000, "/*", false, target));
+    assertTrue("should match /*", cs.readUntilMatch("/*", false, target, 0, 1000));
     assertEquals("Text before ", target.toString());
     assertTrue("should start with /*", cs.startsWidth("/*"));
     cs.skip(2);  // skip /*
 
     target = new StringBuilder();
-    assertTrue("should match with */", cs.readUntilMatch(1000, "*/", false, target));
+    assertTrue("should match with */", cs.readUntilMatch("*/", false, target));
     assertEquals(" some comments ", target.toString());
 
     target = new StringBuilder();
-    assertTrue("should match with */", cs.readUntilMatch(1000, "*/", false, target));
+    assertTrue("should match with */", cs.readUntilMatch("*/", false, target));
   }
 
   @Test public void testReadQuotedString() {
@@ -59,7 +62,8 @@ public abstract class BasecharSourceTest {
       cs.readQuotedString(c);
       fail("Should throw error");
     } catch(EOFRuntimeException e) {
-      e.printStackTrace();
+      assertEquals("Can't find matching quote at position:1", e.getMessage());
+      // e.printStackTrace();
     }
 
     cs = createCharSource("`Invalid escape \\p abcdefg`");
@@ -68,8 +72,8 @@ public abstract class BasecharSourceTest {
       cs.readQuotedString(c);
       fail("Should throw error when parsing invalid escape");
     } catch(ParseRuntimeException e) {
-      e.printStackTrace();
+      assertEquals("Invalid escape sequence:p, Bookmark(line=0, col=18, pos=18), digest: abcd", e.getMessage());
+      // e.printStackTrace();
     }
-
   }
 }

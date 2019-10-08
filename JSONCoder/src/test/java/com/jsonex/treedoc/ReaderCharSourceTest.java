@@ -8,7 +8,7 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
-public class ReaderCharSourceTest extends BasecharSourceTest {
+public class ReaderCharSourceTest extends BaseCharSourceTest {
   protected CharSource createCharSource(String str, int startIndex, int endIndex) {
     return new ReaderCharSource(new StringReader(str.substring(startIndex, endIndex)), 5);
   }

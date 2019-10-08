@@ -93,7 +93,7 @@ public class CoderObject implements ICoder<Object> {
       if (cls.isAssignableFrom(TDNode.class))
         return jsonNode;  // If cls is Object.class, we don't do further decoding
       throw new BeanCoderException("Expect an Map object, but actual type=" + jsonNode.getType() +
-          ";o=" + toTrimmedStr(TDJSONWriter.getInstance().writeAsString(jsonNode), 500));
+          ";o=" + toTrimmedStr(TDJSONWriter.get().writeAsString(jsonNode) + ": pos=" + jsonNode.getStart(), 500));
     }
     Object subType = jsonNode.getChildValue(TYPE_KEY);
     if (subType instanceof String) {

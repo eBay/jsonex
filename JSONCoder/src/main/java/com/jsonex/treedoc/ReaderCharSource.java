@@ -9,16 +9,12 @@
 
 package com.jsonex.treedoc;
 
-import com.jsonex.core.factory.InjectableFactory;
 import lombok.SneakyThrows;
 
 import java.io.Reader;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class ReaderCharSource extends CharSource {
-  public final static InjectableFactory<Reader, ReaderCharSource> factory = InjectableFactory.of(param -> new ReaderCharSource(param));
-
   final Reader reader;
   final char[] buf;
 
@@ -87,15 +83,15 @@ public class ReaderCharSource extends CharSource {
     return p >= loadPos;
   }
 
-  @Override public boolean readUntil(int length, Predicate<CharSource> predicate, StringBuilder target) {
+  @Override public boolean readUntil(Predicate<CharSource> predicate, StringBuilder target, int minLen, int maxLen) {
     if (target != null) {
       backupTarget = target;
       backupMark = getPos();
     }
     try {
       boolean matched = false;
-      for (int len = 0; len < length && !(isEof(0)); len++) {
-        matched = predicate.test(this);
+      for (int len = 0; len < maxLen && !(isEof(0)); len++) {
+        matched = len >= minLen && predicate.test(this);
         if (matched)
           break;
         read();

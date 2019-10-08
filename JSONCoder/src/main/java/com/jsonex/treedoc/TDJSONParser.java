@@ -9,147 +9,191 @@
 
 package com.jsonex.treedoc;
 
-import com.jsonex.treedoc.TDNode.Type;
 import com.jsonex.core.factory.InjectableInstance;
-
-import java.io.Reader;
+import com.jsonex.treedoc.TDNode.Type;
 
 public class TDJSONParser {
   public final static InjectableInstance<TDJSONParser> instance = InjectableInstance.of(TDJSONParser.class);
-  public static TDJSONParser getInstance() { return instance.get(); }
+  public static TDJSONParser get() { return instance.get(); }
 
-  public TDNode parse(Reader reader){ return parse(ReaderCharSource.factory.get(reader)); }
-  public TDNode parse(String jsonStr){ return parse(ArrayCharSource.factory.get(jsonStr.toCharArray())); }
-  public TDNode parse(CharSource in) { return parse(in, new TDNode(null, null)); }
+  public TDNode parse(TDJSONParserOption opt) { return parse(opt.source, opt, new TDNode()); }
 
-  public TDNode parse(CharSource in, TDNode node) {
-    char c = skipSpaceAndComments(in);
-    node.start = in.getPos();
+  public TDNode parse(CharSource src, TDJSONParserOption opt, TDNode node) {
+    if (!skipSpaceAndComments(src))
+      return node;
+
+    char c = src.peek();
+    node.start = src.getPos();
     try {
-      switch (c) {
-        case '{':
-          return parseMap(in, node);
-        case '[':
-          return parseArray(in, node);
-        case '"':
-        case '\'':
-        case '`':
-          in.read();
-          return node.setValue(in.readQuotedString(c));
-        default:
-          String str = in.readUntil(",}]\n\r\t").trim();
-          if ("null".equals(str))
-            return node.setValue(null);
-          if ("true".equals(str))
-            return node.setValue(true);
-          if ("false".equals(str))
-            return node.setValue(false);
-          if (c == '-' || (c >= '0' && c <= '9')) {
-            return node.setValue(parseNumber(str));
-          }
-          if (str.isEmpty())
-            str = in.read(1);  // At least read one to avoid infinite loop
-          return node.setValue(str);
+      if (c == '{')
+        return parseMap(src, opt, node, true);
+
+      if (c == '[')
+        return parseArray(src, opt, node, true);
+
+      if (node.isRoot()) {
+        switch (opt.defaultRootType) {
+          case MAP:
+            return parseMap(src, opt, node, false);
+          case ARRAY:
+            return parseArray(src, opt, node, false);
+        }
       }
+
+      if(c == '"' || c == '\'' || c == '`') {
+        src.read();
+        StringBuilder sb = new StringBuilder();
+        src.readQuotedString(c, sb);
+        readContinuousString(src, sb);
+        return node.setValue(sb.toString());
+      }
+
+      String str = src.readUntil(",}]\n\r\t", 1, Integer.MAX_VALUE).trim();
+      if ("null".equals(str))
+        return node.setValue(null);
+      if ("true".equals(str))
+        return node.setValue(true);
+      if ("false".equals(str))
+        return node.setValue(false);
+      if (str.startsWith("0x") || str.startsWith(("0X")))
+        return node.setValue(parseNumber(str.substring(2), true));
+      if (c == '-' || c == '+' || c == '.' || (c >= '0' && c <= '9'))
+        return node.setValue(parseNumber(str, false));
+      return node.setValue(str);
     } finally {
-      node.length = in.getPos() - node.start;
+      node.length = src.getPos() - node.start;
     }
   }
 
-  private char skipSpaceAndComments(CharSource in) {
-    while (!in.isEof()) {
-      in.skipSpaces();
-      char c = in.peek();
-      if (c!='/' || in.isEof(1))
-        return c;
-      char c1 = in.peek(1);
+  private void readContinuousString(CharSource src, StringBuilder sb) {
+    while(skipSpaceAndComments(src)) {
+      char c = src.peek();
+      if ("\"`'".indexOf(c) < 0)
+        break;
+      src.read();
+      src.readQuotedString(c, sb);
+    }
+  }
+
+  /**
+   * @return true if there's more text left
+   */
+  public static boolean skipSpaceAndComments(CharSource src) {
+    while (src.skipSpaces()) {
+      char c = src.peek();
+      if (c == '#') {
+        if (src.skipUntil("\n"))
+          src.skip(1);
+        continue;
+      }
+
+      if (c != '/' || src.isEof(1))
+        return true;
+      char c1 = src.peek(1);
       switch (c1) {
-        case '/':   //   line comments
-          if (in.skipUntil("\n"))
-            in.skip(1);
+        case '/':   // line comments
+          if (src.skipUntil("\n"))
+            src.skip(1);
           break;
-        case '*':   //	 block comments
-          in.skip(2);
-          in.skipUntilMatch("*/", true);
+        case '*':   // block comments
+          src.skip(2);
+          src.skipUntilMatch("*/", true);
           break;
         default:
-          return c;
+          return true;
       }
     }
-    throw new EOFRuntimeException("In=" + in.dump());
+    return false;
   }
 
-  private TDNode parseMap(CharSource in, TDNode node) {
+  public TDNode parseMap(CharSource src, TDJSONParserOption opt, TDNode node, boolean withStartBracket) {
     node.type = Type.MAP;
-    in.read();
+    if (withStartBracket)
+      src.read();
     while (true) {
-      char c = skipSpaceAndComments(in);
+      if (!skipSpaceAndComments(src)) {
+        if (withStartBracket)
+          throw src.createParseRuntimeException("EOF encountered while expecting matching '}'");
+        break;
+      }
+
+      char c = src.peek();
       if (c == '}') {
-        in.read();
+        src.read();
         break;
       }
 
       if (c == ',') { // Skip ,
-        in.read();
+        src.read();
         continue;
       }
 
       String key;
       if (c == '"' || c == '\'' || c == '`') {
-        in.read();
-        key = in.readQuotedString(c);
-        c = skipSpaceAndComments(in);
-        if (c != ':')
-          throw new ParseRuntimeException("No ':' after key:" + key, in.getBookmark(), in.peak(5));
-        in.read();
+        src.read();
+        key = src.readQuotedString(c);
+        if (!skipSpaceAndComments(src))
+          break;
+        c = src.peek();
+        if (c != ':' && c != '{' && c != '[')
+          throw src.createParseRuntimeException("No ':' after key:" + key);
       } else {
-        key = in.readUntil(":");
-        if (in.isEof())
-          throw new ParseRuntimeException("No ':' after key:" + key, in.getBookmark(), in.peak(5));
-        in.read();
+        key = src.readUntil(":{[", 1, Integer.MAX_VALUE).trim();
+        if (src.isEof())
+          throw src.createParseRuntimeException("No ':' after key:" + key);
+        c = src.peek();
       }
+      if (c == ':')
+        src.read();
 
-      parse(in, node.createChild(key));
+      parse(src, opt, node.createChild(key));
     }
     return node;
   }
 
-  private TDNode parseArray(CharSource in, TDNode node) {
+  private TDNode parseArray(CharSource src, TDJSONParserOption opt, TDNode node, boolean withStartBracket) {
     node.type = Type.ARRAY;
-    in.read();
+    if (withStartBracket)
+      src.read();
     while (true) {
-      char c = skipSpaceAndComments(in);
+      if (!skipSpaceAndComments(src)) {
+        if (withStartBracket)
+          throw src.createParseRuntimeException("EOF encountered while expecting matching ']'");
+        break;
+      }
+
+      char c = src.peek();
       if (c == ']') {
-        in.read();
+        src.read();
         break;
       }
 
       if (c == ',') {
-        in.read();
-        c = skipSpaceAndComments(in);
+        src.read();
         continue;
       }
-      parse(in, node.createChild(null));
+
+      parse(src, opt, node.createChild(null));
     }
     return node;
   }
 
-  private Object parseNumber(String str) {
-    if (str.indexOf('.') >= 0) {
+  private Object parseNumber(String str, boolean isHex) {
+    if (!isHex && str.indexOf('.') >= 0) {
       try {
         return Double.parseDouble(str);
       } catch(NumberFormatException e) {
         return str;
       }
-    } else {
-      try {
-        long value = Long.parseLong(str);
-        if (value < Integer.MAX_VALUE)   // Can't use Ternary here, as the type will be automatically upper casted to long
-          return (int) value;
-        return value;
-      } catch (NumberFormatException e) {
-        return str;
-      }
+    }
+
+    try {
+      long value = Long.parseLong(str, isHex ? 16 : 10);
+      if (value < Integer.MAX_VALUE)   // Can't use Ternary here, as the type will be automatically upper casted to long
+        return (int) value;
+      return value;
+    } catch (NumberFormatException e) {
+      return str;
     }
   }
 }

@@ -28,10 +28,10 @@ public class StringUtil {
   public static String getRight(String src, int length) { return src == null || src.length() < length ? src : src.substring(src.length() - length); }
 
   public static boolean isDigitOnly(String chkStr) {
-    if(chkStr == null)
+    if (chkStr == null)
       return false;
     for (char c : chkStr.toCharArray()) 
-      if(!Character.isDigit(c))
+      if (!Character.isDigit(c))
         return false;
     return true;
   }
@@ -41,8 +41,8 @@ public class StringUtil {
    */
   public static String SQLEscape(String str) {
     StringBuilder sb = new StringBuilder();
-    for(char c : str.toCharArray()){
-      if(c == '\'')
+    for (char c : str.toCharArray()) {
+      if (c == '\'')
         sb.append('\'');
       sb.append(c);
     }
@@ -61,7 +61,7 @@ public class StringUtil {
   public static String fillString(String str, int length, char fillChar, boolean fillLeft) {
     int len = length - str.length();
     StringBuilder sb = new StringBuilder();
-    for(int i = 0; i < len; i++)
+    for (int i = 0; i < len; i++)
       sb.append(fillChar);
     if (fillLeft)
       return sb.append(str).toString();
@@ -86,29 +86,29 @@ public class StringUtil {
    * @return The escaped String
    */
   public static String cEscape(String str, char quoteChar, boolean isWchar) {
-    if(str == null)
+    if (str == null)
       return null;
 
-    //First scan to check if it needs escape just to avoid create new String object for better performance.
+    // First scan to check if it needs escape just to avoid create new String object for better performance.
     int i;
-    for(i=0; i<str.length(); i++){
+    for (i = 0; i < str.length(); i++) {
       char c = str.charAt(i);
-      if(c < MIN_PRINTABLE_CHAR || C_ESC_CHAR.indexOf(c) >= 0)
+      if (c < MIN_PRINTABLE_CHAR || C_ESC_CHAR.indexOf(c) >= 0)
         break;
     }
-    if(i == str.length())  // No need escape 
+    if (i == str.length())  // No need escape
       return str;
     
-    //Second scan, Do escape
+    // Second scan, Do escape
     StringBuilder result = new StringBuilder();
-    for(i=0; i<str.length(); i++){
+    for (i = 0; i < str.length(); i++) {
       char c = str.charAt(i);
-      //check if it's a special printable char
+      // check if it's a special printable char
       int idx = C_ESC_CHAR.indexOf(c);
-      if(idx >= 3 || quoteChar == c){  // first 3 chars are quote chars
+      if (idx >= 3 || quoteChar == c) {  // first 3 chars are quote chars
         result.append('\\');
         result.append(C_ESC_SYMB.charAt(idx));
-      }else if(c < MIN_PRINTABLE_CHAR){//check if it's a un-printable char
+      } else if (c < MIN_PRINTABLE_CHAR) {  // check if it's a un-printable char
         if (!isWchar) {
           result.append("\\0");
           result.append(fillString(Integer.toOctalString((int)c),2,'0',true));
@@ -123,23 +123,23 @@ public class StringUtil {
   }
   
   public static String lowerFirst(String str) {
-    if(Character.isLowerCase(str.charAt(0)))
+    if (Character.isLowerCase(str.charAt(0)))
       return str;
     return Character.toLowerCase(str.charAt(0)) + str.substring(1);
   }
   
   public static String upperFirst(String str){
-    if(str == null || str.length() == 0 || Character.isUpperCase(str.charAt(0)))
+    if (str == null || str.length() == 0 || Character.isUpperCase(str.charAt(0)))
       return str;
     return Character.toUpperCase(str.charAt(0)) + str.substring(1);
   }
   
   public static boolean isJavaIdentifier(String str){
-    if(str == null || str.length() < 1 || !Character.isJavaIdentifierStart(str.charAt(0)))
+    if (str == null || str.length() < 1 || !Character.isJavaIdentifierStart(str.charAt(0)))
       return false;
    
-    for(int i=1; i<str.length(); i++){
-      if(!Character.isJavaIdentifierPart(str.charAt(i)))
+    for (int i=1; i<str.length(); i++){
+      if (!Character.isJavaIdentifierPart(str.charAt(i)))
         return false;
     }
       
@@ -147,20 +147,20 @@ public class StringUtil {
   }
   
   public static int[] splitAsIntArray(String str, String delimiter) {
-    if(str == null)
+    if (str == null)
       return null;
     
     String[] strs = str.split(delimiter);
     int[] result = new int[strs.length];
-    for(int i=0; i<strs.length; i++)
+    for (int i = 0; i < strs.length; i++)
       result[i] = Integer.valueOf(strs[i]);
     return result;
   }
 
   public static String join(byte[] items, String delimiter) {
     StringBuilder sb = new StringBuilder();
-    for(byte b : items) {
-      if(sb.length() > 0)
+    for (byte b : items) {
+      if (sb.length() > 0)
         sb.append(delimiter);
       sb.append(b & 0xff);
     }

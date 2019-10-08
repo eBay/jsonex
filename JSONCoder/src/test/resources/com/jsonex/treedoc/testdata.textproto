@@ -1,0 +1,23 @@
+n: {
+  n1: {
+    n11: 1
+    # Duplicated key; ':' is emitted before '{'
+    n11 {
+      n111: false
+    }
+    n12: "2"
+  }
+  # Multi-line comments
+  # Line2
+  ########
+  n1: {
+    n11: "abcd"
+    #  Extension keys
+    [d.e.f]: 4
+    n11: "multiline 1\n"
+    'line2'
+  }
+  n2: [1,2,3]
+  n2 [3,4,5]  # ':' is emitted before '['
+  "n3" [6, 7, 8, 9]
+}

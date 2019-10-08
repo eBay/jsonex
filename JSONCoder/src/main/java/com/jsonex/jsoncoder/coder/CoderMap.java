@@ -127,6 +127,6 @@ public class CoderMap implements ICoder<Map> {
         return result;
     }
     throw new BeanCoderException("Incorrect input, the input for type:" + cls + " has to be an array or map,  got"
-        + toTrimmedStr(TDJSONWriter.getInstance().writeAsString(jsonNode), 500));
+        + toTrimmedStr(TDJSONWriter.get().writeAsString(jsonNode), 500));
   }
 }

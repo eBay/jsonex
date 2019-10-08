@@ -37,59 +37,54 @@ public abstract class CharSource {
    *
    * @return true The terminate condition matches. otherwise, could be EOF or length matches
    */
-  public abstract boolean readUntil(int length, Predicate<CharSource> predicate, StringBuilder target);
-  public boolean readUntil(Predicate<CharSource> predicate, StringBuilder target) { return readUntil(MAX_STRING_LEN, predicate, target); }
-  public boolean skipUntil(Predicate<CharSource> predicate) { return readUntil(Integer.MAX_VALUE, predicate, null); }
+  public abstract boolean readUntil(Predicate<CharSource> predicate, StringBuilder target, int minLen, int maxLen);
+  public boolean readUntil(Predicate<CharSource> predicate, StringBuilder target) { return readUntil(predicate, target, 0, MAX_STRING_LEN); }
+  public boolean skipUntil(Predicate<CharSource> predicate) { return readUntil(predicate, null, 0, Integer.MAX_VALUE); }
 
-  public boolean readUntil(int length, final String terminator, final boolean include, StringBuilder target) {
-    return readUntil(length, new Predicate<CharSource>() {
-      @Override public boolean test(CharSource THIS) { return terminator.indexOf(THIS.peek(0)) >= 0 == include; }
-    }, target);
+  public boolean readUntil(final String terminator, final boolean include, StringBuilder target, int minLen, int maxLen) {
+    return readUntil(s -> terminator.indexOf(s.peek(0)) >= 0 == include, target, minLen, maxLen);
   }
-  public boolean readUntil(final String terminator, StringBuilder target) { return readUntil(MAX_STRING_LEN, terminator, true, target); }
-  public String readUntil(final String terminator) {
+  public boolean readUntil(final String terminator, StringBuilder target) { return readUntil(terminator, true, target, 0, MAX_STRING_LEN); }
+  public String readUntil(final String terminator) { return readUntil(terminator, 0, Integer.MAX_VALUE); }
+  public String readUntil(final String terminator, int minLen, int maxLen) {
     StringBuilder sb = new StringBuilder();
-    readUntil(terminator, sb);
+    readUntil(terminator, true, sb, minLen, maxLen);
     return sb.toString();
   }
-  public boolean readUntil(final String terminator, final boolean include, StringBuilder target) { return readUntil(MAX_STRING_LEN, terminator, include, target); }
 
-  public boolean skipUntil(final String terminator, final boolean include) { return readUntil(Integer.MAX_VALUE, terminator, include, null); }
+  public boolean skipUntil(final String terminator, final boolean include) { return readUntil(terminator, include, null, 0, Integer.MAX_VALUE); }
   public boolean skipUntil(final String terminator) { return skipUntil(terminator, true); }
   public boolean skipSpaces() { return skipUntil(SPACE_CHARS, false); }
 
-  public boolean read(int length, StringBuilder target) {
-    return readUntil(length, new Predicate<CharSource>() {
-      @Override public boolean test(CharSource THIS) { return false; }
-    }, target);
+  public boolean read(StringBuilder target, int len) {
+    return readUntil(s -> true, target, len, len);
   }
-  public String read(int length) {
+
+  public String read(int len) {
     StringBuilder sb = new StringBuilder();
-    read(length, sb);
+    read(sb, len);
     return sb.toString();
   }
 
-  public boolean skip(int length) { return read(length, null); }
+  public boolean skip(int len) { return read(null, len); }
 
 
-  public boolean readUntilMatch(int length, final String str, final boolean skipStr, StringBuilder target) {
-    boolean matches = readUntil(length, new Predicate<CharSource>() {
-      @Override public boolean test(CharSource THIS) { return startsWidth(str); }
-    }, target);
+  public boolean readUntilMatch(final String str, final boolean skipStr, StringBuilder target, int minLen, int maxLen) {
+    boolean matches = readUntil(s -> startsWidth(str), target, minLen, maxLen);
     if (matches && skipStr)
-      read(str.length(), null);
+      skip(str.length());
     return matches;
   }
 
   public boolean readUntilMatch(final String str, final boolean skipStr, StringBuilder target) {
-    return readUntilMatch(MAX_STRING_LEN, str, skipStr, target);
+    return readUntilMatch(str, skipStr, target, 0, MAX_STRING_LEN);
   }
 
   public boolean skipUntilMatch(final String str, final boolean skipStr) {
-    return readUntilMatch(Integer.MAX_VALUE, str, skipStr, null);
+    return readUntilMatch(str, skipStr, null, 0, Integer.MAX_VALUE);
   }
 
-  public String peak(int len) {
+  public String peekString(int len) {
     StringBuilder sb = new StringBuilder();
     for (int i = 0; i < len; i++) {
       if (isEof(i))
@@ -120,11 +115,14 @@ public abstract class CharSource {
   }
 
   public String readQuotedString(char quote) {
-    StringBuilder sb = new StringBuilder();
+    return readQuotedString(quote, new StringBuilder()).toString();
+  }
+
+  public StringBuilder readQuotedString(char quote, StringBuilder sb) {
     String terminator = getTermStrWithQuoteAndEscape(quote);
     int pos = getPos();
-    while(true) {
-      if(!readUntil(terminator, sb))
+    while (true) {
+      if (!readUntil(terminator, sb))
         throw new EOFRuntimeException("Can't find matching quote at position:" + pos);
       char c = read();
       if (c == quote) {
@@ -153,9 +151,12 @@ public abstract class CharSource {
           try {
             sb.append((char)Integer.parseInt(code, 16));
           } catch (NumberFormatException e) {
-            throw new ParseRuntimeException("escaped unicode with invalid number: " + code, getBookmark(), peak(5));
+            throw createParseRuntimeException("Escaped unicode with invalid number: " + code);
           }
           break;
+        case '\n':
+        case '\r':
+          break;   // Assume it's a line continuation
         case '"':
         case '\'':
         case '\\':
@@ -164,16 +165,20 @@ public abstract class CharSource {
           sb.append(c);
           break;
         default:
-          throw new ParseRuntimeException("invalid escape sequence:" + c, getBookmark(), peak(5));
+          throw createParseRuntimeException("Invalid escape sequence:" + c);
       }
     }
 
-    return sb.toString();
+    return sb;
   }
 
   public String dump() {
     StringBuilder result = new StringBuilder();
-    result.append("," + bookmark + ": string=" + peak(5));
+    result.append("," + bookmark + ": string=" + peek(5));
     return result.toString();
+  }
+
+  public ParseRuntimeException createParseRuntimeException(String message) {
+    return new ParseRuntimeException(message, this.getBookmark(), this.peekString(5));
   }
 }

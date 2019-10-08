@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 /**
- *  Book mark used for document parser. It will store the column and line information
+ *  Bookmark used for document parser. It will store the column and line information
  */
 @RequiredArgsConstructor @ToString @Getter
 public class Bookmark implements Cloneable {
@@ -23,11 +23,11 @@ public class Bookmark implements Cloneable {
   int pos;
 
   public char append(char c) {
-    pos ++;
+    pos++;
     col++;
-    if(c=='\n'){
+    if (c == '\n') {
       line++;
-      col =0;
+      col = 0;
     }
     return c;
   }

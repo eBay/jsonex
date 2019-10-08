@@ -15,7 +15,7 @@ import com.jsonex.jsoncoder.coder.CoderAtomicInteger;
 import com.jsonex.jsoncoder.coder.CoderBigInteger;
 import com.jsonex.jsoncoder.coder.CoderClass;
 import com.jsonex.jsoncoder.coder.CoderEnum;
-import com.jsonex.treedoc.TDJSONWriter.JSONOption;
+import com.jsonex.treedoc.TDJSONWriterOption;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -123,7 +123,7 @@ public class JSONCoderOption {
   @Getter private final List<EqualsWrapper<?>> equalsWrapper = new ArrayList<>();
   
   // JSON coder config
-  @Getter @Setter @Delegate private JSONOption jsonOption = new JSONOption();
+  @Getter @Setter @Delegate private TDJSONWriterOption jsonOption = new TDJSONWriterOption();
 
   public JSONCoderOption() { this(global); }
   private JSONCoderOption(JSONCoderOption parent) { this.parent = parent; }

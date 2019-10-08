@@ -20,12 +20,15 @@ import lombok.experimental.Accessors;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.jsonex.core.util.StringUtil.*;
+import static java.lang.Integer.parseInt;
+
 /** A Node in TreeDoc */
 @RequiredArgsConstructor @Getter @Setter @Accessors(chain = true)
 @EqualsAndHashCode(exclude = {"parent", "start", "length"}) @ToString(exclude = "parent")
 public class TDNode {
-  public enum Type {MAP, ARRAY, SIMPLE}
-  final TDNode parent;
+  public enum Type { MAP, ARRAY, SIMPLE }
+  TDNode parent;
   Type type = Type.SIMPLE;
   /** The key of the node, null for root or array element */
   final String key;
@@ -37,26 +40,56 @@ public class TDNode {
   int start;
   /** Length of this node in the source */
   int length;
+  /** indicate this node is a deduped Array node for textproto which allows duplicated keys */
+  boolean deduped;
 
   // Create a root node
-  public TDNode() { this (null, null); }
+  public TDNode() { this (null); }
 
   public TDNode createChild(String name) {
-    if (children == null)
-      children = new ArrayList<>();
-    TDNode cn = new TDNode(this, name);
-    children.add(cn);
+    int childIndex = indexOf(name);
+    if (childIndex < 0) {
+      TDNode cn = new TDNode(name);
+      addChild(cn);
+      return cn;
+    }
+
+    TDNode existNode = children.get(childIndex);
+
+    // special handling for textproto due to it's bad design that allows duplicated keys
+    if (!existNode.isDeduped()) {
+      TDNode listNode = new TDNode(name).setParent(this).setDeduped(true).setType(Type.ARRAY);
+      this.children.set(childIndex, listNode);
+      listNode.addChild(existNode);
+      existNode = listNode;
+    }
+
+    TDNode cn = new TDNode(null);
+    existNode.addChild(cn);
     return cn;
   }
 
-  public TDNode getChild(String name) {
+  public TDNode addChild(TDNode node) {
     if (children == null)
-      return null;
-    for (TDNode cn : children) {
-      if (name.equals(cn.getKey()))
-        return cn;
-    }
-    return null;
+      children = new ArrayList<>();
+    children.add(node);
+    node.parent = this;
+    return this;
+  }
+
+  public TDNode getChild(String name) {
+    int idx = indexOf(name);
+    return idx < 0 ? null : children.get(idx);
+  }
+
+  int indexOf(String name) {
+    if (children == null || name == null)
+      return -1;
+
+    for (int i = 0; i < children.size(); i++)
+      if (name.equals(children.get(i).getKey()))
+        return i;
+    return -1;
   }
 
   public Object getChildValue(String name) {
@@ -71,15 +104,22 @@ public class TDNode {
   }
 
   public TDNode getChildByPath(String path) { return getChildByPath(path.split("/"), 0); }
+  public Object getValueByPath(String path) {
+    TDNode cn = getChildByPath(path);
+    return cn == null ? null : cn.getValue();
+  }
 
   public TDNode getChildByPath(String[] path, int idx) {
     if (idx == path.length)
       return this;
 
-    TDNode cn = StringUtil.isDigitOnly(path[idx]) ? getChild(Integer.parseInt(path[idx])) : getChild(path[idx]);
+    String pi = path[idx];
+    TDNode cn = isDigitOnly(pi) ? getChild(parseInt(pi)) : getChild(pi);
     return cn == null ? null : cn.getChildByPath(path, idx + 1);
   }
 
   public boolean hasChildren() { return children != null && !children.isEmpty(); }
   public int getChildrenSize() { return children == null ? 0 : children.size(); }
+
+  public boolean isRoot() { return parent == null; }
 }
