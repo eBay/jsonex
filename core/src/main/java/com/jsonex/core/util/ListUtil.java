@@ -16,7 +16,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class ListUtil {
-  public static <C extends Collection<TDest>, TSrc, TDest> C map(Collection<? extends TSrc> source, Function<? super TSrc, ? extends TDest> func, C dest) {
+  public static <C extends Collection<? super TDest>, TSrc, TDest>
+      C map(Collection<? extends TSrc> source, Function<? super TSrc, ? extends TDest> func, C dest) {
     if (source == null)
       return null;
     for (TSrc src : source)
@@ -24,7 +25,8 @@ public class ListUtil {
     return dest;
   }
 
-  public static <TSrc, TDest> List<TDest> map(Collection<? extends TSrc> source, Function<? super TSrc, ? extends TDest> func) {
+  public static <TSrc, TDest>
+      List<TDest> map(Collection<? extends TSrc> source, Function<? super TSrc, ? extends TDest> func) {
     return map(source, func, new ArrayList<>());
   }
 
@@ -32,7 +34,8 @@ public class ListUtil {
     return map(identifiables, param -> param.getId());
   }
 
-  public static <K, E> Map<K, List<E>> groupBy(Collection<? extends E> source, Function<? super E, ? extends K> classifier) {
+  public static <K, E>
+      Map<K, List<E>>  groupBy(Collection<? extends E> source, Function<? super E, ? extends K> classifier) {
     Map<K, List<E>> result = new HashMap<>();
     for (E e : source) {
       K k = classifier.apply(e);
@@ -46,7 +49,8 @@ public class ListUtil {
     return result;
   }
 
-  public static <K, V, T> Map<K, T> mapValues(Map<? extends K, ? extends V> source, Function<? super V, ? extends T> func) {
+  public static <K, V, T>
+      Map<K, T> mapValues(Map<? extends K, ? extends V> source, Function<? super V, ? extends T> func) {
     Map<K, T> result = new HashMap<>();
     for (K k : source.keySet())
       result.put(k, func.apply(source.get(k)));
@@ -81,14 +85,16 @@ public class ListUtil {
     return map;
   }
 
-  public static <S, K, V> Map<K, V> toMap(Collection<S> source, Function<? super S, ? extends K> keyFunc, Function<? super S, ? extends V> valFunc) {
+  public static <S, K, V> Map<K, V> toMap(
+      Collection<S> source, Function<? super S, ? extends K> keyFunc, Function<? super S, ? extends V> valFunc) {
     Map<K, V> map = new HashMap<>();
     for (S s : source)
       map.put(keyFunc.apply(s), valFunc.apply(s));
     return map;
   }
 
-  public static <V, C extends Collection<V>> C filter(C source, Predicate<? super V> pred, C dest) {
+  public static <V, S extends Collection<? extends V>, D extends Collection<? super V>>
+      D filter(S source, Predicate<? super V> pred, D dest) {
     for (V s : source) {
       if (pred.test(s))
         dest.add(s);
@@ -96,17 +102,17 @@ public class ListUtil {
     return dest;
   }
 
-  public static <V, C extends Collection<V>> List<V> filter(C source, Predicate<? super V> pred) {
-    List<V> dest = new ArrayList<>();
-    filter(source, pred, dest);
-    return dest;
+  public static <V, C extends Collection<? extends V>> List<V> filter(C source, Predicate<? super V> pred) {
+    return filter(source, pred, new ArrayList<>());
   }
 
-  public static <V, C extends Collection<V>> List<V> orderBy(C source, final Function<? super V, ? extends Comparable> by) {
+  public static <V, C extends Collection<? extends V>>
+      List<V> orderBy(C source, final Function<? super V, ? extends Comparable> by) {
     return orderBy(source, by, false);
   }
 
-  public static <V, C extends Collection<V>, K extends Comparable<K>> List<V> orderBy(C src, final Function<? super V, K> by, final boolean desc) {
+  public static <V, C extends Collection<? extends V>, K extends Comparable<K>>
+      List<V> orderBy(C src, final Function<? super V, K> by, final boolean desc) {
     List<V> dest = new ArrayList<>(src.size());
     dest.addAll(src);  // clone
     Collections.sort(dest, (o1, o2) -> {
@@ -155,6 +161,21 @@ public class ListUtil {
         return s;
     }
     return null;
+  }
+
+  public static <V, S extends Collection<? extends V>, D extends Collection<? super V>>
+    D takeWhile(S source, Predicate<? super V> pred, D dest) {
+    for (V s : source) {
+      if (!pred.test(s))
+        break;
+      dest.add(s);
+    }
+    return dest;
+  }
+
+  public static <V, S extends Collection<? extends V>>
+  List<V> takeWhile(S source, Predicate<? super V> pred) {
+    return takeWhile(source, pred, new ArrayList<>());
   }
 
   public static <T> T last(List<T> list) { return list == null ? null : list.get(list.size() - 1); }

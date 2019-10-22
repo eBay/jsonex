@@ -172,10 +172,15 @@ public class ListUtilTest {
     assertArrayEquals(new Integer[]{1,2}, list.toArray());
   }
 
-  @Test public void testSetOf() { assertTrue("set should contain all the elemtns", setOf(1,2,3).containsAll(Arrays.asList(1,2,3))); }
+  @Test public void testSetOf() {
+    assertTrue("set should contain all the elemtns", setOf(1,2,3).containsAll(Arrays.asList(1,2,3))); }
 
   @Test public void testContainsAny() {
     assertTrue("containsAny should return true: ", containsAny(setOf(1,2,3), 1, 2));
     assertFalse("containsAny should return false: ", containsAny(setOf(1,2,3), 4, 5));
+  }
+
+  @Test public void testTakeWhile() {
+    assertEquals(Arrays.asList(2, 4), ListUtil.takeWhile(Arrays.asList(2, 4, 5, 6, 8), (Integer n) -> (n % 2 == 0)));
   }
 }
