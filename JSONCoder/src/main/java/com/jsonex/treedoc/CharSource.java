@@ -176,16 +176,17 @@ public abstract class CharSource {
   }
 
   private int readOctNumber(int num) {
-    while (true) {
+    for (int i = 0; i < 2; i++) {
       char d = peek();
       if (!isOctDigit(d))
-        return num;
+        break;
       int newNum = num * 8 + (d - '0');
       if (newNum > 255)
-        return num;
+        break;
       num = newNum;
       read();
     }
+    return num;
   }
 
   static boolean isOctDigit(char c) { return '0' <= c && c <= '8'; }

@@ -56,10 +56,11 @@ public abstract class BaseCharSourceTest {
   }
 
   @Test public void testReadQuotedStringWithOctEscape() {
-    assertReadQuotedString("'\\040b'", "\040b");
-    assertReadQuotedString("'\\40b'", "\040b");
-    assertReadQuotedString("'\\401b'", "\0401b");
-    assertReadQuotedString("'\\491b'", "\0491b");
+//    assertReadQuotedString("'\\040b'", "\040b");
+//    assertReadQuotedString("'\\40b'", "\040b");
+//    assertReadQuotedString("'\\401b'", "\0401b");
+//    assertReadQuotedString("'\\491b'", "\0491b");
+    assertReadQuotedString("'\\0220\\022'", "\0220\022");
   }
 
   private void assertReadQuotedString(String source, String expect) {
