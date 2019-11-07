@@ -146,6 +146,9 @@ public abstract class CharSource {
         case 'r':
           sb.append('\r');
           break;
+        case 'v':
+          sb.append('\u000B');
+          break;
         case 'u':
           String code = this.read(4);
           try {
@@ -157,18 +160,11 @@ public abstract class CharSource {
         case '\n':
         case '\r':
           break;   // Assume it's a line continuation
-        case '"':
-        case '\'':
-        case '\\':
-        case '`':
-        case '/':
-          sb.append(c);
-          break;
         default:
           if (isOctDigit(c))
             sb.append((char)readOctNumber(c - '0'));
           else
-            throw createParseRuntimeException("Invalid escape sequence:" + c);
+            sb.append(c);
       }
     }
 
@@ -198,6 +194,6 @@ public abstract class CharSource {
 //  }
 
   public ParseRuntimeException createParseRuntimeException(String message) {
-    return new ParseRuntimeException(message, this.getBookmark(), this.peekString(5));
+    return new ParseRuntimeException(message, this.getBookmark(), this.peekString(10));
   }
 }
