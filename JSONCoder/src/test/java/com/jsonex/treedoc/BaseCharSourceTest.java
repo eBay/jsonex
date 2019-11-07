@@ -50,9 +50,22 @@ public abstract class BaseCharSourceTest {
   }
 
   @Test public void testReadQuotedString() {
-    CharSource cs = createCharSource("'It\\'s a quoted \\\"string\\\" with escape \\n \\r \\f \\t \\u9829'");
+    assertReadQuotedString(
+        "'It\\'s a quoted \\\"string\\\" with escape \\n \\r \\f \\t \\u9829'",
+        "It's a quoted \"string\" with escape \n \r \f \t \u9829");
+  }
+
+  @Test public void testReadQuotedStringWithOctEscape() {
+    assertReadQuotedString("'\\040b'", "\040b");
+    assertReadQuotedString("'\\40b'", "\040b");
+    assertReadQuotedString("'\\401b'", "\0401b");
+    assertReadQuotedString("'\\491b'", "\0491b");
+  }
+
+  private void assertReadQuotedString(String source, String expect) {
+    CharSource cs = createCharSource(source);
     char c = cs.read();  // skip first quote
-    assertEquals("It's a quoted \"string\" with escape \n \r \f \t \u9829", cs.readQuotedString(c));
+    assertEquals(expect, cs.readQuotedString(c));
   }
 
   @Test public void testReadQuotedStringError() {

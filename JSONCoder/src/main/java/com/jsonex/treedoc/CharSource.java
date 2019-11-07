@@ -165,18 +165,36 @@ public abstract class CharSource {
           sb.append(c);
           break;
         default:
-          throw createParseRuntimeException("Invalid escape sequence:" + c);
+          if (isOctDigit(c))
+            sb.append((char)readOctNumber(c - '0'));
+          else
+            throw createParseRuntimeException("Invalid escape sequence:" + c);
       }
     }
 
     return sb;
   }
 
-  public String dump() {
-    StringBuilder result = new StringBuilder();
-    result.append("," + bookmark + ": string=" + peek(5));
-    return result.toString();
+  private int readOctNumber(int num) {
+    while (true) {
+      char d = peek();
+      if (!isOctDigit(d))
+        return num;
+      int newNum = num * 8 + (d - '0');
+      if (newNum > 255)
+        return num;
+      num = newNum;
+      read();
+    }
   }
+
+  static boolean isOctDigit(char c) { return '0' <= c && c <= '8'; }
+
+//  public String dump() {
+//    StringBuilder result = new StringBuilder();
+//    result.append("," + bookmark + ": string=" + peek(5));
+//    return result.toString();
+//  }
 
   public ParseRuntimeException createParseRuntimeException(String message) {
     return new ParseRuntimeException(message, this.getBookmark(), this.peekString(5));
