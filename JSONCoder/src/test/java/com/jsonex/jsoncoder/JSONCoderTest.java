@@ -9,11 +9,10 @@
 
 package com.jsonex.jsoncoder;
 
+import com.jsonex.core.util.MapBuilder;
 import com.jsonex.jsoncoder.TestBean2.Enum1;
 import com.jsonex.jsoncoder.TestBean2.IdentifiableEnum;
 import com.jsonex.treedoc.TDNode;
-import com.jsonex.treedoc.TestUtil;
-import com.jsonex.core.util.MapBuilder;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
@@ -27,24 +26,10 @@ import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 @Slf4j
 public class JSONCoderTest {

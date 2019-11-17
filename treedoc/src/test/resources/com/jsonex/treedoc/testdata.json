@@ -1,0 +1,29 @@
+// Some comments
+{
+  "total": 100000000000000000000,
+  "limit": 10,
+  "valueWithoutKey",
+
+  /* block comments */
+  "data": [
+    {
+      "name": "Some Name 1",  // More line comments
+      "address": {
+        "streetLine": "1st st",
+        city: "san jose",
+      },
+      "createdAt": "2017-07-14T17:17:33.010Z",
+    },
+    {
+      "name": "Some Name 2",
+      "address": /*comments*/ {
+        "streetLine": "2nd st",
+        city: "san jose",
+      },
+      "createdAt": "2017-07-14T17:17:33.010Z",
+    },
+    `Multiple line literal
+    Line2`
+  ],
+  lastValueWithoutKey
+}

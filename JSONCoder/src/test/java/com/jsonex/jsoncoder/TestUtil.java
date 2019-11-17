@@ -1,6 +1,4 @@
-package com.jsonex.treedoc;
-
-import com.jsonex.jsoncoder.JSONCoder;
+package com.jsonex.jsoncoder;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -15,6 +13,6 @@ public class TestUtil {
   }
 
   public static String toJSON(Object obj) {
-    return JSONCoder.getGlobal().encode(obj);
+     return JSONCoder.getGlobal().encode(obj);
   }
 }

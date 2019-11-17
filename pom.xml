@@ -12,6 +12,7 @@
 
   <modules>
     <module>core</module>
+    <module>treedoc</module>
     <module>JSONCoder</module>
   </modules>
 
@@ -58,6 +59,11 @@
         <version>${project.version}</version>
       </dependency>
       <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>treedoc</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
         <groupId>org.projectlombok</groupId>
         <artifactId>lombok</artifactId>
         <version>1.18.8</version>
@@ -78,6 +84,12 @@
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-simple</artifactId>
         <version>1.7.5</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.google.code.gson</groupId>
+        <artifactId>gson</artifactId>
+        <version>2.8.5</version>
         <scope>test</scope>
       </dependency>
     </dependencies>
