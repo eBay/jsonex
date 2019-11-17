@@ -13,6 +13,6 @@ public class TestUtil {
   }
 
   public static String toJSON(Object obj) {
-     return JSONCoder.getGlobal().encode(obj);
+    return JSONCoder.getGlobal().encode(obj);
   }
 }

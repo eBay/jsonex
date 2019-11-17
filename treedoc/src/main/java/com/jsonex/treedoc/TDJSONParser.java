@@ -48,7 +48,7 @@ public class TDJSONParser {
         return node.setValue(sb.toString());
       }
 
-      String str = src.readUntil(",}]\n\r", 1, Integer.MAX_VALUE).trim();
+      String str = src.readUntil(",}]\n\r", 0, Integer.MAX_VALUE).trim();
       if ("null".equals(str))
         return node.setValue(null);
       if ("true".equals(str))
@@ -114,7 +114,7 @@ public class TDJSONParser {
 
       if (!skipSpaceAndComments(src)) {
         if (withStartBracket)
-          throw src.createParseRuntimeException("EOF encountered while expecting matching '}'");
+          throw src.createParseRuntimeException("EOF while expecting matching '}' with '{' at " + node.start);
         break;
       }
 

@@ -100,7 +100,7 @@ public class TDJsonParserTest {
 
   @Test public void testInvalid() {
     TDNode node = TDJSONParser.get().parse(new TDJSONParserOption("}"));
-    assertEquals("}", node.value);
+    assertEquals("", node.value);
 
     node = TDJSONParser.get().parse(new TDJSONParserOption(""));
     assertNull(node.value);
