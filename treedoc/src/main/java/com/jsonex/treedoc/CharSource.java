@@ -146,6 +146,9 @@ public abstract class CharSource {
         case 'r':
           sb.append('\r');
           break;
+        case 'v':
+          sb.append('\u000B');
+          break;
         case 'u':
           String code = this.read(4);
           try {
@@ -157,28 +160,40 @@ public abstract class CharSource {
         case '\n':
         case '\r':
           break;   // Assume it's a line continuation
-        case '"':
-        case '\'':
-        case '\\':
-        case '`':
-        case '/':
-          sb.append(c);
-          break;
         default:
-          throw createParseRuntimeException("Invalid escape sequence:" + c);
+          if (isOctDigit(c))
+            sb.append((char)readOctNumber(c - '0'));
+          else
+            sb.append(c);
       }
     }
 
     return sb;
   }
 
-  public String dump() {
-    StringBuilder result = new StringBuilder();
-    result.append("," + bookmark + ": string=" + peek(5));
-    return result.toString();
+  private int readOctNumber(int num) {
+    for (int i = 0; i < 2; i++) {
+      char d = peek();
+      if (!isOctDigit(d))
+        break;
+      int newNum = num * 8 + (d - '0');
+      if (newNum > 255)
+        break;
+      num = newNum;
+      read();
+    }
+    return num;
   }
 
+  static boolean isOctDigit(char c) { return '0' <= c && c <= '8'; }
+
+//  public String dump() {
+//    StringBuilder result = new StringBuilder();
+//    result.append("," + bookmark + ": string=" + peek(5));
+//    return result.toString();
+//  }
+
   public ParseRuntimeException createParseRuntimeException(String message) {
-    return new ParseRuntimeException(message, this.getBookmark(), this.peekString(5));
+    return new ParseRuntimeException(message, this.getBookmark(), this.peekString(10));
   }
 }

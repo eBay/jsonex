@@ -27,6 +27,7 @@ import static com.jsonex.core.type.Operator.*;
 import static com.jsonex.core.util.ListUtil.containsAny;
 import static com.jsonex.core.util.ListUtil.setOf;
 import static com.jsonex.core.util.ListUtilTest.TestCls.*;
+import static java.util.Arrays.asList;
 import static org.junit.Assert.*;
 
 @ExtensionMethod({Operator.class, ListUtil.class})
@@ -43,7 +44,7 @@ public class ListUtilTest {
   }
 
   private List<TestCls> buildList() {
-    return Arrays.asList(
+    return asList(
         new TestCls(0, null, 0),
         new TestCls(1, "name1", 1),
         new TestCls(2, null, 2),
@@ -71,8 +72,8 @@ public class ListUtilTest {
 
   @Test public void testMapValues() {
     Map<String, List<Integer>> map = new HashMap<>();
-    map.put("key1", Arrays.asList(1, 2, 3));
-    map.put("key2", Arrays.asList(1, 2));
+    map.put("key1", asList(1, 2, 3));
+    map.put("key2", asList(1, 2));
 
     Map<String, Integer> result = ListUtil.mapValues(map, (v) -> v.size());
 
@@ -82,7 +83,7 @@ public class ListUtilTest {
 
   @SuppressWarnings("unchecked")
   @Test public void testToLongArray() {
-    List list = Arrays.asList("1", 2, null);
+    List list = asList("1", 2, null);
     assertArrayEquals(new long[]{1, 2, 0}, ListUtil.toLongArray(list));
   }
 
@@ -148,7 +149,7 @@ public class ListUtilTest {
     // !!!! Following two commented out statements cause Java compiler throws StackOverflowError for JDK1.8
     // Under following conditions:
     //   1. Use @ExtensionMethod and use lambada
-    //   2. User static import for asserXXX or multiple lines of statement with lambada
+    //   2. User static import for assertXXX or multiple lines of statement with lambada
     //Assert.assertTrue("should contains type of 1", ListUtil.exists(buildList(), obj -> obj.getType() == 1));
     //Assert.assertFalse("shouldn't contains type of 3", ListUtil.exists(buildList(), obj -> obj.getType() == 3));
     assertTrue("should contains type of 1", ListUtil.exists(buildList(), eq(F_TYPE, 1)));
@@ -167,15 +168,23 @@ public class ListUtilTest {
   @Test public void testJoin() { assertEquals("1,2,3", ListUtil.join(new Integer[]{1,2,3}, ",")); }
 
   @Test public void testRemoveLast() {
-    List<Integer> list = new ArrayList<>(Arrays.asList(1,2,3));
+    List<Integer> list = new ArrayList<>(asList(1,2,3));
     ListUtil.removeLast(list);
     assertArrayEquals(new Integer[]{1,2}, list.toArray());
   }
 
-  @Test public void testSetOf() { assertTrue("set should contain all the elemtns", setOf(1,2,3).containsAll(Arrays.asList(1,2,3))); }
+  @Test public void testSetOf() {
+    assertTrue("set should contain all the elemtns", setOf(1,2,3).containsAll(asList(1,2,3))); }
 
   @Test public void testContainsAny() {
     assertTrue("containsAny should return true: ", containsAny(setOf(1,2,3), 1, 2));
     assertFalse("containsAny should return false: ", containsAny(setOf(1,2,3), 4, 5));
+  }
+
+  @Test public void testTakeWhile() {
+    List list = asList(2, 4, 5, 6, 8);
+    assertEquals(asList(2, 4), ListUtil.takeWhile(list, (Integer n) -> (n % 2 == 0)));
+    assertEquals(asList(), ListUtil.takeWhile(list, (Integer n) -> (n < 0)));
+    assertEquals(list, ListUtil.takeWhile(list, (Integer n) -> (n > 0)));
   }
 }

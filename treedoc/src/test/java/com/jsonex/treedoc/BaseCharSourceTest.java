@@ -50,9 +50,23 @@ public abstract class BaseCharSourceTest {
   }
 
   @Test public void testReadQuotedString() {
-    CharSource cs = createCharSource("'It\\'s a quoted \\\"string\\\" with escape \\n \\r \\f \\t \\u9829'");
+    assertReadQuotedString(
+        "'It\\'s a quoted \\\"string\\\" with escape \\n \\r \\f \\t \\v \\? \\u9829'",
+        "It's a quoted \"string\" with escape \n \r \f \t \u000b ? \u9829");
+  }
+
+  @Test public void testReadQuotedStringWithOctEscape() {
+    assertReadQuotedString("'\\040b'", "\040b");
+    assertReadQuotedString("'\\40b'", "\040b");
+    assertReadQuotedString("'\\401b'", "\0401b");
+    assertReadQuotedString("'\\491b'", "\0491b");
+    assertReadQuotedString("'\\0220\\022'", "\0220\022");
+  }
+
+  private void assertReadQuotedString(String source, String expect) {
+    CharSource cs = createCharSource(source);
     char c = cs.read();  // skip first quote
-    assertEquals("It's a quoted \"string\" with escape \n \r \f \t \u9829", cs.readQuotedString(c));
+    assertEquals(expect, cs.readQuotedString(c));
   }
 
   @Test public void testReadQuotedStringError() {
@@ -63,16 +77,6 @@ public abstract class BaseCharSourceTest {
       fail("Should throw error");
     } catch(EOFRuntimeException e) {
       assertEquals("Can't find matching quote at position:1", e.getMessage());
-      // e.printStackTrace();
-    }
-
-    cs = createCharSource("`Invalid escape \\p abcdefg`");
-    c = cs.read();  // skip first quote
-    try {
-      cs.readQuotedString(c);
-      fail("Should throw error when parsing invalid escape");
-    } catch(ParseRuntimeException e) {
-      assertEquals("Invalid escape sequence:p, Bookmark(line=0, col=18, pos=18), digest: abcd", e.getMessage());
       // e.printStackTrace();
     }
   }

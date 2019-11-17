@@ -1,6 +1,4 @@
-package com.jsonex.treedoc;
-
-import com.jsonex.jsoncoder.JSONCoder;
+package com.jsonex.jsoncoder;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;

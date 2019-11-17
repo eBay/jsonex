@@ -31,10 +31,13 @@ public class TDJsonParserTest {
     TDNode node = TDJSONParser.get().parse(new TDJSONParserOption(reader));
 
     log.info("Node=" + TestUtil.toJSON(node));
+    assertEquals("valueWithoutKey", node.getChildValue("2"));
+    assertEquals("lastValueWithoutKey", node.getChildValue("4"));
     assertEquals(10, node.getChild("limit").value);
     assertEquals("100000000000000000000", node.getChildValue("total"));
     assertEquals("Some Name 1", node.getValueByPath("data/0/name"));
     assertEquals("2nd st", node.getValueByPath("data/1/address/streetLine"));
+
 
     String json = TDJSONWriter.get().writeAsString(node);
     log.info("json: " + json);
@@ -44,6 +47,16 @@ public class TDJsonParserTest {
 
     json = TDJSONWriter.get().writeAsString(node, new TDJSONWriterOption().setIndentFactor(2));
     log.info("formatted json: " + json);
+  }
+
+  @Test public void testParseValueWithoutKey() {
+    String json = "{\n" +
+        "  abc: 10\n" +
+        "  aaa\n" +
+        "}";
+    TDNode node = TDJSONParser.get().parse(new TDJSONParserOption(json));
+    log.info("Node=" + TestUtil.toJSON(node));
+    assertEquals("aaa", node.getChildValue("1"));
   }
 
   @Test public void testParseProto() {
@@ -87,7 +100,7 @@ public class TDJsonParserTest {
 
   @Test public void testInvalid() {
     TDNode node = TDJSONParser.get().parse(new TDJSONParserOption("}"));
-    assertEquals("}", node.value);
+    assertEquals("", node.value);
 
     node = TDJSONParser.get().parse(new TDJSONParserOption(""));
     assertNull(node.value);

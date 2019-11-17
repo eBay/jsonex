@@ -23,7 +23,7 @@ public class TDJSONParser {
       return node;
 
     char c = src.peek();
-    node.start = src.getPos();
+    node.start = src.getBookmark();
     try {
       if (c == '{')
         return parseMap(src, opt, node, true);
@@ -48,7 +48,7 @@ public class TDJSONParser {
         return node.setValue(sb.toString());
       }
 
-      String str = src.readUntil(",}]\n\r\t", 1, Integer.MAX_VALUE).trim();
+      String str = src.readUntil(",}]\n\r", 0, Integer.MAX_VALUE).trim();
       if ("null".equals(str))
         return node.setValue(null);
       if ("true".equals(str))
@@ -61,7 +61,7 @@ public class TDJSONParser {
         return node.setValue(parseNumber(str, false));
       return node.setValue(str);
     } finally {
-      node.length = src.getPos() - node.start;
+      node.end = src.getBookmark();
     }
   }
 
@@ -110,10 +110,11 @@ public class TDJSONParser {
     node.type = Type.MAP;
     if (withStartBracket)
       src.read();
-    while (true) {
+    for (int i = 0;;) {
+
       if (!skipSpaceAndComments(src)) {
         if (withStartBracket)
-          throw src.createParseRuntimeException("EOF encountered while expecting matching '}'");
+          throw src.createParseRuntimeException("EOF while expecting matching '}' with '{' at " + node.start);
         break;
       }
 
@@ -135,10 +136,10 @@ public class TDJSONParser {
         if (!skipSpaceAndComments(src))
           break;
         c = src.peek();
-        if (c != ':' && c != '{' && c != '[')
+        if (c != ':' && c != '{' && c != '[' && c != ',' && c != '}')
           throw src.createParseRuntimeException("No ':' after key:" + key);
       } else {
-        key = src.readUntil(":{[", 1, Integer.MAX_VALUE).trim();
+        key = src.readUntil(":{[,}", 1, Integer.MAX_VALUE).trim();
         if (src.isEof())
           throw src.createParseRuntimeException("No ':' after key:" + key);
         c = src.peek();
@@ -146,7 +147,11 @@ public class TDJSONParser {
       if (c == ':')
         src.read();
 
-      parse(src, opt, node.createChild(key));
+      if (c == ',' || c == '}')  // If there's no ':', we consider it as indexed value (array)
+        node.createChild(i + "").setValue(key);
+      else
+        parse(src, opt, node.createChild(key));
+      i++;
     }
     return node;
   }
