@@ -9,23 +9,18 @@
 
 package com.jsonex.treedoc;
 
-import com.jsonex.core.util.StringUtil;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import lombok.experimental.Accessors;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.jsonex.core.util.StringUtil.*;
+import static com.jsonex.core.util.StringUtil.isDigitOnly;
 import static java.lang.Integer.parseInt;
 
 /** A Node in TreeDoc */
 @RequiredArgsConstructor @Getter @Setter @Accessors(chain = true)
-@EqualsAndHashCode(exclude = {"parent", "start", "length"}) @ToString(exclude = "parent")
+@EqualsAndHashCode(exclude = {"parent", "start", "end"}) @ToString(exclude = "parent")
 public class TDNode {
   public enum Type { MAP, ARRAY, SIMPLE }
   TDNode parent;
@@ -37,9 +32,9 @@ public class TDNode {
   /** Children of node. Use List instead of Map to avoid performance overhead of HashMap for small number of elements */
   List<TDNode> children;
   /** Start position in the source */
-  int start;
+  Bookmark start;
   /** Length of this node in the source */
-  int length;
+  Bookmark end;
   /** indicate this node is a deduped Array node for textproto which allows duplicated keys */
   boolean deduped;
 
@@ -61,6 +56,8 @@ public class TDNode {
       TDNode listNode = new TDNode(name).setParent(this).setDeduped(true).setType(Type.ARRAY);
       this.children.set(childIndex, listNode);
       listNode.addChild(existNode);
+      listNode.start = existNode.start;  // Reuse first node's start and length
+      listNode.end = existNode.end;
       existNode = listNode;
     }
 

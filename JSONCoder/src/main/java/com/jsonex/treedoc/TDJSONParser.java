@@ -23,7 +23,7 @@ public class TDJSONParser {
       return node;
 
     char c = src.peek();
-    node.start = src.getPos();
+    node.start = src.getBookmark();
     try {
       if (c == '{')
         return parseMap(src, opt, node, true);
@@ -61,7 +61,7 @@ public class TDJSONParser {
         return node.setValue(parseNumber(str, false));
       return node.setValue(str);
     } finally {
-      node.length = src.getPos() - node.start;
+      node.end = src.getBookmark();
     }
   }
 
