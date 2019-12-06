@@ -7,7 +7,7 @@
  https://opensource.org/licenses/MIT.
  ************************************************************/
 
-package com.jsonex.treedoc;
+package com.jsonex.treedoc.json;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,19 +25,19 @@ public class ArrayCharSource extends CharSource {
   @Override public char read() {
     if (isEof(0))
       throw new EOFRuntimeException();
-    return bookmark.append(buf[startIndex + bookmark.pos]);
+    return bookmark.append(buf[startIndex + bookmark.getPos()]);
   }
 
   @Override public char peek(int i) {
     if (isEof(i))
       throw new EOFRuntimeException();
-    return buf[startIndex + bookmark.pos + i];
+    return buf[startIndex + bookmark.getPos() + i];
   }
 
-  @Override public boolean isEof(int i) { return startIndex + bookmark.pos + i >= endIndex; }
+  @Override public boolean isEof(int i) { return startIndex + bookmark.getPos() + i >= endIndex; }
 
   @Override public boolean readUntil(Predicate<CharSource> predicate, StringBuilder target, int minLen, int maxLen) {
-    int startPos = bookmark.pos;
+    int startPos = bookmark.getPos();
     int len = 0;
     boolean matched = false;
     for (; len < maxLen && !(isEof(0)); len++) {

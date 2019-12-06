@@ -118,7 +118,7 @@ public class JSONCoderTest {
     String str = toJSONString(tb, new JSONCoderOption().setJsonOption(false, '`', 0));
     log("JSONStr=" + str);
 
-    assertTrue("Cyclic reference should be encoded as $ref", str.indexOf("testBean:`$ref:../../`") > 0);
+    assertTrue("Cyclic reference should be encoded as $ref:str=" + str, str.indexOf("testBean:{$ref:`../../`}") > 0);
     TestBean tb1 = JSONCoder.global.decode(str, TestBean.class);
     assertEquals(tb1.getBean2().testBean, tb1);
   }
@@ -163,6 +163,12 @@ public class JSONCoderTest {
     str = toJSONString(buildTestBean(), codeOption);
     log("strWithBackQuote=" + str);
     assertTrue("back quote should be quoted when quoteChar set to back quote", str.indexOf("`String1: '\"`") > 0);
+  }
+
+  @Test public void testIgnoreReadOnly() {
+    JSONCoderOption opt = JSONCoderOption.create().setIgnoreReadOnly(true);
+    String str = toJSONString(buildTestBean(), opt);
+    assertTrue(str.indexOf("readonly") < 0);
   }
 
   @SneakyThrows
@@ -362,18 +368,18 @@ public class JSONCoderTest {
 
   @Test public void testDeepClone() {
     TestBean tb = buildTestBean();
-    TestBean tb2 = BeanCoder.deepClone(tb);
+    TestBean tb2 = BeanCoder.get().deepClone(tb);
     assertNotSame("deep clone should have different sub-object", tb.getBean2(), tb2.getBean2());
     assertEquals(tb.getBean2().getStrField(), tb2.getBean2().getStrField());
 
-    assertNull(BeanCoder.deepClone(null));
+    assertNull(BeanCoder.get().deepClone(null));
   }
 
   @Test public void testDeepCopyTo() {
     TestBean to = buildTestBean();
     TestBean from = new TestBean();
     from.setBean2(new TestBean2().setStrField("newStrValue"));
-    BeanCoder.deepCopyTo(from, to);
+    BeanCoder.get().deepCopyTo(from, to);
     assertNotSame("deep copy should have different sub-object", to.getBean2(), from.getBean2());
     assertEquals(from.getBean2().getStrField(), to.getBean2().getStrField());
   }

@@ -1,4 +1,4 @@
-package com.jsonex.treedoc;
+package com.jsonex.treedoc.json;
 
 import com.jsonex.core.util.StringUtil;
 import lombok.Getter;

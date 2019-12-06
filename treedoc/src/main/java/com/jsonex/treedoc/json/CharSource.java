@@ -7,8 +7,9 @@
  https://opensource.org/licenses/MIT.
  ************************************************************/
 
-package com.jsonex.treedoc;
+package com.jsonex.treedoc.json;
 
+import com.jsonex.treedoc.Bookmark;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,7 +28,7 @@ public abstract class CharSource {
 
   @SneakyThrows
   public Bookmark getBookmark() { return bookmark.clone(); }
-  public int getPos() { return bookmark.pos; }
+  public int getPos() { return bookmark.getPos(); }
   public boolean isEof() { return isEof(0); }
   public char peek() { return peek(0); }
 

@@ -15,7 +15,7 @@ import com.jsonex.jsoncoder.coder.CoderAtomicInteger;
 import com.jsonex.jsoncoder.coder.CoderBigInteger;
 import com.jsonex.jsoncoder.coder.CoderClass;
 import com.jsonex.jsoncoder.coder.CoderEnum;
-import com.jsonex.treedoc.TDJSONWriterOption;
+import com.jsonex.treedoc.json.TDJSONWriterOption;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;

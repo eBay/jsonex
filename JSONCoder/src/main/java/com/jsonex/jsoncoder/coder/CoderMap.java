@@ -13,7 +13,7 @@ import com.jsonex.jsoncoder.BeanCoderContext;
 import com.jsonex.jsoncoder.BeanCoderException;
 import com.jsonex.jsoncoder.ICoder;
 import com.jsonex.jsoncoder.JSONCoderOption;
-import com.jsonex.treedoc.TDJSONWriter;
+import com.jsonex.treedoc.json.TDJSONWriter;
 import com.jsonex.treedoc.TDNode;
 import com.jsonex.core.util.BeanConvertContext;
 import com.jsonex.core.util.ClassUtil;
@@ -25,7 +25,7 @@ import java.lang.reflect.Type;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static com.jsonex.jsoncoder.BeanCoder.HASH_KEY;
+import static com.jsonex.jsoncoder.BeanCoder.ID_KEY;
 import static com.jsonex.core.util.ClassUtil.isSimpleType;
 import static com.jsonex.core.util.StringUtil.toTrimmedStr;
 
@@ -106,7 +106,7 @@ public class CoderMap implements ICoder<Map> {
 
     switch (jsonNode.getType()) {
       case MAP:
-        String hash = (String) jsonNode.getChildValue(HASH_KEY);
+        String hash = (String) jsonNode.getChildValue(ID_KEY);
         if (hash != null)
           ctx.getHashToObjectMap().put(hash, result);
 

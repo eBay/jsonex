@@ -9,11 +9,13 @@
 
 package com.jsonex.jsoncoder;
 
+import com.jsonex.core.factory.InjectableInstance;
 import com.jsonex.jsoncoder.coder.CoderArray;
 import com.jsonex.jsoncoder.coder.CoderCollection;
 import com.jsonex.jsoncoder.coder.CoderMap;
 import com.jsonex.jsoncoder.coder.CoderObject;
-import com.jsonex.treedoc.TDJSONWriter;
+import com.jsonex.treedoc.TreeDoc;
+import com.jsonex.treedoc.json.TDJSONWriter;
 import com.jsonex.treedoc.TDNode;
 import com.jsonex.core.util.ClassUtil;
 import com.jsonex.core.util.StringUtil;
@@ -38,30 +40,33 @@ import static com.jsonex.core.util.ClassUtil.objectToSimpleType;
  */
 @SuppressWarnings({"WeakerAccess"})
 public class BeanCoder {
+  public final static InjectableInstance<BeanCoder> it = InjectableInstance.of(BeanCoder.class);
+  public static BeanCoder get() { return it.get(); }
+
   private final static int MAX_OBJECTS = 10_000;
   private final static int MAX_DEPTH = 50;
-  public final static String HASH_KEY = "$hash";
-  private final static String REF_PREFIX = "$ref:";
+  public final static String ID_KEY = "$id";
+  private final static String REF_KEY = "$ref";
 
   // Convenient utility method
-  public static TDNode encode(Object obj) { return encode(obj, new BeanCoderContext(JSONCoderOption.global), null); }
-  public static TDNode encode(Object obj, BeanCoderContext context, Type type) { return _encode(obj, context.reset(), type, new TDNode()); }
+  public TDNode encode(Object obj) { return encode(obj, new BeanCoderContext(JSONCoderOption.global), null); }
+  public TDNode encode(Object obj, BeanCoderContext context, Type type) { return _encode(obj, context.reset(), type, new TreeDoc().getRoot()); }
 
-  public static Object decode(TDNode obj, Type type) { return decode(obj, type, null, "", new BeanCoderContext(JSONCoderOption.global)); }
+  public Object decode(TDNode obj, Type type) { return decode(obj, type, null, "", new BeanCoderContext(JSONCoderOption.global)); }
   @SuppressWarnings("unchecked")
-  public static <T> T decode(TDNode obj, T target) {
+  public <T> T decode(TDNode obj, T target) {
     return (T)decode(obj, target.getClass(), target, "", new BeanCoderContext(JSONCoderOption.global));
   }
 
   @SuppressWarnings("unchecked")
-  public static <T> T deepClone(T src) { return src == null ? null : (T)decode(encode(src), src.getClass()); }
-  public static <T> T deepCopyTo(T src, T target) { return src == null ? null : decode(encode(src), target); }
+  public <T> T deepClone(T src) { return src == null ? null : (T)decode(encode(src), src.getClass()); }
+  public <T> T deepCopyTo(T src, T target) { return src == null ? null : decode(encode(src), target); }
 
   /**
    * This method should only be called internally during recursion, as it will not reset context
    */
   @SuppressWarnings("unchecked")
-  static TDNode _encode(Object obj, BeanCoderContext ctx, Type type, TDNode target)
+  TDNode _encode(Object obj, BeanCoderContext ctx, Type type, TDNode target)
   {
     JSONCoderOption opt = ctx.getOption();
     int pathSize = ctx.objectPath.size();
@@ -95,7 +100,7 @@ public class BeanCoder {
       try {
         int p = ctx.objectPath.indexOf(eqWrapper);
         if (p >= 0) {
-          return target.setValue(REF_PREFIX + StringUtil.appendRepeatedly(new StringBuilder(), "../", p + 1));
+          return setRef(target, StringUtil.appendRepeatedly(new StringBuilder(), "../", p + 1).toString());
         }
       } catch(ClassCastException e) {
         // Workaround for some class that breaks equals() contract by doing caste before type check
@@ -107,12 +112,12 @@ public class BeanCoder {
 
       TDNode orgResult = ctx.convertedObjects.get(eqWrapper);
       if(opt.dedupWithRef && orgResult != null) {
-        String hash = (String) orgResult.getChildValue(HASH_KEY);
+        String hash = (String) orgResult.getChildValue(ID_KEY);
         if (hash == null) {  // This is the first reference. Only if there's a reference, the original map will display the hash value
           hash = Long.toHexString(abs(eqWrapper.hashCode()));
-          orgResult.createChild(HASH_KEY).setValue(hash);
+          orgResult.createChild(ID_KEY).setValue(hash);
         }
-        return target.setValue(REF_PREFIX + "#" + hash);
+        return setRef(target, "#" + hash);
       }
 
       //Don't put empty collection and map as the hashCode method is not implemented properly
@@ -143,62 +148,65 @@ public class BeanCoder {
     }
   }
 
+  private static TDNode setRef(TDNode node, String ref) {
+    node.setType(TDNode.Type.MAP).createChild(REF_KEY).setValue(ref);
+    return node;
+  }
+
   /**
    *
-   * @param jsonNode  The json object to decode
+   * @param tdNode  The json object to decode
    * @param type  The target type to decode to
    * @param targetObj The target object to decode to, if it's null, a new Object will be created
    * @param ctx  The decode context
    * @return The decoded Object
    */
-  public static Object decode(TDNode jsonNode, Type type, Object targetObj, String name, BeanCoderContext ctx)
+  public Object decode(TDNode tdNode, Type type, Object targetObj, String name, BeanCoderContext ctx)
   {
-    if(jsonNode == null)
+    if(tdNode == null)
       return null;
     Class<?> cls = ClassUtil.getGenericClass(type);
 
     int pathSize = ctx.objectPath.size();
     try{
-      if (jsonNode.getValue() instanceof String && cls != String.class) {  // handle $ref type
-        String s = (String) jsonNode.getValue();
-        if (s.startsWith(REF_PREFIX)) {
-          String ref = s.substring(REF_PREFIX.length());
-          if(ref.length() > 0 && ref.charAt(0) == '#')  // Reference to a hashcode
-            return ctx.hashToObjectMap.get(ref.substring(1));
+      Object refVal = tdNode.getChildValue(REF_KEY);
+      if (refVal instanceof String) {
+        String ref = (String)refVal;
+        if(ref.length() > 0 && ref.charAt(0) == '#')  // Reference to a hashcode
+          return ctx.hashToObjectMap.get(ref.substring(1));
 
-          // Assume ref is in the format of "../../" etc.
-          int level = ref.length() / 3;
-          if (ctx.objectPath.size() < level)
-            throw new BeanCoderException("Reference level exceeding objectPath:" + ctx.objectPath + "; ref:" + ref);
-          return ctx.objectPath.get(level - 1);
-        }
+        // Assume ref is in the format of "../../" etc.
+        int level = ref.length() / 3;
+        if (ctx.objectPath.size() < level)
+          throw new BeanCoderException("Reference level exceeding objectPath:" + ctx.objectPath + "; ref:" + ref);
+        return ctx.objectPath.get(level - 1);
       }
 
-      if (jsonNode.getType() == TDNode.Type.SIMPLE) {
-        Object p = objectToSimpleType(jsonNode.getValue(), cls);
+      if (tdNode.getType() == TDNode.Type.SIMPLE) {
+        Object p = objectToSimpleType(tdNode.getValue(), cls);
         if (p != null)
           return p;
       }
 
       ICoder<?> coder = ctx.option.findCoder(cls);
       if(coder != null)
-        return coder.decode(jsonNode, type, targetObj, ctx);
+        return coder.decode(tdNode, type, targetObj, ctx);
 
       if (cls == String.class) {  // expect a string, but got non-string, just return serialized form of the the object
-        return TDJSONWriter.get().writeAsString(jsonNode);
+        return TDJSONWriter.get().writeAsString(tdNode);
       }
 
       if (cls.isArray())  // Handle the array type
-        return CoderArray.getInstance().decode(jsonNode, type, targetObj, ctx);
+        return CoderArray.getInstance().decode(tdNode, type, targetObj, ctx);
 
       if (Collection.class.isAssignableFrom(cls))  // Handle the collection type
-        return CoderCollection.getInstance().decode(jsonNode, type, targetObj, ctx);
+        return CoderCollection.getInstance().decode(tdNode, type, targetObj, ctx);
 
       if (Map.class.isAssignableFrom(cls))
-        return CoderMap.getInstance().decode(jsonNode, type, targetObj, ctx);
+        return CoderMap.getInstance().decode(tdNode, type, targetObj, ctx);
 
       //Handle bean type
-      return CoderObject.getInstance().decode(jsonNode, type, targetObj, ctx);
+      return CoderObject.getInstance().decode(tdNode, type, targetObj, ctx);
     } catch(Exception e) {
       throw new BeanCoderException("failed to decode:"+type + "; name=" + name, e);
     } finally {
