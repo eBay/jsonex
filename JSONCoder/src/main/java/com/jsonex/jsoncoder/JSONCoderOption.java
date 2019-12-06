@@ -15,7 +15,7 @@ import com.jsonex.jsoncoder.coder.CoderAtomicInteger;
 import com.jsonex.jsoncoder.coder.CoderBigInteger;
 import com.jsonex.jsoncoder.coder.CoderClass;
 import com.jsonex.jsoncoder.coder.CoderEnum;
-import com.jsonex.treedoc.TDJSONWriterOption;
+import com.jsonex.treedoc.json.TDJSONWriterOption;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -59,7 +59,7 @@ public class JSONCoderOption {
   private final JSONCoderOption parent;
   
   /**
-   * If true, when convert from an java bean, the readonly field will also be converted.
+   * If true, when convert from an java bean, the readonly field will be ignored
    */
   @Getter @Setter boolean ignoreReadOnly;
   

@@ -7,7 +7,7 @@
  https://opensource.org/licenses/MIT.
  ************************************************************/
 
-package com.jsonex.treedoc;
+package com.jsonex.treedoc.json;
 
 @SuppressWarnings("serial")
 public class EOFRuntimeException extends RuntimeException{

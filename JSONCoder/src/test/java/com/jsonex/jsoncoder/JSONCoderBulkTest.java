@@ -1,7 +1,7 @@
 package com.jsonex.jsoncoder;
 
-import com.jsonex.treedoc.CharSource;
-import com.jsonex.treedoc.ReaderCharSource;
+import com.jsonex.treedoc.json.CharSource;
+import com.jsonex.treedoc.json.ReaderCharSource;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Rule;

@@ -9,6 +9,7 @@
 
 package com.jsonex.treedoc;
 
+import com.jsonex.treedoc.TDPath.Part;
 import lombok.*;
 import lombok.experimental.Accessors;
 
@@ -20,9 +21,10 @@ import static java.lang.Integer.parseInt;
 
 /** A Node in TreeDoc */
 @RequiredArgsConstructor @Getter @Setter @Accessors(chain = true)
-@EqualsAndHashCode(exclude = {"parent", "start", "end"}) @ToString(exclude = "parent")
+@EqualsAndHashCode(exclude = {"parent", "start", "end", "doc"}) @ToString(exclude = {"parent", "doc"})
 public class TDNode {
   public enum Type { MAP, ARRAY, SIMPLE }
+  final TreeDoc doc;
   TDNode parent;
   Type type = Type.SIMPLE;
   /** The key of the node, null for root or array element */
@@ -39,12 +41,12 @@ public class TDNode {
   boolean deduped;
 
   // Create a root node
-  public TDNode() { this (null); }
+  public TDNode(TreeDoc doc) { this (doc,null); }
 
   public TDNode createChild(String name) {
     int childIndex = indexOf(name);
     if (childIndex < 0) {
-      TDNode cn = new TDNode(name);
+      TDNode cn = new TDNode(doc, name);
       addChild(cn);
       return cn;
     }
@@ -53,7 +55,7 @@ public class TDNode {
 
     // special handling for textproto due to it's bad design that allows duplicated keys
     if (!existNode.isDeduped()) {
-      TDNode listNode = new TDNode(name).setParent(this).setDeduped(true).setType(Type.ARRAY);
+      TDNode listNode = new TDNode(doc, name).setParent(this).setDeduped(true).setType(Type.ARRAY);
       this.children.set(childIndex, listNode);
       listNode.addChild(existNode);
       listNode.start = existNode.start;  // Reuse first node's start and length
@@ -61,7 +63,7 @@ public class TDNode {
       existNode = listNode;
     }
 
-    TDNode cn = new TDNode(null);
+    TDNode cn = new TDNode(doc, null);
     existNode.addChild(cn);
     return cn;
   }
@@ -95,28 +97,50 @@ public class TDNode {
   }
 
   public TDNode getChild(int idx) {
-    if (children == null || idx >= children.size())
-      return null;
-    return children.get(idx);
-  }
-
-  public TDNode getChildByPath(String path) { return getChildByPath(path.split("/"), 0); }
-  public Object getValueByPath(String path) {
-    TDNode cn = getChildByPath(path);
-    return cn == null ? null : cn.getValue();
-  }
-
-  public TDNode getChildByPath(String[] path, int idx) {
-    if (idx == path.length)
-      return this;
-
-    String pi = path[idx];
-    TDNode cn = isDigitOnly(pi) ? getChild(parseInt(pi)) : getChild(pi);
-    return cn == null ? null : cn.getChildByPath(path, idx + 1);
+    return hasChildren() ? children.get(idx) : null;
   }
 
   public boolean hasChildren() { return children != null && !children.isEmpty(); }
   public int getChildrenSize() { return children == null ? 0 : children.size(); }
+
+  public Object getValueByPath(String path) { return getValueByPath(TDPath.parse(path)); }
+  public Object getValueByPath(TDPath path) {
+    TDNode cn = getByPath(path);
+    return cn == null ? null : cn.getValue();
+  }
+
+  public Object getByPath(String path) { return getByPath(TDPath.parse(path)); }
+  public TDNode getByPath(TDPath path) { return getByPath(path, false); }
+
+  /** If noNull is true, it will return the last matched node */
+  public TDNode getByPath(TDPath path, boolean noNull) { return getByPath(path, 0, noNull); }
+  public TDNode getByPath(TDPath path, int idx, boolean noNull) {
+    if (idx == path.parts.size())
+      return this;
+
+    TDNode next = getNextNode(path.getParts().get(idx));
+    if (next == null)
+      return noNull ? this : null;
+
+    return next.getByPath(path, idx + 1, noNull);
+  }
+
+  private TDNode getNextNode(Part part) {
+    switch (part.type) {
+      case ROOT: return doc.root;
+      case ID: return doc.idMap.get(part.key);
+      case RELATIVE: return getAncestor(part.level);
+      case CHILD: return isDigitOnly(part.key) ? getChild(parseInt(part.key)) : getChild(part.key);
+      default: return null;  // Impossible
+    }
+  }
+
+  private TDNode getAncestor(int level) {
+    TDNode result = this;
+    for (int i = 0; i < level && result != null; i++, result = result.parent)
+      ;
+    return result;
+  }
 
   public boolean isRoot() { return parent == null; }
 }

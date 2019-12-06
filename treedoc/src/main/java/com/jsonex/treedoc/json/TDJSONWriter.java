@@ -7,10 +7,11 @@
  https://opensource.org/licenses/MIT.
  ************************************************************/
 
-package com.jsonex.treedoc;
+package com.jsonex.treedoc.json;
 
 import com.jsonex.core.factory.InjectableInstance;
 import com.jsonex.core.util.StringUtil;
+import com.jsonex.treedoc.TDNode;
 import lombok.SneakyThrows;
 
 import java.io.IOException;
@@ -41,7 +42,7 @@ public class TDJSONWriter {
     if (!isCompact)
       childIndentStr = indentStr + opt.getIndentStr();
 
-    switch (node.type) {
+    switch (node.getType()) {
       case MAP:
         writeMap(out, node, opt, indentStr, childIndentStr);
         return;
@@ -56,24 +57,24 @@ public class TDJSONWriter {
   @SneakyThrows
   private void writeMap(Appendable out, TDNode node, TDJSONWriterOption opt, String indentStr, String childIndentStr) {
     out.append('{');
-    if (node.children != null) {
-      for (int i = 0; i < node.children.size(); i++){
-        TDNode cn = node.children.get(i);
+    if (node.getChildren() != null) {
+      for (int i = 0; i < node.getChildrenSize(); i++){
+        TDNode cn = node.getChild(i);
         if (opt.indentFactor > 0) {
           out.append('\n');
           out.append(childIndentStr);
         }
-        if (!StringUtil.isJavaIdentifier(cn.key) || opt.alwaysQuoteName)  // Quote the key in case  it's not valid java identifier
-          writeQuotedString(out, cn.key, opt.quoteChar);
+        if (!StringUtil.isJavaIdentifier(cn.getKey()) || opt.alwaysQuoteName)  // Quote the key in case  it's not valid java identifier
+          writeQuotedString(out, cn.getKey(), opt.quoteChar);
         else
-          out.append(cn.key);
+          out.append(cn.getKey());
         out.append(":");
         write(out, cn, opt, childIndentStr);
-        if (i < node.children.size() - 1) // No need "," for last entry
+        if (i < node.getChildrenSize() - 1) // No need "," for last entry
           out.append(",");
       }
 
-      if (opt.indentFactor > 0 && !node.children.isEmpty()) {
+      if (opt.indentFactor > 0 && node.hasChildren()) {
         out.append('\n');
         out.append(indentStr);
       }
@@ -85,19 +86,19 @@ public class TDJSONWriter {
   @SneakyThrows
   private void writeArray(Appendable out, TDNode node, TDJSONWriterOption opt, String indentStr, String childIndentStr) {
     out.append('[');
-    if (node.children != null) {
-      for (int i = 0; i < node.children.size(); i++) {
-        TDNode cn = node.children.get(i);
+    if (node.hasChildren()) {
+      for (int i = 0; i < node.getChildrenSize(); i++) {
+        TDNode cn = node.getChild(i);
         if (opt.indentFactor > 0) {
           out.append('\n');
           out.append(childIndentStr);
         }
         write(out, cn, opt, childIndentStr);
-        if (i < node.children.size() - 1) // No need "," for last entry
+        if (i < node.getChildrenSize() - 1) // No need "," for last entry
           out.append(",");
       }
 
-      if (opt.indentFactor > 0 && !node.children.isEmpty()) {
+      if (opt.indentFactor > 0 && node.hasChildren()) {
         out.append('\n');
         out.append(indentStr);
       }
@@ -108,17 +109,17 @@ public class TDJSONWriter {
 
   @SneakyThrows
   private void writeSimple(Appendable out, TDNode node, TDJSONWriterOption opt) {
-    if (node.value instanceof String) {
-      writeQuotedString(out, (String)node.value, opt.quoteChar);
+    if (node.getValue() instanceof String) {
+      writeQuotedString(out, (String)node.getValue(), opt.quoteChar);
       return;
     }
 
-    if (node.value instanceof Character) {
-      writeQuotedString(out, String.valueOf(node.value), opt.quoteChar);
+    if (node.getValue() instanceof Character) {
+      writeQuotedString(out, String.valueOf(node.getValue()), opt.quoteChar);
       return;
     }
 
-    out.append(String.valueOf(node.value));
+    out.append(String.valueOf(node.getValue()));
   }
 
   private void writeQuotedString(Appendable out, String str, char quoteChar) throws IOException {

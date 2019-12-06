@@ -7,7 +7,7 @@
  https://opensource.org/licenses/MIT.
  ************************************************************/
 
-package com.jsonex.treedoc;
+package com.jsonex.treedoc.json;
 
 import lombok.SneakyThrows;
 

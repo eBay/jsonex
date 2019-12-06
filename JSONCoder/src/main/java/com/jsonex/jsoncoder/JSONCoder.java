@@ -9,10 +9,11 @@
 
 package com.jsonex.jsoncoder;
 
-import com.jsonex.treedoc.CharSource;
-import com.jsonex.treedoc.TDJSONParser;
-import com.jsonex.treedoc.TDJSONParserOption;
-import com.jsonex.treedoc.TDJSONWriter;
+import com.jsonex.treedoc.TDPath;
+import com.jsonex.treedoc.json.CharSource;
+import com.jsonex.treedoc.json.TDJSONParser;
+import com.jsonex.treedoc.json.TDJSONParserOption;
+import com.jsonex.treedoc.json.TDJSONWriter;
 import com.jsonex.treedoc.TDNode;
 import lombok.Getter;
 
@@ -31,16 +32,16 @@ public class JSONCoder {
     try {
       TDNode tdNode = req.tdNode;
       if (tdNode == null && req.source != null) {
-        tdNode = TDJSONParser.get().parse(new TDJSONParserOption(req.source));
+        tdNode = TDJSONParser.get().parse(new TDJSONParserOption(req.source)).getRoot();
       }
 
       if (req.nodePath != null)
-        tdNode = tdNode.getChildByPath(req.nodePath);
-      
+        tdNode = tdNode.getByPath(TDPath.parse(req.nodePath));
+
       if (tdNode == null)
         return null;
 
-      return (T) BeanCoder.decode(tdNode, req.getType(), req.target, "", new BeanCoderContext(opt));
+      return (T) BeanCoder.get().decode(tdNode, req.getType(), req.target, "", new BeanCoderContext(opt));
     } catch (Exception e) {
       if (e instanceof BeanCoderException)
         throw (BeanCoderException)e;
@@ -81,7 +82,7 @@ public class JSONCoder {
       if (writer == null) {
         writer = sWriter = new StringBuilder();
       }
-      TDNode jsonNode = BeanCoder.encode(req.object, new BeanCoderContext(opt), req.type);
+      TDNode jsonNode = BeanCoder.get().encode(req.object, new BeanCoderContext(opt), req.type);
       TDJSONWriter.get().write(writer, jsonNode, opt.getJsonOption());
       return sWriter == null ? null : sWriter.toString();
     } catch (Exception e) {

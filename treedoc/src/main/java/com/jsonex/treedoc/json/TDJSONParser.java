@@ -7,23 +7,28 @@
  https://opensource.org/licenses/MIT.
  ************************************************************/
 
-package com.jsonex.treedoc;
+package com.jsonex.treedoc.json;
 
 import com.jsonex.core.factory.InjectableInstance;
-import com.jsonex.treedoc.TDNode.Type;
+import com.jsonex.treedoc.TDNode;
+import com.jsonex.treedoc.TreeDoc;
 
 public class TDJSONParser {
   public final static InjectableInstance<TDJSONParser> instance = InjectableInstance.of(TDJSONParser.class);
   public static TDJSONParser get() { return instance.get(); }
 
-  public TDNode parse(TDJSONParserOption opt) { return parse(opt.source, opt, new TDNode()); }
+  public TreeDoc parse(TDJSONParserOption opt) {
+    TreeDoc doc = new TreeDoc(opt.uri);
+    parse(opt.source, opt, doc.getRoot());
+    return doc;
+  }
 
-  public TDNode parse(CharSource src, TDJSONParserOption opt, TDNode node) {
+  private TDNode parse(CharSource src, TDJSONParserOption opt, TDNode node) {
     if (!skipSpaceAndComments(src))
       return node;
 
     char c = src.peek();
-    node.start = src.getBookmark();
+    node.setStart(src.getBookmark());
     try {
       if (c == '{')
         return parseMap(src, opt, node, true);
@@ -37,6 +42,7 @@ public class TDJSONParser {
             return parseMap(src, opt, node, false);
           case ARRAY:
             return parseArray(src, opt, node, false);
+          default:;
         }
       }
 
@@ -61,7 +67,7 @@ public class TDJSONParser {
         return node.setValue(parseNumber(str, false));
       return node.setValue(str);
     } finally {
-      node.end = src.getBookmark();
+      node.setEnd(src.getBookmark());
     }
   }
 
@@ -107,14 +113,14 @@ public class TDJSONParser {
   }
 
   public TDNode parseMap(CharSource src, TDJSONParserOption opt, TDNode node, boolean withStartBracket) {
-    node.type = Type.MAP;
+    node.setType(TDNode.Type.MAP);
     if (withStartBracket)
       src.read();
     for (int i = 0;;) {
 
       if (!skipSpaceAndComments(src)) {
         if (withStartBracket)
-          throw src.createParseRuntimeException("EOF while expecting matching '}' with '{' at " + node.start);
+          throw src.createParseRuntimeException("EOF while expecting matching '}' with '{' at " + node.getStart());
         break;
       }
 
@@ -149,15 +155,18 @@ public class TDJSONParser {
 
       if (c == ',' || c == '}')  // If there's no ':', we consider it as indexed value (array)
         node.createChild(i + "").setValue(key);
-      else
-        parse(src, opt, node.createChild(key));
+      else {
+        TDNode childNode = parse(src, opt, node.createChild(key));
+        if (opt.KEY_ID.equals(key) && childNode.getType() == TDNode.Type.SIMPLE)
+          node.getDoc().getIdMap().put(childNode.getValue().toString(), node);
+      }
       i++;
     }
     return node;
   }
 
   private TDNode parseArray(CharSource src, TDJSONParserOption opt, TDNode node, boolean withStartBracket) {
-    node.type = Type.ARRAY;
+    node.setType(TDNode.Type.ARRAY);
     if (withStartBracket)
       src.read();
     while (true) {

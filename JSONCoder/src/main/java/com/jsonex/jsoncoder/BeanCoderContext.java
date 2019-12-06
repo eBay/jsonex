@@ -57,10 +57,10 @@ public class BeanCoderContext {
     return this;
   }
 
-  public TDNode encode(Object obj, Type type, TDNode target) { return BeanCoder._encode(obj, this, type, target); }
+  public TDNode encode(Object obj, Type type, TDNode target) { return BeanCoder.get()._encode(obj, this, type, target); }
 
   public Object decode(TDNode jsonNode, Type type, Object targetObj, String name) {
-    return BeanCoder.decode(jsonNode, type, targetObj, name, this);
+    return BeanCoder.get().decode(jsonNode, type, targetObj, name, this);
   }
 
   public SimpleDateFormat getCachedDateFormat(String dateFmt) { return dateFormatCache.get(dateFmt); }

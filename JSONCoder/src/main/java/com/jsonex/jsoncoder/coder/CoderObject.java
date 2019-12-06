@@ -13,7 +13,7 @@ import com.jsonex.jsoncoder.BeanCoderContext;
 import com.jsonex.jsoncoder.BeanCoderException;
 import com.jsonex.jsoncoder.ICoder;
 import com.jsonex.jsoncoder.JSONCoderOption;
-import com.jsonex.treedoc.TDJSONWriter;
+import com.jsonex.treedoc.json.TDJSONWriter;
 import com.jsonex.treedoc.TDNode;
 import com.jsonex.core.util.BeanProperty;
 import com.jsonex.core.util.ClassUtil;
@@ -29,7 +29,7 @@ import java.lang.reflect.Type;
 import java.util.Date;
 import java.util.Map;
 
-import static com.jsonex.jsoncoder.BeanCoder.HASH_KEY;
+import static com.jsonex.jsoncoder.BeanCoder.ID_KEY;
 import static com.jsonex.core.util.ClassUtil.isSimpleType;
 import static com.jsonex.core.util.StringUtil.toTrimmedStr;
 
@@ -58,7 +58,7 @@ public class CoderObject implements ICoder<Object> {
         continue;
 
       if(pd.isImmutable(opt.isShowPrivateField()) && opt.isIgnoreReadOnly())
-        continue; //Only mutable attribute will be encoded
+        continue;  // Only mutable attribute will be encoded
 
       if(pd.isTransient())
         continue;
@@ -66,7 +66,7 @@ public class CoderObject implements ICoder<Object> {
       if(opt.isFieldSkipped(cls, pd.getName()))
         continue;
 
-      //V3DAL will cause Lazy load exception, we have to catch it
+      // V3DAL will cause Lazy load exception, we have to catch it
       try{
         Type childType = pd.getGenericType();
         Object co = pd.get(obj);
@@ -77,7 +77,7 @@ public class CoderObject implements ICoder<Object> {
         }
       }catch(Exception e) {
         log.info("warning during encoding", e);
-        //ignore this exception
+        // ignore this exception
       }
     }
     return target;
@@ -116,7 +116,7 @@ public class CoderObject implements ICoder<Object> {
     }
 
     ctx.getObjectPath().push(result);
-    String hash = (String) jsonNode.getChildValue(HASH_KEY);
+    String hash = (String) jsonNode.getChildValue(ID_KEY);
     if (hash != null)
       ctx.getHashToObjectMap().put(hash, result);
 
@@ -141,7 +141,7 @@ public class CoderObject implements ICoder<Object> {
       if(Modifier.isStatic(mod) || prop.isTransient()){
         if(opt.isErrorOnUnknownProperty())
           throw new BeanCoderException("Field is static or transient:" + nc.getKey() + ",class:" + cls);
-        continue;  //None public, or static, transient
+        continue;  // None public, or static, transient
       }
 
       Object childTargetObj = null;
@@ -158,7 +158,7 @@ public class CoderObject implements ICoder<Object> {
           // ignore if calling get throws exception
         }
 
-      if (childTargetObj == null && prop.isImmutable(true)) {  //In that case, the attribute has to be mutable.
+      if (childTargetObj == null && prop.isImmutable(true)) {  // In that case, the attribute has to be mutable.
         if(opt.isErrorOnUnknownProperty())
           throw new BeanCoderException("Field is not mutable:" + nc.getKey() + ",class:" + cls);
         continue;

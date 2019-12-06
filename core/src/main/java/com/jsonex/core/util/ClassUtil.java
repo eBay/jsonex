@@ -151,7 +151,7 @@ public class ClassUtil {
     }
 
     // Check fields, reorder based on field order.
-    Map<String, BeanProperty> fieldMap = new LinkedHashMap<>();//NOPMD
+    Map<String, BeanProperty> fieldMap = new LinkedHashMap<>();
     for(Field f : getAllFields(cls)){
       int mod = f.getModifiers();
       if(Modifier.isStatic(mod))
@@ -160,9 +160,17 @@ public class ClassUtil {
       String name = f.getName();
       if(name.startsWith("m_"))  // Remove prefix in case it follows legacy naming convension
         name = name.substring(2);
+
+      // Field names may not be unique if the same name is defined in the base class
+      // We skip those duplicated names for re-ordering
+      if (fieldMap.containsKey(name)) {
+        fieldMap.get(name).field = f;
+        continue;
+      }
+
       BeanProperty prop = attributeMap.remove(name);
-      if(prop == null){
-        prop = new BeanProperty(name);//NOPMD
+      if (prop == null) {
+        prop = new BeanProperty(name);
       }
       fieldMap.put(name, prop);
       prop.field = f;
