@@ -59,7 +59,7 @@ public class JSONCoderOption {
   private final JSONCoderOption parent;
   
   /**
-   * If true, when convert from an java bean, the readonly field will also be converted.
+   * If true, when convert from an java bean, the readonly field will be ignored
    */
   @Getter @Setter boolean ignoreReadOnly;
   

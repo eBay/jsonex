@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @SuppressWarnings("CanBeFinal")
 @Accessors(chain = true)
-public class TestBean {
+public class TestBean extends BaseTestBean {
   @Getter @Setter private Map<String, String> treeMap = new TreeMap<>();//NOPMD
   @Getter @Setter private List<String> linkedList1 = new LinkedList<>();
 
@@ -50,6 +50,7 @@ public class TestBean {
   @Getter @Setter Method someMethod;
   @Getter @Setter XMLGregorianCalendar xmlCalendar;
   @Getter @Setter Map<Date, Number> dateNumberMap;
+  @Getter @Setter String fieldInBaseClass = "Overridden Value";
 
   public List<String> publicLinkedList = new LinkedList<>();
   public Map<String, String> publicTreeMap = new TreeMap<>();//NOPMD

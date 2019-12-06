@@ -30,9 +30,9 @@ public class TDJsonParserTest {
     Reader reader = TestUtil.loadResource(this.getClass(), "testdata.json");
     TDNode node = TDJSONParser.get().parse(new TDJSONParserOption(reader)).getRoot();
 
-    log.info("Node=" + TestUtil.toJSON(node));
+    log.info("testParse: Node=" + TestUtil.toJSON(node));
     assertEquals("valueWithoutKey", node.getChildValue("2"));
-    assertEquals("lastValueWithoutKey", node.getChildValue("4"));
+    assertEquals("lastValueWithoutKey", node.getChildValue("5"));
     assertEquals(10, node.getChild("limit").getValue());
     assertEquals("100000000000000000000", node.getChildValue("total"));
     assertEquals("Some Name 1", node.getValueByPath("/data/0/name"));

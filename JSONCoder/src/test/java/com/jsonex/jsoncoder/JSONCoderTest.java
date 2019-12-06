@@ -97,6 +97,7 @@ public class JSONCoderTest {
     assertTrue("Should contain identifier for Integer IdentifiableEnum", str.contains("\"enumField2\":12345"));
     assertTrue("Double quote should be escaped", str.contains("\"String1: '\\\"\""));
     assertTrue("Should contain identifier for String IdentifiableEnum", str.contains("strEnumV1"));
+    assertTrue("Overridden field should be properly serialized", str.contains("\"fieldInBaseClass\":\"Overridden Value\""));
     assertFalse("TransientProp shouldn't be encoded", str.contains("TransientProp"));
     assertFalse("transientField shouldn't be encoded", str.contains("transientField"));
     assertFalse("privateField shouldn't be encoded", str.contains("privateField"));
@@ -148,20 +149,20 @@ public class JSONCoderTest {
     JSONCoderOption codeOption = JSONCoderOption.create();
     codeOption.getJsonOption().setQuoteChar('\'');
     String str = toJSONString(buildTestBean(), codeOption);
-    log("strWithSingleQuote=" + str);
+    log("testCustomQuote: strWithSingleQuote=" + str);
     assertTrue("Single quote instead of double quote should be quoted when Quote char is set to single quote",
         str.indexOf("'String1: \\'\"'") > 0);
     assertEquals(toJSONString(JSONCoder.global.decode(str, TestBean.class), codeOption), str);
 
     codeOption.getJsonOption().setAlwaysQuoteName(false);  // Make quote optional for attribute names
     str = toJSONString(buildTestBean(), codeOption);
-    log("strWithNoKeyQuote=" + str);
-    assertTrue("Key shouldn't be quoted when alwaysQuoteName is set to false", str.contains("{treeMap:"));
+    log("testCustomQuote: strWithNoKeyQuote=" + str);
+    assertTrue("Key shouldn't be quoted when alwaysQuoteName is set to false", str.contains("treeMap:"));
     assertEquals(toJSONString(JSONCoder.global.decode(str, TestBean.class), codeOption), str);
 
     codeOption.getJsonOption().setQuoteChar('`');
     str = toJSONString(buildTestBean(), codeOption);
-    log("strWithBackQuote=" + str);
+    log("testCustomQuote: strWithBackQuote=" + str);
     assertTrue("back quote should be quoted when quoteChar set to back quote", str.indexOf("`String1: '\"`") > 0);
   }
 
