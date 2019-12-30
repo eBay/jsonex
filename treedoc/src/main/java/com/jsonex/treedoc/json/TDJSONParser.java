@@ -17,11 +17,7 @@ public class TDJSONParser {
   public final static InjectableInstance<TDJSONParser> instance = InjectableInstance.of(TDJSONParser.class);
   public static TDJSONParser get() { return instance.get(); }
 
-  public TreeDoc parse(TDJSONParserOption opt) {
-    TreeDoc doc = new TreeDoc(opt.uri);
-    parse(opt.source, opt, doc.getRoot());
-    return doc;
-  }
+  public TDNode parse(TDJSONParserOption opt) { return parse(opt.source, opt, new TreeDoc(opt.uri).getRoot()); }
 
   private TDNode parse(CharSource src, TDJSONParserOption opt, TDNode node) {
     if (!skipSpaceAndComments(src))

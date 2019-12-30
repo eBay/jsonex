@@ -9,6 +9,7 @@
 
 package com.jsonex.jsoncoder.coder;
 
+import com.jsonex.core.factory.InjectableInstance;
 import com.jsonex.jsoncoder.BeanCoderContext;
 import com.jsonex.jsoncoder.BeanCoderException;
 import com.jsonex.jsoncoder.ICoder;
@@ -30,6 +31,9 @@ import static com.jsonex.core.util.ClassUtil.isSimpleType;
 import static com.jsonex.core.util.StringUtil.toTrimmedStr;
 
 public class CoderMap implements ICoder<Map> {
+  public static final InjectableInstance<CoderMap> it = InjectableInstance.of(CoderMap.class);
+  public static CoderMap get() { return it.get(); }
+
   @Getter private static final CoderMap instance = new CoderMap();
 
   @Override public Class<Map> getType() {return Map.class;}

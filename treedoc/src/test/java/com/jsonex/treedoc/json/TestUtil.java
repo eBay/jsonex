@@ -19,6 +19,6 @@ public class TestUtil {
     // return JSONCoder.getGlobal().encode(obj);
     // GSON cause stack overflow due to cyclic reference.
     // return new Gson().toJson(obj);
-    return obj.toString();
+    return obj == null ? "null" : obj.toString();
   }
 }

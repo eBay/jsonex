@@ -34,13 +34,13 @@ public class JSONPointer {
   public static JSONPointer get() { return it.get(); }
 
   public TDPath parse(String str) {
+    TDPath path = new TDPath();
     if (StringUtil.isEmpty(str))
-      return null;
+      return path;
 
     if (str.endsWith("#")) // Ignore the last # which indicate "key" of the map
       str = str.substring(0, str.length() - 1);
 
-    TDPath path = new TDPath();
     if (str.indexOf('#') < 0) {
       if (parseParts(str, path, true))
         return path;

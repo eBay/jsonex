@@ -9,6 +9,7 @@
 
 package com.jsonex.jsoncoder.coder;
 
+import com.jsonex.core.factory.InjectableInstance;
 import com.jsonex.jsoncoder.BeanCoderContext;
 import com.jsonex.jsoncoder.BeanCoderException;
 import com.jsonex.jsoncoder.ICoder;
@@ -35,7 +36,8 @@ import static com.jsonex.core.util.StringUtil.toTrimmedStr;
 
 @Slf4j
 public class CoderObject implements ICoder<Object> {
-  @Getter private static final CoderObject instance = new CoderObject();
+  public static final InjectableInstance<CoderObject> it = InjectableInstance.of(CoderObject.class);
+  public static CoderObject get() { return it.get(); }
 
   private final static String TYPE_KEY = "$type";
 

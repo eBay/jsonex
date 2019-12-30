@@ -41,9 +41,12 @@ public class TDNode {
   boolean deduped;
 
   // Create a root node
-  public TDNode(TreeDoc doc) { this (doc,null); }
-
+  public TDNode(TreeDoc doc) { this (doc,""); }
+  public TDNode createChild() { return createChild(null); }
   public TDNode createChild(String name) {
+    if (name == null)  // Assume it's array element
+      name = "" + getChildrenSize();
+
     int childIndex = indexOf(name);
     if (childIndex < 0) {
       TDNode cn = new TDNode(doc, name);
@@ -63,9 +66,7 @@ public class TDNode {
       existNode = listNode;
     }
 
-    TDNode cn = new TDNode(doc, null);
-    existNode.addChild(cn);
-    return cn;
+    return existNode.createChild();
   }
 
   public TDNode addChild(TDNode node) {
@@ -109,7 +110,8 @@ public class TDNode {
     return cn == null ? null : cn.getValue();
   }
 
-  public Object getByPath(String path) { return getByPath(TDPath.parse(path)); }
+  public TDNode getByPath(String path) { return getByPath(TDPath.parse(path)); }
+  public TDNode getByPath(String[] path) { return getByPath(TDPath.parse(path)); }
   public TDNode getByPath(TDPath path) { return getByPath(path, false); }
 
   /** If noNull is true, it will return the last matched node */
@@ -135,7 +137,7 @@ public class TDNode {
     }
   }
 
-  private TDNode getAncestor(int level) {
+  public TDNode getAncestor(int level) {
     TDNode result = this;
     for (int i = 0; i < level && result != null; i++, result = result.parent)
       ;
@@ -143,4 +145,14 @@ public class TDNode {
   }
 
   public boolean isRoot() { return parent == null; }
+
+  public List<String> getPath() {
+    if (parent == null)
+      return new ArrayList<>();
+    List<String> result = parent.getPath();
+    result.add(key);
+    return result;
+  }
+
+  public boolean isLeaf() { return getChildrenSize() == 0; }
 }
