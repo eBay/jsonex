@@ -77,6 +77,8 @@ public class TDJsonParserTest {
     assertEquals(Boolean.FALSE, node.getValueByPath("n/n1/0/n11/1/n111"));
     assertEquals(4, node.getValueByPath("n/n1/1/[d.e.f]"));
     assertEquals(6, node.getValueByPath("n/n3/0"));
+    assertEquals("0", node.getByPath("n/n1/0").getKey());
+    assertEquals("1", node.getByPath("n/n1/1").getKey());
   }
 
   @Test public void testParseJson5() {
@@ -89,8 +91,10 @@ public class TDJsonParserTest {
     assertEquals(912559, node.getValueByPath( "hexadecimal"));
     assertEquals(0.8675309, node.getValueByPath( "leadingDecimalPoint"));
     assertEquals(1, node.getValueByPath( "positiveSign"));
+  }
 
-    node = TDJSONParser.get().parse(
+  @Test public void testRootMap() {
+    TDNode node = TDJSONParser.get().parse(
         new TDJSONParserOption("'a':1\nb:2").setDefaultRootType(TDNode.Type.MAP));
     assertEquals(1, node.getValueByPath("a"));
     assertEquals(2, node.getValueByPath("b"));
