@@ -1,13 +1,10 @@
 package com.jsonex.treedoc.json;
 
 import com.jsonex.treedoc.TDNode;
-import com.jsonex.treedoc.TDPath;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 
 import java.io.Reader;
-import java.util.ArrayList;
-import java.util.Arrays;
 
 import static org.junit.Assert.*;
 
