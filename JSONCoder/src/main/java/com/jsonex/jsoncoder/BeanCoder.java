@@ -127,13 +127,13 @@ public class BeanCoder {
       }
 
       if (cls.isArray()) {   //Handle it as any array
-        CoderArray.getInstance().encode(obj, type, ctx, target);
+        CoderArray.get().encode(obj, type, ctx, target);
       } else if (obj instanceof Collection) {  //Handle it as an Collection
-        CoderCollection.getInstance().encode((Collection<?>)obj, type, ctx, target);
+        CoderCollection.get().encode((Collection<?>)obj, type, ctx, target);
       } else if (obj instanceof Map) {
-        CoderMap.getInstance().encode((Map<?,?>)obj, type, ctx, target);
+        CoderMap.get().encode((Map<?,?>)obj, type, ctx, target);
       } else
-        CoderObject.getInstance().encode(obj, type, ctx, target);
+        CoderObject.get().encode(obj, type, ctx, target);
 
       if (target.getType() == TDNode.Type.MAP && target.hasChildren())
         ctx.convertedObjects.put(eqWrapper, target);
@@ -197,16 +197,16 @@ public class BeanCoder {
       }
 
       if (cls.isArray())  // Handle the array type
-        return CoderArray.getInstance().decode(tdNode, type, targetObj, ctx);
+        return CoderArray.get().decode(tdNode, type, targetObj, ctx);
 
       if (Collection.class.isAssignableFrom(cls))  // Handle the collection type
-        return CoderCollection.getInstance().decode(tdNode, type, targetObj, ctx);
+        return CoderCollection.get().decode(tdNode, type, targetObj, ctx);
 
       if (Map.class.isAssignableFrom(cls))
-        return CoderMap.getInstance().decode(tdNode, type, targetObj, ctx);
+        return CoderMap.get().decode(tdNode, type, targetObj, ctx);
 
       //Handle bean type
-      return CoderObject.getInstance().decode(tdNode, type, targetObj, ctx);
+      return CoderObject.get().decode(tdNode, type, targetObj, ctx);
     } catch(Exception e) {
       throw new BeanCoderException("failed to decode:"+type + "; name=" + name, e);
     } finally {

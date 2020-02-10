@@ -25,24 +25,25 @@ public class TDPath {
   /** The TreeDoc file path or URL, it could absolution or relative */
   String docPath;
   /** The path parts */
-  List<Part> parts = new ArrayList<>();
+  final List<Part> parts = new ArrayList<>();
   public TDPath addParts(Part... part) { parts.addAll(Arrays.asList(part)); return this; }
 
   public static TDPath parse(String str) {
-    if (str.isEmpty())
-      return new TDPath().addParts(Part.ofRelative(0));
-    TDPath path = new TDPath();
-    if (str.charAt(0) == '/') {
-      path.addParts(Part.ofRoot());
-      str = str.substring(1);
-    }
+    return parse(str.split("/"));
+  }
 
-    String[] strs = str.split("/");
+  public static TDPath parse(String[] strs) {
+    if (strs.length == 0 || strs.length == 1 && strs[0].isEmpty())
+      return new TDPath().addParts(Part.ofRelative(0));
+
+    TDPath path = new TDPath();
     for (String s : strs) {
       if (".".equals(s))
         path.addParts(Part.ofRelative(0));
       else if ("..".equals(s))
         path.addParts(Part.ofRelative(1));
+      else if (s.isEmpty())
+        path.addParts(Part.ofRoot());
       else
         path.addParts(Part.ofChild(s));
     }

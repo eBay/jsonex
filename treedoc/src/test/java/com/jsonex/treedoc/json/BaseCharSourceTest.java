@@ -20,9 +20,9 @@ public abstract class BaseCharSourceTest {
     assertEquals('3', cs.peek(1));
     assertEquals('2', cs.read());
     assertEquals('3', cs.read());
-    Assert.assertEquals("Bookmark(line=0, col=4, pos=4)", cs.getBookmark().toString());
+    assertEquals("Bookmark(line=0, col=4, pos=4)", cs.getBookmark().toString());
     assertEquals('\n', cs.read());
-    Assert.assertEquals("Bookmark(line=1, col=0, pos=5)", cs.getBookmark().toString());
+    assertEquals("Bookmark(line=1, col=0, pos=5)", cs.getBookmark().toString());
     assertTrue("should eof", cs.isEof(0));
     try {
       cs.read();

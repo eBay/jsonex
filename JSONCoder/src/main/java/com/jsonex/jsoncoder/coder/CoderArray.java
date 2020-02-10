@@ -9,6 +9,7 @@
 
 package com.jsonex.jsoncoder.coder;
 
+import com.jsonex.core.factory.InjectableInstance;
 import com.jsonex.jsoncoder.BeanCoderContext;
 import com.jsonex.jsoncoder.BeanCoderException;
 import com.jsonex.jsoncoder.ICoder;
@@ -22,7 +23,8 @@ import java.lang.reflect.Type;
 import static com.jsonex.core.util.StringUtil.toTrimmedStr;
 
 public class CoderArray implements ICoder<Object> {
-  @Getter private static final CoderArray instance = new CoderArray();
+  public static final InjectableInstance<CoderArray> it = InjectableInstance.of(CoderArray.class);
+  public static CoderArray get() { return it.get(); }
 
   @Override public Class<Object> getType() {return Object.class;}
 
@@ -31,7 +33,7 @@ public class CoderArray implements ICoder<Object> {
     target.setType(TDNode.Type.ARRAY);
     Class<?> cls = ClassUtil.getGenericClass(type);
     for (int i = 0; i < Array.getLength(obj); i++)
-      ctx.encode(Array.get(obj, i), cls.getComponentType(), target.createChild(null));
+      ctx.encode(Array.get(obj, i), cls.getComponentType(), target.createChild());
     return target;
   }
 

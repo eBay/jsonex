@@ -12,22 +12,21 @@ package com.jsonex.treedoc.json;
 import com.jsonex.core.factory.InjectableInstance;
 import com.jsonex.treedoc.TDNode;
 import com.jsonex.treedoc.TreeDoc;
+import jdk.nashorn.internal.runtime.regexp.joni.constants.NodeType;
+
 
 public class TDJSONParser {
+  private final static char EOF = '\uFFFF';
   public final static InjectableInstance<TDJSONParser> instance = InjectableInstance.of(TDJSONParser.class);
   public static TDJSONParser get() { return instance.get(); }
 
-  public TreeDoc parse(TDJSONParserOption opt) {
-    TreeDoc doc = new TreeDoc(opt.uri);
-    parse(opt.source, opt, doc.getRoot());
-    return doc;
-  }
+  public TDNode parse(TDJSONParserOption opt) { return parse(opt.source, opt, new TreeDoc(opt.uri).getRoot()); }
 
   private TDNode parse(CharSource src, TDJSONParserOption opt, TDNode node) {
-    if (!skipSpaceAndComments(src))
+    char c = skipSpaceAndComments(src);
+    if (c == EOF)
       return node;
 
-    char c = src.peek();
     node.setStart(src.getBookmark());
     try {
       if (c == '{')
@@ -54,7 +53,11 @@ public class TDJSONParser {
         return node.setValue(sb.toString());
       }
 
-      String str = src.readUntil(",}]\n\r", 0, Integer.MAX_VALUE).trim();
+      String term = ",\n\r";
+      if (node.getParent() != null)  // parent.type can either by ARRAY or MAP.
+        term = node.getParent().getType() == TDNode.Type.ARRAY ? ",\n\r]" : ",\n\r}";
+
+      String str = src.readUntil(term, 0, Integer.MAX_VALUE).trim();
       if ("null".equals(str))
         return node.setValue(null);
       if ("true".equals(str))
@@ -72,8 +75,8 @@ public class TDJSONParser {
   }
 
   private void readContinuousString(CharSource src, StringBuilder sb) {
-    while(skipSpaceAndComments(src)) {
-      char c = src.peek();
+    char c;
+    while((c = skipSpaceAndComments(src)) != EOF) {
       if ("\"`'".indexOf(c) < 0)
         break;
       src.read();
@@ -82,9 +85,9 @@ public class TDJSONParser {
   }
 
   /**
-   * @return true if there's more text left
+   * @return char next char to read (peeked), if '\uFFFF' indicate it's EOF
    */
-  public static boolean skipSpaceAndComments(CharSource src) {
+  public static char skipSpaceAndComments(CharSource src) {
     while (src.skipSpaces()) {
       char c = src.peek();
       if (c == '#') {
@@ -94,7 +97,7 @@ public class TDJSONParser {
       }
 
       if (c != '/' || src.isEof(1))
-        return true;
+        return c;
       char c1 = src.peek(1);
       switch (c1) {
         case '/':   // line comments
@@ -106,10 +109,10 @@ public class TDJSONParser {
           src.skipUntilMatch("*/", true);
           break;
         default:
-          return true;
+          return c1;
       }
     }
-    return false;
+    return EOF;
   }
 
   public TDNode parseMap(CharSource src, TDJSONParserOption opt, TDNode node, boolean withStartBracket) {
@@ -117,14 +120,13 @@ public class TDJSONParser {
     if (withStartBracket)
       src.read();
     for (int i = 0;;) {
-
-      if (!skipSpaceAndComments(src)) {
+      char c = skipSpaceAndComments(src);
+      if (c == EOF) {
         if (withStartBracket)
           throw src.createParseRuntimeException("EOF while expecting matching '}' with '{' at " + node.getStart());
         break;
       }
 
-      char c = src.peek();
       if (c == '}') {
         src.read();
         break;
@@ -139,9 +141,9 @@ public class TDJSONParser {
       if (c == '"' || c == '\'' || c == '`') {
         src.read();
         key = src.readQuotedString(c);
-        if (!skipSpaceAndComments(src))
+        c = skipSpaceAndComments(src);
+        if (c == EOF)
           break;
-        c = src.peek();
         if (c != ':' && c != '{' && c != '[' && c != ',' && c != '}')
           throw src.createParseRuntimeException("No ':' after key:" + key);
       } else {
@@ -170,24 +172,23 @@ public class TDJSONParser {
     if (withStartBracket)
       src.read();
     while (true) {
-      if (!skipSpaceAndComments(src)) {
+      char c = skipSpaceAndComments(src);
+      if (c == EOF) {
         if (withStartBracket)
           throw src.createParseRuntimeException("EOF encountered while expecting matching ']'");
         break;
       }
 
-      char c = src.peek();
       if (c == ']') {
         src.read();
         break;
       }
 
+      parse(src, opt, node.createChild(null));
+      c = skipSpaceAndComments(src);
       if (c == ',') {
         src.read();
-        continue;
       }
-
-      parse(src, opt, node.createChild(null));
     }
     return node;
   }

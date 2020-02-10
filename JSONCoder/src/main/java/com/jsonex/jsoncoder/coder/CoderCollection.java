@@ -9,6 +9,7 @@
 
 package com.jsonex.jsoncoder.coder;
 
+import com.jsonex.core.factory.InjectableInstance;
 import com.jsonex.jsoncoder.BeanCoderContext;
 import com.jsonex.jsoncoder.BeanCoderException;
 import com.jsonex.jsoncoder.ICoder;
@@ -28,7 +29,8 @@ import java.util.Set;
 import static com.jsonex.core.util.StringUtil.toTrimmedStr;
 
 public class CoderCollection implements ICoder<Collection> {
-  @Getter private static final CoderCollection instance = new CoderCollection();
+  public static final InjectableInstance<CoderCollection> it = InjectableInstance.of(CoderCollection.class);
+  public static CoderCollection get() { return it.get(); }
 
   @Override public Class<Collection> getType() {return Collection.class;}
 
