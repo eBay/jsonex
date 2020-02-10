@@ -12,15 +12,15 @@ import static org.junit.Assert.*;
 public class TDJsonParserTest {
   @Test public void testSkipSpaceAndComments() {
     ArrayCharSource in = new ArrayCharSource("  //abcd \n // defghi \n abc");
-    assertTrue(TDJSONParser.skipSpaceAndComments(in));
+    assertEquals('a', TDJSONParser.skipSpaceAndComments(in));
     assertEquals("abc", in.read(3));
 
     in = new ArrayCharSource("  #abcd \n # defghi \n abc");
-    assertTrue(TDJSONParser.skipSpaceAndComments(in));
+    assertEquals('a', TDJSONParser.skipSpaceAndComments(in));
     assertEquals("abc", in.read(3));
 
     in = new ArrayCharSource("/* abcd*/ \n /* defghi*/ \n abc");
-    assertTrue(TDJSONParser.skipSpaceAndComments(in));
+    assertEquals('a', TDJSONParser.skipSpaceAndComments(in));
     assertEquals("abc", in.read(3));
   }
 
@@ -53,7 +53,7 @@ public class TDJsonParserTest {
     json = TDJSONWriter.get().writeAsString(node, new TDJSONWriterOption().setIndentFactor(2));
     log.info("formatted json: " + json);
   }
-  
+
   @Test public void testParseValueWithoutKey() {
     String json = "{\n" +
         "  abc: 10\n" +
@@ -104,17 +104,20 @@ public class TDJsonParserTest {
     log.info("testParseJson5: Node=" + TestUtil.toJSON(node));
     String json = TDJSONWriter.get().writeAsString(node, new TDJSONWriterOption().setIndentFactor(2));
     log.info("testParseJson5: formatted json: " + json);
-    assertEquals(4, node.getChildrenSize());
-    assertEquals(2, node.getValueByPath("1"));
-    assertEquals(3, node.getValueByPath("2/v"));
+    assertEquals(7, node.getChildrenSize());
+    assertEquals(2, node.getValueByPath("2"));
+    assertEquals(3, node.getValueByPath("3/v"));
   }
 
   @Test public void testInvalid() {
     TDNode node = TDJSONParser.get().parse(new TDJSONParserOption("}"));
-    assertEquals("", node.getValue());
+    assertEquals("}", node.getValue());
 
     node = TDJSONParser.get().parse(new TDJSONParserOption(""));
     assertNull(node.getValue());
+
+    node = TDJSONParser.get().parse(new TDJSONParserOption("[}]"));
+    assertEquals("}", node.getChild(0).getValue());
   }
 
   @Test public void testTDPath() {
