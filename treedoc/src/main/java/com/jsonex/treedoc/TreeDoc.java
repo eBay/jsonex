@@ -13,6 +13,6 @@ import java.util.Map;
 public class TreeDoc {
   final Map<String, TDNode> idMap = new HashMap<>();
   final URI uri;
-  final TDNode root = new TDNode(this);
+  final TDNode root = new TDNode(this, null);
   public TreeDoc() { this (null); }
 }
