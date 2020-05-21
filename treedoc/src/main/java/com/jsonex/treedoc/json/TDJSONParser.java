@@ -13,8 +13,6 @@ import com.jsonex.core.factory.InjectableInstance;
 import com.jsonex.treedoc.TDNode;
 import com.jsonex.treedoc.TreeDoc;
 import java.io.Reader;
-import jdk.nashorn.internal.runtime.regexp.joni.constants.NodeType;
-
 
 public class TDJSONParser {
   private final static char EOF = '\uFFFF';
