@@ -1,6 +1,6 @@
 # JSONCoder
-[![Build Status](https://travis-ci.org/jianwu/JSONCoder.svg?branch=master)](https://travis-ci.org/jianwu/JSONCoder)
-[![codecov](https://codecov.io/gh/eBay/JSONCoder/branch/master/graph/badge.svg)](https://codecov.io/gh/eBay/JSONCoder)
+[![Build Status](https://travis-ci.org/eBay/jsonex.svg?branch=master)](https://travis-ci.org/eBay/jsonex)
+[![codecov](https://codecov.io/gh/eBay/jsonex/branch/master/graph/badge.svg)](https://codecov.io/gh/eBay/jsonex)
 ## Description
 JSONCoder is a light weight generic object serialization / deserialization library similar to Jackson or FastJson. This library has been widely used in various eBay domain projects for years. It does not mean to be a replacement for other popular libraries. But it solves some specific problems which are not available or not well supported in other alternatives. 
 
@@ -35,23 +35,23 @@ There are plenty of options for JSON serialization/deserialization libraries, wh
 * JDK version: 1.7 or above 
 
 
-And many more, please refer the class [JSONCoderOption](JSONCoder/src/main/java/com/ebay/jsoncoder/JSONCoderOption.java)
+And many more, please refer the class [JSONCoderOption](JSONCoder/src/main/java/com/jsonex/jsoncoder/JSONCoderOption.java)
 for more details. 
 
 Please refer the unit test class for more detailed usage patterns: 
-[JSONCoderTest](JSONCoder/src/test/java/com/ebay/jsoncoder/JSONCoderTest.java)
+[JSONCoderTest](JSONCoder/src/test/java/com/jsonex/jsoncoder/JSONCoderTest.java)
 
 ## Usage
 
 1. Maven Dependencies
     ```xml
      <dependency>
-       <groupId>com.ebay.jsoncoder</groupId>
+       <groupId>com.jsonex</groupId>
        <artifactId>JSONCoder</artifactId>
        <version>${jsonCoderVersion}</version>
      </dependency>
     ````
-    You can get current version by searching [maven central](https://search.maven.org/search?q=g:com.ebay.jsoncoder)
+    You can get current version by searching [maven central](https://search.maven.org/search?q=g:com.jsonex)
 2. Simple Serialization / Deserialization
     ```java
       // serialization
@@ -111,6 +111,8 @@ Please refer the unit test class for more detailed usage patterns:
 * Performance improvement
 * Support of variable placeholder in JSON doc
 
+## Tech blogs
+[Dependency Indirection with Injectable Factory](https://medium.com/@jianwu_23512/dependency-indirection-with-injectable-factory-d6f2f60cced1)
 
 ## License
  

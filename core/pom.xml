@@ -7,18 +7,14 @@
     <groupId>com.jsonex</groupId>
     <artifactId>jcParent</artifactId>
     <version>0.1.1</version>
-    <relativePath>..</relativePath>
+    <relativePath>../</relativePath>
   </parent>
-  <artifactId>JSONCoder</artifactId>
-  <name>JSONCoder</name>
+  <artifactId>core</artifactId>
+  <name>core</name>
   <dependencies>
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>treedoc</artifactId>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -27,7 +23,17 @@
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
+      <version>2.9.6</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
