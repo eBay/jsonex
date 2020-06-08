@@ -41,7 +41,7 @@ public class ListUtil {
 
   public static <K, E> Map<K, List<E>>  groupBy(
       Collection<? extends E> source, Function<? super E, ? extends K> classifier) {
-    Map<K, List<E>> result = new HashMap<>();
+    Map<K, List<E>> result = new LinkedHashMap<>();
     for (E e : source) {
       K k = classifier.apply(e);
       List<E> v = result.get(k);
@@ -84,7 +84,7 @@ public class ListUtil {
   }
 
   public static <K, V> Map<K, V> toMap(Collection<V> source, Function<? super V, ? extends K> keyFunc) {
-    Map<K, V> map = new HashMap<>();
+    Map<K, V> map = new LinkedHashMap<>();
     for (V s : source)
       map.put(keyFunc.apply(s), s);
     return map;
@@ -92,14 +92,14 @@ public class ListUtil {
 
   public static <S, K, V> Map<K, V> toMap(
       Collection<S> source, Function<? super S, ? extends K> keyFunc, Function<? super S, ? extends V> valFunc) {
-    Map<K, V> map = new HashMap<>();
+    Map<K, V> map = new LinkedHashMap<>();
     for (S s : source)
       map.put(keyFunc.apply(s), valFunc.apply(s));
     return map;
   }
 
-  public static <V, S extends Collection<? extends V>, D extends Collection<? super V>>
-      D filter(S source, Predicate<? super V> pred, D dest) {
+  public static <V, S extends Collection<? extends V>, D extends Collection<? super V>> D filter(
+      S source, Predicate<? super V> pred, D dest) {
     for (V s : source) {
       if (pred.test(s))
         dest.add(s);
@@ -111,8 +111,8 @@ public class ListUtil {
     return filter(source, pred, new ArrayList<>());
   }
 
-  public static <V, C extends Collection<? extends V>>
-      List<V> orderBy(C source, final Function<? super V, ? extends Comparable> by) {
+  public static <V, C extends Collection<? extends V>> List<V> orderBy(
+      C source, final Function<? super V, ? extends Comparable> by) {
     return orderBy(source, by, false);
   }
 
@@ -183,7 +183,9 @@ public class ListUtil {
   }
 
   public static <T> T last(List<T> list) { return list == null ? null : list.get(list.size() - 1); }
-  public static <T> T first(Collection<T> list) { return list == null || list.size() == 0 ? null : list.iterator().next(); }
+  public static <T> T first(Collection<T> list) {
+    return list == null || list.size() == 0 ? null : list.iterator().next();
+  }
 
   public static <T> boolean containsAny(Collection<T> list, T... elements) {
     for (T e : elements) {
@@ -195,7 +197,7 @@ public class ListUtil {
 
   public static void removeLast(List<?> list) { list.remove(list.size() - 1); }
 
-  public static <T> Set<T> setOf(T... e) { return new HashSet<>(Arrays.asList(e)); }
+  public static <T> Set<T> setOf(T... e) { return new LinkedHashSet<>(Arrays.asList(e)); }
 
   public static <K, V, M extends Map<K, V>> M mergeWith(M target, Map<? extends K, ? extends V> source,
       BiFunction<? super V, ? super V, ? extends V> mergeFunc) {
@@ -203,7 +205,8 @@ public class ListUtil {
     return target;
   }
 
-  public static <K, V, L extends Collection<V>, M extends Map<K, L>> M mergeWith(M target, Map<? extends K, ? extends L> source) {
+  public static <K, V, L extends Collection<V>, M extends Map<K, L>> M mergeWith(
+      M target, Map<? extends K, ? extends L> source) {
     return mergeWith(target, source, (l1, l2) -> {
       l1.addAll(l2);
       return l1;

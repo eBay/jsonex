@@ -22,13 +22,12 @@ import java.util.List;
 @RequiredArgsConstructor
 // @Getter @Setter
 @Accessors(chain = true)
- @EqualsAndHashCode(exclude = {"parent", "start", "end", "doc"}) @ToString(exclude = {"parent", "doc"})
 public class TDNode {
   public enum Type { MAP, ARRAY, SIMPLE }
   @Getter final TreeDoc doc;
   @Getter TDNode parent;
   @Getter @Setter Type type = Type.SIMPLE;
-  /** The key of the node, null for root or array element */
+  /** The key of the node, null for root */
   @Getter String key;
   /** The value of the node, only available for leave node */
   @Getter Object value;
@@ -77,9 +76,8 @@ public class TDNode {
       return cn;
     }
 
-    TDNode existNode = children.get(childIndex);
-
     // special handling for textproto due to it's bad design that allows duplicated keys
+    TDNode existNode = children.get(childIndex);
     if (!existNode.deduped) {
       TDNode listNode = new TDNode(this, name).setType(Type.ARRAY);
       listNode.deduped = true;
@@ -191,30 +189,30 @@ public class TDNode {
 
   @Override public String toString() {
     if (str == null)
-      str = new StringBuilder(key + "").append(':').append(valueToString(100000)).toString();
+      str = toString(new StringBuilder(), 100000).toString();
     return str;
   }
 
-  private String valueToString(int limit) {
-    StringBuilder sb = new StringBuilder();
+  public StringBuilder toString(StringBuilder sb, int limit) {
+    if (parent != null && parent.type == Type.MAP)
+      sb.append(key + ":");
+
     if (value != null)
       sb.append(value);
 
     if (this.children == null)
-      return sb.toString();
+      return sb;
 
     sb.append(type == Type.ARRAY ? '[' : '{');
     for (TDNode n : this.children) {
-      if (type == Type.MAP)
-        sb.append(n.key).append(':');
-      sb.append(n.valueToString(limit)).append(',');
+      n.toString(sb, limit).append(',');
       if (sb.length() > limit) {
         sb.append("...");
         break;
       }
     }
     sb.append(type == Type.ARRAY ? ']' : '}');
-    return sb.toString();
+    return sb;
   }
 
   @Override

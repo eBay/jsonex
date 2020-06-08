@@ -137,7 +137,7 @@ public class TDJsonParserTest {
     Reader reader = TestUtil.loadResource(this.getClass(), "testdata.json");
     TDNode node = TDJSONParser.get().parse(reader);
     String str = node.toString();
-    log.info("testToString:str:" + str);
+    log.info("testToString:str=" + str);
     String str1 = node.toString();
     assertSame(str, str1);
     TDNode city = node.getByPath("/data/0/address/city");
@@ -148,7 +148,12 @@ public class TDJsonParserTest {
 
     city.setValue("other city");
     String str3 = node.toString();
-    log.info("testToString:str:" + str3);
+    log.info("testToString:str=" + str3);
     assertFalse("toString should return different value when node value changed", str.equals(str3));
+    String expected = "{total:100000000000000000000,limit:10,2:valueWithoutKey,data:[{$id:1,name:Some Name 1,address:" +
+        "{streetLine:1st st,city:other city,},createdAt:2017-07-14T17:17:33.010Z,},{$id:2,name:Some Name 2,address:{" +
+        "streetLine:2nd st,city:san jose,},createdAt:2017-07-14T17:17:33.010Z,},Multiple line literal\n" +
+        "    Line2,],objRef:{$ref:1,},5:lastValueWithoutKey,}";
+    assertEquals(expected, str3);
   }
 }
