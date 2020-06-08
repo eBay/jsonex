@@ -2,6 +2,7 @@ package com.jsonex.treedoc.json;
 
 import com.jsonex.treedoc.TDNode;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.Reader;
@@ -27,7 +28,7 @@ public class TDJsonParserTest {
 
   @Test public void testParse() {
     Reader reader = TestUtil.loadResource(this.getClass(), "testdata.json");
-    TDNode node = TDJSONParser.get().parse(new TDJSONParserOption(reader));
+    TDNode node = TDJSONParser.get().parse(reader);
 
     log.info("testParse: Node=" + TestUtil.toJSON(node));
     assertEquals("valueWithoutKey", node.getChildValue("2"));
@@ -47,7 +48,7 @@ public class TDJsonParserTest {
     String json = TDJSONWriter.get().writeAsString(node);
     log.info("json: " + json);
 
-    TDNode node1 = TDJSONParser.get().parse(new TDJSONParserOption(json));
+    TDNode node1 = TDJSONParser.get().parse(json);
     assertEquals(node, node1);
 
     json = TDJSONWriter.get().writeAsString(node, new TDJSONWriterOption().setIndentFactor(2));
@@ -59,7 +60,7 @@ public class TDJsonParserTest {
         "  abc: 10\n" +
         "  aaa\n" +
         "}";
-    TDNode node = TDJSONParser.get().parse(new TDJSONParserOption(json));
+    TDNode node = TDJSONParser.get().parse(json);
     log.info("Node=" + TestUtil.toJSON(node));
     assertEquals("aaa", node.getChildValue("1"));
   }
@@ -110,25 +111,49 @@ public class TDJsonParserTest {
   }
 
   @Test public void testInvalid() {
-    TDNode node = TDJSONParser.get().parse(new TDJSONParserOption("}"));
+    TDNode node = TDJSONParser.get().parse("}");
     assertEquals("}", node.getValue());
 
-    node = TDJSONParser.get().parse(new TDJSONParserOption(""));
+    node = TDJSONParser.get().parse("");
     assertNull(node.getValue());
 
-    node = TDJSONParser.get().parse(new TDJSONParserOption("[}]"));
+    node = TDJSONParser.get().parse("[}]");
     assertEquals("}", node.getChild(0).getValue());
   }
 
   @Test public void testTDPath() {
     JSONPointer jp = JSONPointer.get();
     Reader reader = TestUtil.loadResource(this.getClass(), "testdata.json");
-    TDNode node = TDJSONParser.get().parse(new TDJSONParserOption(reader));
+    TDNode node = TDJSONParser.get().parse(reader);
 
     TDNode node1 = jp.query(node, "#1");
     log.info("testTDPath: node1: " + TestUtil.toJSON(node1));
 
     assertEquals("Some Name 1", node1.getChildValue("name"));
     assertEquals(10, jp.query(node1, "2/limit").getValue());
+  }
+
+  @Test public void testToString() {
+    Reader reader = TestUtil.loadResource(this.getClass(), "testdata.json");
+    TDNode node = TDJSONParser.get().parse(reader);
+    String str = node.toString();
+    log.info("testToString:str=" + str);
+    String str1 = node.toString();
+    assertSame(str, str1);
+    TDNode city = node.getByPath("/data/0/address/city");
+    city.setValue(city.getValue());
+    String str2 = node.toString();
+    assertNotSame(str, str2);
+    assertEquals(str, str2);
+
+    city.setValue("other city");
+    String str3 = node.toString();
+    log.info("testToString:str=" + str3);
+    assertFalse("toString should return different value when node value changed", str.equals(str3));
+    String expected = "{total:100000000000000000000,limit:10,2:valueWithoutKey,data:[{$id:1,name:Some Name 1,address:" +
+        "{streetLine:1st st,city:other city,},createdAt:2017-07-14T17:17:33.010Z,},{$id:2,name:Some Name 2,address:{" +
+        "streetLine:2nd st,city:san jose,},createdAt:2017-07-14T17:17:33.010Z,},Multiple line literal\n" +
+        "    Line2,],objRef:{$ref:1,},5:lastValueWithoutKey,}";
+    assertEquals(expected, str3);
   }
 }

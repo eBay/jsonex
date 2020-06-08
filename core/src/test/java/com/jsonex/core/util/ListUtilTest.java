@@ -43,6 +43,10 @@ public class ListUtilTest {
     public final static Field<TestCls, Integer> F_TYPE = new Field<>("type", TestCls::getType);
   }
 
+  private static <T> List<T> asList(T... values) {
+    return new ArrayList<T>(Arrays.asList(values));
+  }
+
   private List<TestCls> buildList() {
     return asList(
         new TestCls(0, null, 0),
@@ -54,6 +58,9 @@ public class ListUtilTest {
 
   @Test public void testMap() {
     List<String> result = ListUtil.map(buildList(), F_NAME);
+    assertArrayEquals(new String[]{null, "name1", null, "name3"}, result.toArray());
+
+    result = ListUtil.map(buildList(), TestCls::getName);
     assertArrayEquals(new String[]{null, "name1", null, "name3"}, result.toArray());
 
     assertNull("should be null if pass null", ListUtil.map(null, F_NAME));
@@ -186,5 +193,22 @@ public class ListUtilTest {
     assertEquals(asList(2, 4), ListUtil.takeWhile(list, (Integer n) -> (n % 2 == 0)));
     assertEquals(asList(), ListUtil.takeWhile(list, (Integer n) -> (n < 0)));
     assertEquals(list, ListUtil.takeWhile(list, (Integer n) -> (n > 0)));
+  }
+
+  @Test public void testMergeWith() {
+    Map<String, List<Integer>> target = new MapBuilder<String, List<Integer>>()
+        .put("key1", asList(1, 2, 3))
+        .put("key2", asList(1, 2)).getMap();
+
+    Map<String, List<Integer>> source = new MapBuilder<String, List<Integer>>()
+        .put("key2", asList(4,5))
+        .put("key3", asList(7,8)).getMap();
+
+    Map<String, List<Integer>> result = new MapBuilder<String, List<Integer>>()
+        .put("key1", asList(1, 2, 3))
+        .put("key2", asList(1, 2, 4, 5))
+        .put("key3", asList(7, 8)).getMap();
+
+    assertEquals(result, ListUtil.mergeWith(target, source));
   }
 }

@@ -10,39 +10,57 @@
 package com.jsonex.treedoc;
 
 import com.jsonex.treedoc.TDPath.Part;
+import java.util.Objects;
+import javax.swing.tree.TreeNode;
 import lombok.*;
 import lombok.experimental.Accessors;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.jsonex.core.util.StringUtil.isDigitOnly;
-import static java.lang.Integer.parseInt;
-
 /** A Node in TreeDoc */
-@RequiredArgsConstructor @Getter @Setter @Accessors(chain = true)
-@EqualsAndHashCode(exclude = {"parent", "start", "end", "doc"}) @ToString(exclude = {"parent", "doc"})
+@RequiredArgsConstructor
+// @Getter @Setter
+@Accessors(chain = true)
 public class TDNode {
   public enum Type { MAP, ARRAY, SIMPLE }
-  final TreeDoc doc;
-  TDNode parent;
-  Type type = Type.SIMPLE;
-  /** The key of the node, null for root or array element */
-  String key;
+  @Getter final TreeDoc doc;
+  @Getter TDNode parent;
+  @Getter @Setter Type type = Type.SIMPLE;
+  /** The key of the node, null for root */
+  @Getter String key;
   /** The value of the node, only available for leave node */
-  Object value;
+  @Getter Object value;
   /** Children of node. Use List instead of Map to avoid performance overhead of HashMap for small number of elements */
-  List<TDNode> children;
+  @Getter List<TDNode> children;
   /** Start position in the source */
-  Bookmark start;
+  @Getter @Setter Bookmark start;
   /** Length of this node in the source */
-  Bookmark end;
+  @Getter @Setter Bookmark end;
   /** indicate this node is a deduped Array node for textproto which allows duplicated keys */
-  boolean deduped;
+  transient private boolean deduped;
+  transient private int hash;
+  transient private String str;
+
+  public TDNode(TDNode parent, String key) {
+    this(parent.doc);
+    this.parent = parent;
+    this.key = key;
+  }
 
   public TDNode(TreeDoc doc, String key) {
     this(doc);
     this.key = key;
+  }
+
+  public TDNode setKey(String key) {
+    this.key = key;
+    return touch();
+  }
+
+  public TDNode setValue(Object value) {
+    this.value = value;
+    return touch();
   }
 
   // Create a root node
@@ -58,11 +76,11 @@ public class TDNode {
       return cn;
     }
 
-    TDNode existNode = children.get(childIndex);
-
     // special handling for textproto due to it's bad design that allows duplicated keys
-    if (!existNode.isDeduped()) {
-      TDNode listNode = new TDNode(doc, name).setParent(this).setDeduped(true).setType(Type.ARRAY);
+    TDNode existNode = children.get(childIndex);
+    if (!existNode.deduped) {
+      TDNode listNode = new TDNode(this, name).setType(Type.ARRAY);
+      listNode.deduped = true;
       this.children.set(childIndex, listNode);
       existNode.key = "0";
       listNode.addChild(existNode);
@@ -79,7 +97,7 @@ public class TDNode {
       children = new ArrayList<>();
     children.add(node);
     node.parent = this;
-    return this;
+    return touch();
   }
 
   public TDNode getChild(String name) {
@@ -137,7 +155,7 @@ public class TDNode {
       case ROOT: return doc.root;
       case ID: return doc.idMap.get(part.key);
       case RELATIVE: return getAncestor(part.level);
-      case CHILD: return isDigitOnly(part.key) ? getChild(parseInt(part.key)) : getChild(part.key);
+      case CHILD: return getChild(part.key);
       default: return null;  // Impossible
     }
   }
@@ -160,4 +178,58 @@ public class TDNode {
   }
 
   public boolean isLeaf() { return getChildrenSize() == 0; }
+
+  private TDNode touch() {
+    this.hash = 0;
+    this.str = null;
+    if (parent != null)
+      parent.touch();
+    return this;
+  }
+
+  @Override public String toString() {
+    if (str == null)
+      str = toString(new StringBuilder(), 100000).toString();
+    return str;
+  }
+
+  public StringBuilder toString(StringBuilder sb, int limit) {
+    if (parent != null && parent.type == Type.MAP)
+      sb.append(key + ":");
+
+    if (value != null)
+      sb.append(value);
+
+    if (this.children == null)
+      return sb;
+
+    sb.append(type == Type.ARRAY ? '[' : '{');
+    for (TDNode n : this.children) {
+      n.toString(sb, limit).append(',');
+      if (sb.length() > limit) {
+        sb.append("...");
+        break;
+      }
+    }
+    sb.append(type == Type.ARRAY ? ']' : '}');
+    return sb;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o)
+      return true;
+
+    if (o == null || getClass() != o.getClass())
+      return false;
+
+    TDNode tdNode = (TDNode) o;
+    return Objects.equals(key, tdNode.key) && Objects.equals(value, tdNode.value) && Objects.equals(children, tdNode.children);
+  }
+
+  @Override public int hashCode() {
+    if (hash == 0)
+      hash = Objects.hash(key, value, children);
+    return hash;
+  }
 }

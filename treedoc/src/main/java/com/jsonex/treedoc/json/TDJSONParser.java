@@ -12,8 +12,7 @@ package com.jsonex.treedoc.json;
 import com.jsonex.core.factory.InjectableInstance;
 import com.jsonex.treedoc.TDNode;
 import com.jsonex.treedoc.TreeDoc;
-import jdk.nashorn.internal.runtime.regexp.joni.constants.NodeType;
-
+import java.io.Reader;
 
 public class TDJSONParser {
   private final static char EOF = '\uFFFF';
@@ -21,6 +20,8 @@ public class TDJSONParser {
   public static TDJSONParser get() { return instance.get(); }
 
   public TDNode parse(TDJSONParserOption opt) { return parse(opt.source, opt, new TreeDoc(opt.uri).getRoot()); }
+  public TDNode parse(String str) { return parse(new TDJSONParserOption(str)); }
+  public TDNode parse(Reader reader) { return parse(new TDJSONParserOption(reader)); }
 
   private TDNode parse(CharSource src, TDJSONParserOption opt, TDNode node) {
     char c = skipSpaceAndComments(src);

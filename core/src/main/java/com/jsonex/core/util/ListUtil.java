@@ -12,12 +12,17 @@ package com.jsonex.core.util;
 import com.jsonex.core.type.Identifiable;
 
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+/**
+ * A collection of utilities related to Collection classes. Many methods here are a better alternative
+ * to Java8 stream with more concise expression
+ */
 public class ListUtil {
-  public static <C extends Collection<? super TDest>, TSrc, TDest>
-      C map(Collection<? extends TSrc> source, Function<? super TSrc, ? extends TDest> func, C dest) {
+  public static <C extends Collection<? super TDest>, TSrc, TDest> C map(
+      Collection<? extends TSrc> source, Function<? super TSrc, ? extends TDest> func, C dest) {
     if (source == null)
       return null;
     for (TSrc src : source)
@@ -25,8 +30,8 @@ public class ListUtil {
     return dest;
   }
 
-  public static <TSrc, TDest>
-      List<TDest> map(Collection<? extends TSrc> source, Function<? super TSrc, ? extends TDest> func) {
+  public static <TSrc, TDest> List<TDest> map(
+      Collection<? extends TSrc> source, Function<? super TSrc, ? extends TDest> func) {
     return map(source, func, new ArrayList<>());
   }
 
@@ -34,9 +39,9 @@ public class ListUtil {
     return map(identifiables, param -> param.getId());
   }
 
-  public static <K, E>
-      Map<K, List<E>>  groupBy(Collection<? extends E> source, Function<? super E, ? extends K> classifier) {
-    Map<K, List<E>> result = new HashMap<>();
+  public static <K, E> Map<K, List<E>>  groupBy(
+      Collection<? extends E> source, Function<? super E, ? extends K> classifier) {
+    Map<K, List<E>> result = new LinkedHashMap<>();
     for (E e : source) {
       K k = classifier.apply(e);
       List<E> v = result.get(k);
@@ -49,8 +54,8 @@ public class ListUtil {
     return result;
   }
 
-  public static <K, V, T>
-      Map<K, T> mapValues(Map<? extends K, ? extends V> source, Function<? super V, ? extends T> func) {
+  public static <K, V, T> Map<K, T> mapValues(
+      Map<? extends K, ? extends V> source, Function<? super V, ? extends T> func) {
     Map<K, T> result = new HashMap<>();
     for (K k : source.keySet())
       result.put(k, func.apply(source.get(k)));
@@ -79,7 +84,7 @@ public class ListUtil {
   }
 
   public static <K, V> Map<K, V> toMap(Collection<V> source, Function<? super V, ? extends K> keyFunc) {
-    Map<K, V> map = new HashMap<>();
+    Map<K, V> map = new LinkedHashMap<>();
     for (V s : source)
       map.put(keyFunc.apply(s), s);
     return map;
@@ -87,14 +92,14 @@ public class ListUtil {
 
   public static <S, K, V> Map<K, V> toMap(
       Collection<S> source, Function<? super S, ? extends K> keyFunc, Function<? super S, ? extends V> valFunc) {
-    Map<K, V> map = new HashMap<>();
+    Map<K, V> map = new LinkedHashMap<>();
     for (S s : source)
       map.put(keyFunc.apply(s), valFunc.apply(s));
     return map;
   }
 
-  public static <V, S extends Collection<? extends V>, D extends Collection<? super V>>
-      D filter(S source, Predicate<? super V> pred, D dest) {
+  public static <V, S extends Collection<? extends V>, D extends Collection<? super V>> D filter(
+      S source, Predicate<? super V> pred, D dest) {
     for (V s : source) {
       if (pred.test(s))
         dest.add(s);
@@ -106,13 +111,13 @@ public class ListUtil {
     return filter(source, pred, new ArrayList<>());
   }
 
-  public static <V, C extends Collection<? extends V>>
-      List<V> orderBy(C source, final Function<? super V, ? extends Comparable> by) {
+  public static <V, C extends Collection<? extends V>> List<V> orderBy(
+      C source, final Function<? super V, ? extends Comparable> by) {
     return orderBy(source, by, false);
   }
 
-  public static <V, C extends Collection<? extends V>, K extends Comparable<K>>
-      List<V> orderBy(C src, final Function<? super V, K> by, final boolean desc) {
+  public static <V, C extends Collection<? extends V>, K extends Comparable<K>> List<V> orderBy(
+      C src, final Function<? super V, K> by, final boolean desc) {
     List<V> dest = new ArrayList<>(src.size());
     dest.addAll(src);  // clone
     Collections.sort(dest, (o1, o2) -> {
@@ -163,8 +168,8 @@ public class ListUtil {
     return null;
   }
 
-  public static <V, S extends Collection<? extends V>, D extends Collection<? super V>>
-    D takeWhile(S source, Predicate<? super V> pred, D dest) {
+  public static <V, S extends Collection<? extends V>, D extends Collection<? super V>> D takeWhile(
+      S source, Predicate<? super V> pred, D dest) {
     for (V s : source) {
       if (!pred.test(s))
         break;
@@ -173,13 +178,14 @@ public class ListUtil {
     return dest;
   }
 
-  public static <V, S extends Collection<? extends V>>
-  List<V> takeWhile(S source, Predicate<? super V> pred) {
+  public static <V, S extends Collection<? extends V>> List<V> takeWhile(S source, Predicate<? super V> pred) {
     return takeWhile(source, pred, new ArrayList<>());
   }
 
   public static <T> T last(List<T> list) { return list == null ? null : list.get(list.size() - 1); }
-  public static <T> T first(Collection<T> list) { return list == null || list.size() == 0 ? null : list.iterator().next(); }
+  public static <T> T first(Collection<T> list) {
+    return list == null || list.size() == 0 ? null : list.iterator().next();
+  }
 
   public static <T> boolean containsAny(Collection<T> list, T... elements) {
     for (T e : elements) {
@@ -191,5 +197,19 @@ public class ListUtil {
 
   public static void removeLast(List<?> list) { list.remove(list.size() - 1); }
 
-  public static <T> Set<T> setOf(T... e) { return new HashSet<>(Arrays.asList(e)); }
+  public static <T> Set<T> setOf(T... e) { return new LinkedHashSet<>(Arrays.asList(e)); }
+
+  public static <K, V, M extends Map<K, V>> M mergeWith(M target, Map<? extends K, ? extends V> source,
+      BiFunction<? super V, ? super V, ? extends V> mergeFunc) {
+    source.forEach((k, v) -> target.merge(k, v, mergeFunc));
+    return target;
+  }
+
+  public static <K, V, L extends Collection<V>, M extends Map<K, L>> M mergeWith(
+      M target, Map<? extends K, ? extends L> source) {
+    return mergeWith(target, source, (l1, l2) -> {
+      l1.addAll(l2);
+      return l1;
+    });
+  }
 }
