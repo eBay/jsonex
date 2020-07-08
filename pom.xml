@@ -192,6 +192,9 @@
                 </goals>
               </execution>
             </executions>
+            <configuration>
+              <executable>gpg</executable>
+            </configuration>
           </plugin>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>

@@ -56,7 +56,7 @@ public class JSONCoderTest {
         .setBigInteger(new BigInteger("123456789012345678901234567890"))
         .setSomeClass(java.util.Date.class)
         .setXmlCalendar(DatatypeFactory.newInstance().newXMLGregorianCalendar(new GregorianCalendar()))
-        .setDateNumberMap(new MapBuilder<Date, Number>().put(new Date(), 10_000).getMap());
+        .setDateNumberMap(new MapBuilder(new Date(), 10_000).getMap());
 
     tb.publicInts = tb.getInts();
     tb.publicStrField = "PublicString";
@@ -126,15 +126,17 @@ public class JSONCoderTest {
 
   @Test public void testDedupWithRef() {
     TestBean2 tb2 = new TestBean2();
-    TestBean tb = new TestBean().setBean2(tb2);
+    TestBean tb = new TestBean().setBean2(tb2).setInts(new int[]{1,2,3});
     tb.bean2List = Collections.singletonList(tb2);
+    tb2.setInts(tb.getInts());  // Duplicated arrays
 
-    String str = toJSONString(tb, JSONCoderOption.create().setDedupWithRef(true));
+    String str = toJSONString(tb, JSONCoderOption.create().setDedupWithRef(true).setJsonOption(false, '"', 2));
     log("JSONStr=" + str);
 
     assertTrue("Generate ref if dedupWithRef is set", str.contains("$ref"));
     TestBean tb1 = JSONCoder.global.decode(str, TestBean.class);
     assertSame(tb1.getBean2(), tb1.bean2List.get(0));
+    assertSame(tb1.getInts(), tb1.getBean2().getInts());
   }
 
   @Test public void testEnumNameOption() {
@@ -395,7 +397,7 @@ public class JSONCoderTest {
     assertEquals("line1\n\r\b\t\fline2", bean.getStrField());
   }
 
-  @Test public void testDecodeDecodeNull() {
+  @Test public void testEecodeDecodeNull() {
     assertNull(JSONCoder.global.decode((String)null, Object.class));
     assertEquals("null", JSONCoder.global.encode((Object)null));
   }

@@ -9,6 +9,9 @@
 
 package com.jsonex.core.util;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class StringUtil {
   private final static String EMPTY = "";
 
@@ -166,6 +169,18 @@ public class StringUtil {
     }
     return sb.toString();
   }
+
+  public static String join(String[] items, String delimiter) { return join(Arrays.asList(items), delimiter); }
+  public static String join(List<String> items, String delimiter) {
+    StringBuilder sb = new StringBuilder();
+    for (String itm : items) {
+      if (sb.length() > 0)
+        sb.append(delimiter);
+      sb.append(itm);
+    }
+    return sb.toString();
+  }
+
 
   public static StringBuilder appendRepeatedly(StringBuilder result, String str, int times) {
     for (int i=0; i<times; i++)

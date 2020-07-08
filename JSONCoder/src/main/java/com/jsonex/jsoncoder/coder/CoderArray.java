@@ -10,12 +10,11 @@
 package com.jsonex.jsoncoder.coder;
 
 import com.jsonex.core.factory.InjectableInstance;
+import com.jsonex.core.util.ClassUtil;
 import com.jsonex.jsoncoder.BeanCoderContext;
 import com.jsonex.jsoncoder.BeanCoderException;
 import com.jsonex.jsoncoder.ICoder;
 import com.jsonex.treedoc.TDNode;
-import com.jsonex.core.util.ClassUtil;
-import lombok.Getter;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
@@ -38,14 +37,16 @@ public class CoderArray implements ICoder<Object> {
   }
 
   @Override
-  public Object decode(TDNode jsonNode, Type type, Object targetObj, BeanCoderContext ctx) {
-    if (jsonNode.getType() != TDNode.Type.ARRAY)
-      throw new BeanCoderException("Incorrect input, the input has to be an array:" + toTrimmedStr(jsonNode, 500));
+  public Object decode(TDNode tdNode, Type type, Object targetObj, BeanCoderContext ctx) {
+    if (tdNode.getType() != TDNode.Type.ARRAY)
+      throw new BeanCoderException("Incorrect input, the input has to be an array:" + toTrimmedStr(tdNode, 500));
     Class<?> cls = ClassUtil.getGenericClass(type);
-    Object array = Array.newInstance(cls.getComponentType(), jsonNode.getChildren().size());
-    ctx.getObjectPath().push(array);
-    for (int i=0; i < jsonNode.getChildrenSize(); i++)
-      Array.set(array, i, ctx.decode(jsonNode.getChild(i), cls.getComponentType(), null, Integer.toString(i)));
-    return array;
+    Object result = Array.newInstance(cls.getComponentType(), tdNode.getChildren().size());
+
+    ctx.getNodeToObjectMap().put(tdNode, result);
+
+    for (int i=0; i < tdNode.getChildrenSize(); i++)
+      Array.set(result, i, ctx.decode(tdNode.getChild(i), cls.getComponentType(), null, Integer.toString(i)));
+    return result;
   }
 }

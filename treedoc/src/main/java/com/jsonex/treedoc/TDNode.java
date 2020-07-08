@@ -9,14 +9,16 @@
 
 package com.jsonex.treedoc;
 
+import com.jsonex.core.util.StringUtil;
 import com.jsonex.treedoc.TDPath.Part;
-import java.util.Objects;
-import javax.swing.tree.TreeNode;
-import lombok.*;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /** A Node in TreeDoc */
 @RequiredArgsConstructor
@@ -169,6 +171,7 @@ public class TDNode {
 
   public boolean isRoot() { return parent == null; }
 
+  public String getPathAsString() { return "/" + StringUtil.join(getPath(), "/"); }
   public List<String> getPath() {
     if (parent == null)
       return new ArrayList<>();
