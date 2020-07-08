@@ -53,7 +53,8 @@ public class BeanProperty {
       }else
         throw new InvokeRuntimeException("field is not mutable: " + name + ",class:" + obj.getClass());
     }catch(Exception e){
-      throw new InvokeRuntimeException("error set value obj=" + obj + " setter=" + setter + " value=" + value, e);
+      throw new InvokeRuntimeException(
+          "error set value obj=" + obj + ";setter=" + setter + ";name=" + name + ";value=" + value, e);
     }
   }
   

@@ -42,8 +42,10 @@ public class TDPath {
         path.addParts(Part.ofRelative(0));
       else if ("..".equals(s))
         path.addParts(Part.ofRelative(1));
-      else if (s.isEmpty())
+      else if (s.isEmpty() || s.equals("#"))
         path.addParts(Part.ofRoot());
+      else if (s.startsWith("#")  && s.length() > 0)
+        path.addParts(Part.ofId(s.substring(1)));
       else
         path.addParts(Part.ofChild(s));
     }

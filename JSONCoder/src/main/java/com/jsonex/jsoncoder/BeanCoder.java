@@ -10,15 +10,15 @@
 package com.jsonex.jsoncoder;
 
 import com.jsonex.core.factory.InjectableInstance;
+import com.jsonex.core.util.ClassUtil;
+import com.jsonex.core.util.StringUtil;
 import com.jsonex.jsoncoder.coder.CoderArray;
 import com.jsonex.jsoncoder.coder.CoderCollection;
 import com.jsonex.jsoncoder.coder.CoderMap;
 import com.jsonex.jsoncoder.coder.CoderObject;
+import com.jsonex.treedoc.TDNode;
 import com.jsonex.treedoc.TreeDoc;
 import com.jsonex.treedoc.json.TDJSONWriter;
-import com.jsonex.treedoc.TDNode;
-import com.jsonex.core.util.ClassUtil;
-import com.jsonex.core.util.StringUtil;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -107,17 +107,20 @@ public class BeanCoder {
         // We will ignore this error
       }
 
-      if (ctx.convertedObjects.size() > MAX_OBJECTS || ctx.objectPath.size() > MAX_DEPTH)
+      if (ctx.objToNodeMap.size() > MAX_OBJECTS || ctx.objectPath.size() > MAX_DEPTH)
         return target.setValue("[TRIMMED_DUE_TO_TOO_MANY_OBJECT]");
 
-      TDNode orgResult = ctx.convertedObjects.get(eqWrapper);
+      TDNode orgResult = ctx.objToNodeMap.get(eqWrapper);
       if(opt.dedupWithRef && orgResult != null) {
-        String hash = (String) orgResult.getChildValue(ID_KEY);
-        if (hash == null) {  // This is the first reference. Only if there's a reference, the original map will display the hash value
-          hash = Long.toHexString(abs(eqWrapper.hashCode()));
-          orgResult.createChild(ID_KEY).setValue(hash);
-        }
-        return setRef(target, "#" + hash);
+        if (orgResult.getType() == TDNode.Type.MAP) {
+          Integer id = (Integer) orgResult.getChildValue(ID_KEY);
+          if (id == null) {  // This is the first reference. Only if there's a reference, the original map will display the hash value
+            id = ctx.getNextId();
+            orgResult.createChild(ID_KEY).setValue(id);
+          }
+          return setRef(target, "#" + id);
+        } else
+          return setRef(target, orgResult.getPathAsString());
       }
 
       //Don't put empty collection and map as the hashCode method is not implemented properly
@@ -135,15 +138,15 @@ public class BeanCoder {
       } else
         CoderObject.get().encode(obj, type, ctx, target);
 
-      if (target.getType() == TDNode.Type.MAP && target.hasChildren())
-        ctx.convertedObjects.put(eqWrapper, target);
+      if (target.getType() == TDNode.Type.MAP || target.getType() == TDNode.Type.ARRAY)
+        ctx.objToNodeMap.put(eqWrapper, target);
 
       return target;
     } catch (Exception ex) {
       throw new BeanCoderException(ex);
     } finally{
       if(ctx.objectPath.size() > pathSize) {
-          ctx.objectPath.pop();
+        ctx.objectPath.pop();
       }
     }
   }
@@ -154,7 +157,6 @@ public class BeanCoder {
   }
 
   /**
-   *
    * @param tdNode  The json object to decode
    * @param type  The target type to decode to
    * @param targetObj The target object to decode to, if it's null, a new Object will be created
@@ -167,34 +169,28 @@ public class BeanCoder {
       return null;
     Class<?> cls = ClassUtil.getGenericClass(type);
 
-    int pathSize = ctx.objectPath.size();
     try{
       Object refVal = tdNode.getChildValue(REF_KEY);
       if (refVal instanceof String) {
         String ref = (String)refVal;
-        if(ref.length() > 0 && ref.charAt(0) == '#')  // Reference to a hashcode
-          return ctx.hashToObjectMap.get(ref.substring(1));
-
-        // Assume ref is in the format of "../../" etc.
-        int level = ref.length() / 3;
-        if (ctx.objectPath.size() < level)
-          throw new BeanCoderException("Reference level exceeding objectPath:" + ctx.objectPath + "; ref:" + ref);
-        return ctx.objectPath.get(level - 1);
+        TDNode target = tdNode.getByPath(ref);
+        if (target == null)
+          throw new BeanCoderException("Reference is not found: ref:" + ref + "; current Node:" + tdNode.getPath());
+        return ctx.nodeToObjectMap.get(target);
       }
 
       if (tdNode.getType() == TDNode.Type.SIMPLE) {
-        Object p = objectToSimpleType(tdNode.getValue(), cls);
-        if (p != null)
-          return p;
+        Object result = objectToSimpleType(tdNode.getValue(), cls);
+        if (result != null)
+          return result;
       }
 
       ICoder<?> coder = ctx.option.findCoder(cls);
       if(coder != null)
         return coder.decode(tdNode, type, targetObj, ctx);
 
-      if (cls == String.class) {  // expect a string, but got non-string, just return serialized form of the the object
+      if (cls == String.class) // expect a string, but got non-string, just return serialized form of the the object
         return TDJSONWriter.get().writeAsString(tdNode);
-      }
 
       if (cls.isArray())  // Handle the array type
         return CoderArray.get().decode(tdNode, type, targetObj, ctx);
@@ -209,9 +205,6 @@ public class BeanCoder {
       return CoderObject.get().decode(tdNode, type, targetObj, ctx);
     } catch(Exception e) {
       throw new BeanCoderException("failed to decode:"+type + "; name=" + name, e);
-    } finally {
-      if(ctx.objectPath.size() > pathSize)
-        ctx.objectPath.pop();
     }
   }
 

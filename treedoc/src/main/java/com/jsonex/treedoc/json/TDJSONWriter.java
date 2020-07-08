@@ -37,9 +37,8 @@ public class TDJSONWriter {
       return;
     }
 
-    boolean isCompact = opt.getIndentFactor() == 0;
     String childIndentStr = "";
-    if (!isCompact)
+    if (opt.hasIndent())
       childIndentStr = indentStr + opt.getIndentStr();
 
     switch (node.getType()) {
@@ -60,7 +59,7 @@ public class TDJSONWriter {
     if (node.getChildren() != null) {
       for (int i = 0; i < node.getChildrenSize(); i++){
         TDNode cn = node.getChild(i);
-        if (opt.indentFactor > 0) {
+        if (opt.hasIndent()) {
           out.append('\n');
           out.append(childIndentStr);
         }
@@ -74,7 +73,7 @@ public class TDJSONWriter {
           out.append(",");
       }
 
-      if (opt.indentFactor > 0 && node.hasChildren()) {
+      if (opt.hasIndent() && node.hasChildren()) {
         out.append('\n');
         out.append(indentStr);
       }
@@ -89,7 +88,7 @@ public class TDJSONWriter {
     if (node.hasChildren()) {
       for (int i = 0; i < node.getChildrenSize(); i++) {
         TDNode cn = node.getChild(i);
-        if (opt.indentFactor > 0) {
+        if (opt.hasIndent()) {
           out.append('\n');
           out.append(childIndentStr);
         }
@@ -98,7 +97,7 @@ public class TDJSONWriter {
           out.append(",");
       }
 
-      if (opt.indentFactor > 0 && node.hasChildren()) {
+      if (opt.hasIndent() && node.hasChildren()) {
         out.append('\n');
         out.append(indentStr);
       }

@@ -10,21 +10,16 @@
 package com.jsonex.jsoncoder.coder;
 
 import com.jsonex.core.factory.InjectableInstance;
+import com.jsonex.core.util.ClassUtil;
 import com.jsonex.jsoncoder.BeanCoderContext;
 import com.jsonex.jsoncoder.BeanCoderException;
 import com.jsonex.jsoncoder.ICoder;
 import com.jsonex.treedoc.TDNode;
-import com.jsonex.core.util.ClassUtil;
-import lombok.Getter;
 import lombok.SneakyThrows;
 
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import static com.jsonex.core.util.StringUtil.toTrimmedStr;
 
@@ -50,9 +45,9 @@ public class CoderCollection implements ICoder<Collection> {
 
   @SuppressWarnings("unchecked")
   @SneakyThrows
-  @Override public Collection decode(TDNode jsonNode, Type type, Object targetObj, BeanCoderContext ctx) {
-    if (jsonNode.getType() != TDNode.Type.ARRAY)
-      throw new BeanCoderException("Incorrect input, the input has to be an array:" + toTrimmedStr(jsonNode, 500));
+  @Override public Collection decode(TDNode tdNode, Type type, Object targetObj, BeanCoderContext ctx) {
+    if (tdNode.getType() != TDNode.Type.ARRAY)
+      throw new BeanCoderException("Incorrect input, the input has to be an array:" + toTrimmedStr(tdNode, 500));
 
     Class<?> cls = ClassUtil.getGenericClass(type);
 
@@ -77,9 +72,10 @@ public class CoderCollection implements ICoder<Collection> {
         result = (Collection<Object>) cls.newInstance();
     }
 
-    ctx.getObjectPath().push(result);
-    for (int i = 0; i < jsonNode.getChildrenSize(); i++)
-      result.add(ctx.decode(jsonNode.getChildren().get(i), childType, null, Integer.toString(i)));
+    ctx.getNodeToObjectMap().put(tdNode, result);
+
+    for (int i = 0; i < tdNode.getChildrenSize(); i++)
+      result.add(ctx.decode(tdNode.getChildren().get(i), childType, null, Integer.toString(i)));
     return result;
   }
 }
