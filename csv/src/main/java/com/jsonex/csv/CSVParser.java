@@ -20,51 +20,54 @@ public class CSVParser {
 
   public TDNode parse(Reader reader, CSVOption opt) { return parse(new ReaderCharSource(reader), opt); }
   public TDNode parse(String str, CSVOption opt) { return parse(new ArrayCharSource(str), opt); }
-  public TDNode parse(CharSource source, CSVOption opt) { return parse(source, opt, new TreeDoc(null).getRoot()); }
-  public TDNode parse(CharSource source, CSVOption opt, TDNode root) {
+  public TDNode parse(CharSource src, CSVOption opt) { return parse(src, opt, new TreeDoc(null).getRoot()); }
+  public TDNode parse(CharSource src, CSVOption opt, TDNode root) {
     root.setType(TDNode.Type.ARRAY);
-    while(!source.isEof()) {
-      if(!source.skipChars(SPACE_CHARS))
+    while (!src.isEof()) {
+      if (!src.skipChars(SPACE_CHARS))
         break;
-      TDNode child = root.createChild();
-      readRecord(source, opt, child);
+      readRecord(src, opt, root);
     }
     return root;
   }
 
-  void readRecord(CharSource source, CSVOption opt, TDNode row) {
-    row.setStart(source.getBookmark());
-    while(!source.isEof() && source.peek() != opt.recordSep) {
-      if (!source.skipChars(SPACE_CHARS))
-        return;
-      Bookmark start = source.getBookmark();
-      TDNode fieldNode = row.createChild().setValue(readField(source, opt));
-      fieldNode.setStart(start).setEnd(source.getBookmark());
+  void readRecord(CharSource src, CSVOption opt, TDNode root) {
+    TDNode row = new TDNode(root.getDoc(), null);
+    row.setStart(src.getBookmark());
+    while (!src.isEof() && src.peek() != opt.recordSep) {
+      if (!src.skipChars(SPACE_CHARS))
+        break;
+      Bookmark start = src.getBookmark();
+      TDNode field = row.createChild().setValue(readField(src, opt));
+      field.setStart(start).setEnd(src.getBookmark());
     }
-    row.setEnd(source.getBookmark());
-    if (!source.isEof())
-      source.read();  // Skip the recordSep
+    row.setEnd(src.getBookmark());
+    if (row.hasChildren())
+      root.addChild(row);
+    if (!src.isEof())
+      src.read();  // Skip the recordSep
+
   }
 
-  String readField(CharSource source, CSVOption opt) {
+  String readField(CharSource src, CSVOption opt) {
     StringBuilder sb = new StringBuilder();
     boolean previousQuoted = false;
-    while(!source.isEof() && source.peek() != opt.fieldSep && source.peek() != opt.recordSep) {
-      if (source.peek() == opt.quoteChar) {
+    while (!src.isEof() && src.peek() != opt.fieldSep && src.peek() != opt.recordSep) {
+      if (src.peek() == opt.quoteChar) {
         if (previousQuoted)
           sb.append(opt.quoteChar);
-        source.skip();  // for "", we will keep one quote
-        source.readUntil(opt.getQuoteCharStr(), sb);
-        if (source.peek() == opt.quoteChar)
-          source.skip();
+        src.skip();  // for "", we will keep one quote
+        src.readUntil(opt.getQuoteCharStr(), sb);
+        if (src.peek() == opt.quoteChar)
+          src.skip();
         previousQuoted = true;
       } else {
-        sb.append(source.readUntil(opt.getFieldAndRecord()).trim());
+        sb.append(src.readUntil(opt.getFieldAndRecord()).trim());
         previousQuoted = false;
       }
     }
-    if (!source.isEof() && source.peek() == opt.fieldSep)
-      source.skip();  // Skip fieldSep
+    if (!src.isEof() && src.peek() == opt.fieldSep)
+      src.skip();  // Skip fieldSep
 
     return sb.toString();
   }

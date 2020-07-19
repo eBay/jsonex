@@ -45,25 +45,25 @@ public abstract class CharSource {
     return readUntil(predicate, null, 0, Integer.MAX_VALUE);
   }
   /** @return true Terminal conditions matches  */
-  public boolean readUntil(final String chars, final boolean include, StringBuilder target, int minLen, int maxLen) {
+  public boolean readUntil(String chars, StringBuilder target, boolean include, int minLen, int maxLen) {
     return readUntil(s -> chars.indexOf(s.peek(0)) >= 0 == include, target, minLen, maxLen);
   }
   /** @return true Terminal conditions matches  */
-  public boolean readUntil(final String terminator, StringBuilder target) {
-    return readUntil(terminator, true, target, 0, MAX_STRING_LEN);
+  public boolean readUntil(String terminator, StringBuilder target) {
+    return readUntil(terminator, target, true, 0, MAX_STRING_LEN);
   }
   /** @return true Terminal conditions matches  */
   public String readUntil(final String terminator) { return readUntil(terminator, 0, Integer.MAX_VALUE); }
   /** @return true Terminal conditions matches  */
   public String readUntil(final String terminator, int minLen, int maxLen) {
     StringBuilder sb = new StringBuilder();
-    readUntil(terminator, true, sb, minLen, maxLen);
+    readUntil(terminator, sb, true, minLen, maxLen);
     return sb.toString();
   }
 
   /** @return true Indicates more character in the stream  */
   public boolean skipUntil(final String chars, final boolean include) {
-    return readUntil(chars, include, null, 0, Integer.MAX_VALUE);
+    return readUntil(chars, null, include, 0, Integer.MAX_VALUE);
   }
   /** @return true Indicates more character in the stream  */
   public boolean skipUntil(final String terminator) { return skipUntil(terminator, true); }

@@ -13,12 +13,16 @@ public class CSVWriter {
 
   @SneakyThrows
   public <T extends Appendable> T write(T out, TDNode node, CSVOption opt) {
-    for (TDNode row: node.getChildren()) {
-      for (TDNode field: row.getChildren()) {
-        writeField(out, field, opt);
-        out.append(opt.getFieldSepStr());
+    if (node.getChildren() != null) {
+      for (TDNode row : node.getChildren()) {
+        if (row.getChildren() != null) {
+          for (TDNode field : row.getChildren()) {
+            writeField(out, field, opt);
+            out.append(opt.getFieldSepStr());
+          }
+          out.append(opt.getRecordSepStr());
+        }
       }
-      out.append(opt.getRecordSepStr());
     }
     return out;
   }

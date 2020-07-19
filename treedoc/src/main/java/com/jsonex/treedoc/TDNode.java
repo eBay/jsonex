@@ -58,22 +58,12 @@ public class TDNode {
     this.key = key;
   }
 
-  public TDNode setKey(String key) {
-    this.key = key;
-    return touch();
-  }
-
-  public TDNode setValue(Object value) {
-    this.value = value;
-    return touch();
-  }
+  public TDNode setKey(String key) {  this.key = key; return touch(); }
+  public TDNode setValue(Object value) { this.value = value; return touch(); }
 
   // Create a child node for array
   public TDNode createChild() { return createChild(null); }
   public TDNode createChild(String name) {
-    if (name == null)  // Assume it's array element
-      name = "" + getChildrenSize();
-
     int childIndex = indexOf(name);
     if (childIndex < 0) {
       TDNode cn = new TDNode(doc, name);
@@ -100,8 +90,10 @@ public class TDNode {
   public TDNode addChild(TDNode node) {
     if (children == null)
       children = new ArrayList<>();
-    children.add(node);
     node.parent = this;
+    if (node.key == null)  // Assume it's array element
+      node.key = "" + getChildrenSize();
+    children.add(node);
     return touch();
   }
 
@@ -131,7 +123,7 @@ public class TDNode {
   }
 
   int indexOf(TDNode node) { return ListUtil.indexOf(children, n -> n == node); }
-  int indexOf(String name) { return ListUtil.indexOf(children, n -> name.equals(n.getKey())); }
+  int indexOf(String name) { return ListUtil.indexOf(children, n -> n.getKey().equals(name)); }
   int index() { return parent == null ? 0 : parent.indexOf(this); }
 
   public Object getChildValue(String name) {
