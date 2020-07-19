@@ -7,9 +7,7 @@
  https://opensource.org/licenses/MIT.
  ************************************************************/
 
-package com.jsonex.treedoc.json;
-
-import com.jsonex.treedoc.Bookmark;
+package com.jsonex.core.charsource;
 
 public class ParseRuntimeException extends RuntimeException {
   final Bookmark bookmark;

@@ -135,9 +135,10 @@ public class ListUtil {
   }
 
   public static boolean contains(long[] longs, long match) {
-    for (long l : longs)
-      if (match == l)
-        return true;
+    if (longs != null)
+      for (long l : longs)
+        if (match == l)
+          return true;
     return false;
   }
 
@@ -153,28 +154,35 @@ public class ListUtil {
   }
 
   public static <V, C extends Collection<V>> boolean exists(C source, Predicate<? super V> pred) {
-    for (V s : source) {
-      if (pred.test(s))
-        return true;
-    }
-    return false;
+    return first(source, pred) != null;
   }
 
   public static <V, C extends Collection<V>> V first(C source, Predicate<? super V> pred) {
-    for (V s : source) {
-      if (pred.test(s))
-        return s;
-    }
+    if (source != null)
+      for (V s : source) {
+        if (pred.test(s))
+          return s;
+      }
     return null;
+  }
+
+  public static <V, C extends List<V>> int indexOf(C source, Predicate<? super V> pred) {
+    if (source != null)
+      for (int i = 0; i < source.size(); i++) {
+        if (pred.test(source.get(i)))
+          return i;
+      }
+    return -1;
   }
 
   public static <V, S extends Collection<? extends V>, D extends Collection<? super V>> D takeWhile(
       S source, Predicate<? super V> pred, D dest) {
-    for (V s : source) {
-      if (!pred.test(s))
-        break;
-      dest.add(s);
-    }
+    if (source != null)
+      for (V s : source) {
+        if (!pred.test(s))
+          break;
+        dest.add(s);
+      }
     return dest;
   }
 
@@ -188,10 +196,11 @@ public class ListUtil {
   }
 
   public static <T> boolean containsAny(Collection<T> list, T... elements) {
-    for (T e : elements) {
-      if (list.contains(e))
-        return true;
-    }
+    if (list != null)
+      for (T e : elements) {
+        if (list.contains(e))
+          return true;
+      }
     return false;
   }
 

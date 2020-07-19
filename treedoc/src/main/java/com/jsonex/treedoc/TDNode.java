@@ -9,14 +9,18 @@
 
 package com.jsonex.treedoc;
 
+import com.jsonex.core.charsource.Bookmark;
+import com.jsonex.core.util.ListUtil;
+import com.jsonex.core.util.StringUtil;
 import com.jsonex.treedoc.TDPath.Part;
-import java.util.Objects;
-import javax.swing.tree.TreeNode;
-import lombok.*;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /** A Node in TreeDoc */
 @RequiredArgsConstructor
@@ -34,7 +38,8 @@ public class TDNode {
   /** Children of node. Use List instead of Map to avoid performance overhead of HashMap for small number of elements */
   @Getter List<TDNode> children;
   /** Start position in the source */
-  @Getter @Setter Bookmark start;
+  @Getter @Setter
+  Bookmark start;
   /** Length of this node in the source */
   @Getter @Setter Bookmark end;
   /** indicate this node is a deduped Array node for textproto which allows duplicated keys */
@@ -53,22 +58,12 @@ public class TDNode {
     this.key = key;
   }
 
-  public TDNode setKey(String key) {
-    this.key = key;
-    return touch();
-  }
+  public TDNode setKey(String key) {  this.key = key; return touch(); }
+  public TDNode setValue(Object value) { this.value = value; return touch(); }
 
-  public TDNode setValue(Object value) {
-    this.value = value;
-    return touch();
-  }
-
-  // Create a root node
+  // Create a child node for array
   public TDNode createChild() { return createChild(null); }
   public TDNode createChild(String name) {
-    if (name == null)  // Assume it's array element
-      name = "" + getChildrenSize();
-
     int childIndex = indexOf(name);
     if (childIndex < 0) {
       TDNode cn = new TDNode(doc, name);
@@ -95,9 +90,31 @@ public class TDNode {
   public TDNode addChild(TDNode node) {
     if (children == null)
       children = new ArrayList<>();
-    children.add(node);
     node.parent = this;
+    if (node.key == null)  // Assume it's array element
+      node.key = "" + getChildrenSize();
+    children.add(node);
     return touch();
+  }
+
+  public void swapWith(TDNode to) {
+    if (this.parent == null || to.parent == null)
+      throw new IllegalArgumentException("Can't swap root node");
+    int idx1 = index();
+    int idx2 = to.index();
+    if (idx1 < 0 || idx2 < 0)
+      throw new IllegalArgumentException("Note is not attached to it's parent:idx1=" + idx1 + "; idx2=" + idx2);
+
+    TDNode toParent = to.parent;
+    String toKey = to.key;
+
+    parent.children.set(idx1, to);
+    to.parent = parent;
+    to.key = key;
+
+    toParent.children.set(idx2, this);
+    parent = toParent;
+    key = toKey;
   }
 
   public TDNode getChild(String name) {
@@ -105,15 +122,9 @@ public class TDNode {
     return idx < 0 ? null : children.get(idx);
   }
 
-  int indexOf(String name) {
-    if (children == null || name == null)
-      return -1;
-
-    for (int i = 0; i < children.size(); i++)
-      if (name.equals(children.get(i).getKey()))
-        return i;
-    return -1;
-  }
+  int indexOf(TDNode node) { return ListUtil.indexOf(children, n -> n == node); }
+  int indexOf(String name) { return ListUtil.indexOf(children, n -> n.getKey().equals(name)); }
+  int index() { return parent == null ? 0 : parent.indexOf(this); }
 
   public Object getChildValue(String name) {
     TDNode cn = getChild(name);
@@ -150,7 +161,7 @@ public class TDNode {
     return next.getByPath(path, idx + 1, noNull);
   }
 
-  private TDNode getNextNode(Part part) {
+  TDNode getNextNode(Part part) {
     switch (part.type) {
       case ROOT: return doc.root;
       case ID: return doc.idMap.get(part.key);
@@ -169,6 +180,7 @@ public class TDNode {
 
   public boolean isRoot() { return parent == null; }
 
+  public String getPathAsString() { return "/" + StringUtil.join(getPath(), "/"); }
   public List<String> getPath() {
     if (parent == null)
       return new ArrayList<>();
@@ -215,8 +227,7 @@ public class TDNode {
     return sb;
   }
 
-  @Override
-  public boolean equals(Object o) {
+  @Override public boolean equals(Object o) {
     if (this == o)
       return true;
 

@@ -150,6 +150,7 @@ public class ListUtilTest {
   @Test public void testContains() {
     assertTrue("should contains", ListUtil.contains(new long[]{1,2,3}, 3));
     assertFalse("should not contains", ListUtil.contains(new long[]{1,2,3}, 4));
+    assertFalse("return null if source is null", ListUtil.contains(null, 0));
   }
 
   @Test public void testExits() {
@@ -161,15 +162,20 @@ public class ListUtilTest {
     //Assert.assertFalse("shouldn't contains type of 3", ListUtil.exists(buildList(), obj -> obj.getType() == 3));
     assertTrue("should contains type of 1", ListUtil.exists(buildList(), eq(F_TYPE, 1)));
     assertFalse("shouldn't contains type of 3", ListUtil.exists(buildList(), eq(F_TYPE, 3)));
+    assertFalse("shouldn return false for null source", ListUtil.exists(null, eq(F_TYPE, 3)));
   }
 
-  @Test public void testFirstLast() {
+  @Test public void testFirstLastIndexOf() {
     List<TestCls> list = buildList();
     assertEquals(list.get(0), ListUtil.first(list));
     assertEquals(list.get(3), ListUtil.last(list));
 
     assertEquals(list.get(2), ListUtil.first(list, eq(F_TYPE, 2)));
+    assertEquals(2, ListUtil.indexOf(list, eq(F_TYPE, 2)));
+
     assertEquals(null, ListUtil.first(list, eq(F_TYPE, 3)));
+    assertEquals(null, ListUtil.first(null, eq(F_TYPE, 3)));
+    assertEquals(-1, ListUtil.indexOf(null, eq(F_TYPE, 2)));
   }
 
   @Test public void testJoin() { assertEquals("1,2,3", ListUtil.join(new Integer[]{1,2,3}, ",")); }
@@ -184,8 +190,9 @@ public class ListUtilTest {
     assertTrue("set should contain all the elemtns", setOf(1,2,3).containsAll(asList(1,2,3))); }
 
   @Test public void testContainsAny() {
-    assertTrue("containsAny should return true: ", containsAny(setOf(1,2,3), 1, 2));
-    assertFalse("containsAny should return false: ", containsAny(setOf(1,2,3), 4, 5));
+    assertTrue("Should return true: ", containsAny(setOf(1,2,3), 1, 2));
+    assertFalse("Should return false: ", containsAny(setOf(1,2,3), 4, 5));
+    assertFalse("Should return false for null source: ", containsAny(null, 0));
   }
 
   @Test public void testTakeWhile() {
@@ -193,6 +200,7 @@ public class ListUtilTest {
     assertEquals(asList(2, 4), ListUtil.takeWhile(list, (Integer n) -> (n % 2 == 0)));
     assertEquals(asList(), ListUtil.takeWhile(list, (Integer n) -> (n < 0)));
     assertEquals(list, ListUtil.takeWhile(list, (Integer n) -> (n > 0)));
+    assertEquals(0, ListUtil.takeWhile(null, (Integer n) -> (n > 0)).size());
   }
 
   @Test public void testMergeWith() {

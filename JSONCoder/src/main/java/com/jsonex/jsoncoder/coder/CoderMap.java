@@ -10,14 +10,14 @@
 package com.jsonex.jsoncoder.coder;
 
 import com.jsonex.core.factory.InjectableInstance;
+import com.jsonex.core.util.BeanConvertContext;
+import com.jsonex.core.util.ClassUtil;
 import com.jsonex.jsoncoder.BeanCoderContext;
 import com.jsonex.jsoncoder.BeanCoderException;
 import com.jsonex.jsoncoder.ICoder;
 import com.jsonex.jsoncoder.JSONCoderOption;
-import com.jsonex.treedoc.json.TDJSONWriter;
 import com.jsonex.treedoc.TDNode;
-import com.jsonex.core.util.BeanConvertContext;
-import com.jsonex.core.util.ClassUtil;
+import com.jsonex.treedoc.json.TDJSONWriter;
 import lombok.Getter;
 import lombok.SneakyThrows;
 
@@ -26,7 +26,6 @@ import java.lang.reflect.Type;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static com.jsonex.jsoncoder.BeanCoder.ID_KEY;
 import static com.jsonex.core.util.ClassUtil.isSimpleType;
 import static com.jsonex.core.util.StringUtil.toTrimmedStr;
 
@@ -84,7 +83,7 @@ public class CoderMap implements ICoder<Map> {
 
   @SuppressWarnings("unchecked")
   @SneakyThrows
-  @Override public Map decode(TDNode jsonNode, Type type, Object targetObj, BeanCoderContext ctx) {
+  @Override public Map decode(TDNode tdNode, Type type, Object targetObj, BeanCoderContext ctx) {
     Class<?> cls = ClassUtil.getGenericClass(type);
     // Get the key/value types
     // TODO: call ClassUtil.getGenericTypeActualParamsForInterface() instead to support MultiValueMap
@@ -106,24 +105,20 @@ public class CoderMap implements ICoder<Map> {
         result = (Map<Object,Object>) cls.newInstance();
     }
 
-    ctx.getObjectPath().push(result);
+    ctx.getNodeToObjectMap().put(tdNode, result);
 
-    switch (jsonNode.getType()) {
+    switch (tdNode.getType()) {
       case MAP:
-        String hash = (String) jsonNode.getChildValue(ID_KEY);
-        if (hash != null)
-          ctx.getHashToObjectMap().put(hash, result);
-
-        for (int i = 0; i < jsonNode.getChildrenSize(); i++) {
-          TDNode cn = jsonNode.getChild(i);
+        for (int i = 0; i < tdNode.getChildrenSize(); i++) {
+          TDNode cn = tdNode.getChild(i);
           Object key = ClassUtil.stringToSimpleObject(cn.getKey(), ClassUtil.getGenericClass(childKeyType), new BeanConvertContext());
           Object value = ctx.decode(cn, childValueType, result.get(key), i + ".value");
           result.put(key, value);
         }
         return result;
       case ARRAY:
-        for (int i = 0; i < jsonNode.getChildrenSize(); i++) {
-          TDNode cn = jsonNode.getChild(i);
+        for (int i = 0; i < tdNode.getChildrenSize(); i++) {
+          TDNode cn = tdNode.getChild(i);
           Object key = ctx.decode(cn.getChild("key"), childKeyType, null, i + ".key");
           Object value = ctx.decode(cn.getChild("value"), childValueType, result.get(key), i + ".value");
           result.put(key, value);
@@ -131,6 +126,6 @@ public class CoderMap implements ICoder<Map> {
         return result;
     }
     throw new BeanCoderException("Incorrect input, the input for type:" + cls + " has to be an array or map,  got"
-        + toTrimmedStr(TDJSONWriter.get().writeAsString(jsonNode), 500));
+        + toTrimmedStr(TDJSONWriter.get().writeAsString(tdNode), 500));
   }
 }

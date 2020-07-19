@@ -43,6 +43,7 @@ public class TestBean2 {
   @Getter @Setter private String strField;
   @Getter @Setter private Enum1 enumField;
   @Getter @Setter private Object[] objs;
+  @Getter @Setter private int[] ints;
   public IdentifiableEnum enumField2;
   public EnumStr strEnum;
   public EnumSet<Enum1> enumSet = EnumSet.allOf(Enum1.class);

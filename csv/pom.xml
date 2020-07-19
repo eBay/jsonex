@@ -9,16 +9,12 @@
     <version>0.0.1-SNAPSHOT</version>
     <relativePath>../</relativePath>
   </parent>
-  <artifactId>treedoc</artifactId>
-  <name>treedoc</name>
+  <artifactId>csv</artifactId>
+  <name>csv</name>
   <dependencies>
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>core</artifactId>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -26,19 +22,16 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>treedoc</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-annotations</artifactId>
-      <version>2.9.6</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.google.code.gson</groupId>
-      <artifactId>gson</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

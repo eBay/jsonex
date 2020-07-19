@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
@@ -31,19 +32,19 @@ import static com.jsonex.core.factory.InjectableFactory.of;
 public class BeanCoderContext {
   // For performance reason, we need to cache SimpleDateFormat in the same thread as SimpleDateFormat is not threadsafe
   public static final InjectableFactory<String, SimpleDateFormat> dateFormatCache = of(SimpleDateFormat::new, CacheScope.THREAD_LOCAL);
-
+  private int nextId = 1;   // The next id for $ref
   @Getter final JSONCoderOption option;
 
   /**
    * Used only for encoding, remember encoded objects to be used to dedupWithreference
    * Key is the Object to be encoded or EqualsWrapper or the object, the value of this map is the converted result
    */
-  @Getter final Map<Object, TDNode> convertedObjects = new HashMap<>();
+  @Getter final Map<Object, TDNode> objToNodeMap = new IdentityHashMap<>();
 
   /**
    * Used only for decoding, remember decoded objects, key is the hash
    */
-  @Getter final Map<String, Object> hashToObjectMap = new HashMap<>();
+  @Getter final Map<TDNode, Object> nodeToObjectMap = new HashMap<>();
 
   /**
    * The current path of the encoding or decoding, mainly used as Deque (Stack), use LinkedList here as we also need random access
@@ -51,8 +52,8 @@ public class BeanCoderContext {
   @Getter final LinkedList<Object> objectPath = new LinkedList<>();
 
   public BeanCoderContext reset() {
-    convertedObjects.clear();
-    hashToObjectMap.clear();
+    objToNodeMap.clear();
+    nodeToObjectMap.clear();
     objectPath.clear();
     return this;
   }
@@ -64,4 +65,5 @@ public class BeanCoderContext {
   }
 
   public SimpleDateFormat getCachedDateFormat(String dateFmt) { return dateFormatCache.get(dateFmt); }
+  public int getNextId() { return nextId ++; }
 }
