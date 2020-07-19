@@ -10,7 +10,7 @@
 package com.jsonex.jsoncoder;
 
 import com.jsonex.treedoc.TDPath;
-import com.jsonex.treedoc.json.CharSource;
+import com.jsonex.core.charsource.CharSource;
 import com.jsonex.treedoc.json.TDJSONParser;
 import com.jsonex.treedoc.json.TDJSONParserOption;
 import com.jsonex.treedoc.json.TDJSONWriter;
@@ -32,7 +32,7 @@ public class JSONCoder {
     try {
       TDNode tdNode = req.tdNode;
       if (tdNode == null && req.source != null) {
-        tdNode = TDJSONParser.get().parse(new TDJSONParserOption(req.source));
+        tdNode = TDJSONParser.get().parse(req.source, new TDJSONParserOption());
       }
 
       if (req.nodePath != null)

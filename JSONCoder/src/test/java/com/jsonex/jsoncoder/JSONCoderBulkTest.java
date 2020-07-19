@@ -1,7 +1,8 @@
 package com.jsonex.jsoncoder;
 
-import com.jsonex.treedoc.json.CharSource;
-import com.jsonex.treedoc.json.ReaderCharSource;
+import com.jsonex.core.charsource.CharSource;
+import com.jsonex.core.charsource.ReaderCharSource;
+import com.jsonex.core.util.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Rule;
@@ -27,7 +28,7 @@ public class JSONCoderBulkTest {
   }
 
   @Test public void testBulkDecode() {
-    Reader in = TestUtil.loadResource(this.getClass(), "bulk.json");
+    Reader in = FileUtil.loadResource(this.getClass(), "bulk.json");
     CharSource source = new ReaderCharSource(in);
     String[] expectedFirstNames = {"first1", "first2", "first3"};
     for (int i = 0; !source.isEof(); i++) {

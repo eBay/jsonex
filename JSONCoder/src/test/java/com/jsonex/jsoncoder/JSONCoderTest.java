@@ -9,6 +9,7 @@
 
 package com.jsonex.jsoncoder;
 
+import com.jsonex.core.util.FileUtil;
 import com.jsonex.core.util.MapBuilder;
 import com.jsonex.jsoncoder.TestBean2.Enum1;
 import com.jsonex.jsoncoder.TestBean2.IdentifiableEnum;
@@ -436,7 +437,7 @@ public class JSONCoderTest {
   }
 
   @Test public void testDecodeJsonex() {
-    Reader in = TestUtil.loadResource(this.getClass(), "jsonex.json");
+    Reader in = FileUtil.loadResource(this.getClass(), "jsonex.json");
     TestBean testBean = JSONCoder.global.decode(in, TestBean.class);
     assertEquals(100, testBean.getIntField());
     assertEquals("This is multi-line text\n" +

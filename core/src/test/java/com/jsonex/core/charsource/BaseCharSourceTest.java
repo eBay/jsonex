@@ -1,12 +1,8 @@
-package com.jsonex.treedoc.json;
+package com.jsonex.core.charsource;
 
-import junit.framework.Assert;
 import org.junit.Test;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertTrue;
-import static junit.framework.Assert.fail;
+import static junit.framework.Assert.*;
 
 public abstract class BaseCharSourceTest {
   protected abstract CharSource createCharSource(String str, int startIndex, int endIndex);
@@ -33,7 +29,7 @@ public abstract class BaseCharSourceTest {
 
   @Test public void testParseText() {
     CharSource cs = createCharSource("  Text before /* some comments */ Text after");
-    cs.skipSpaces();
+    cs.skipSpacesAndReturns();
     assertEquals(2, cs.getPos());
 
     StringBuilder target = new StringBuilder();

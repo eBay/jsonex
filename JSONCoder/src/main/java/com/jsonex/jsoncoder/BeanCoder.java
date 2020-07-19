@@ -175,7 +175,7 @@ public class BeanCoder {
         String ref = (String)refVal;
         TDNode target = tdNode.getByPath(ref);
         if (target == null)
-          throw new BeanCoderException("Reference is not found: ref:" + ref + "; current Node:" + tdNode.getPath());
+          throw new BeanCoderException("Reference is not found: ref:" + ref + "; current Node:" + tdNode.getPathAsString());
         return ctx.nodeToObjectMap.get(target);
       }
 

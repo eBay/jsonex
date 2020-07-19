@@ -23,18 +23,17 @@ public class TDJSONWriter {
 
   public String writeAsString(TDNode node) { return writeAsString(node, new TDJSONWriterOption()); }
   public String writeAsString(TDNode node, TDJSONWriterOption opt) {
-    StringBuilder out = new StringBuilder();
-    write(out, node, opt);
-    return out.toString();
+    return write(new StringBuilder(), node, opt).toString();
   }
 
-  public void write(Appendable out, TDNode node, TDJSONWriterOption opt) { write(out, node, opt, ""); }
+  public <T extends Appendable> T write(T out, TDNode node, TDJSONWriterOption opt) {
+    return write(out, node, opt, "");
+  }
 
   @SneakyThrows
-  public void write(Appendable out, TDNode node, TDJSONWriterOption opt, String indentStr) {
+  public <T extends Appendable> T write(T out, TDNode node, TDJSONWriterOption opt, String indentStr) {
     if (node == null) {
-      out.append("null");
-      return;
+      return (T)out.append("null");
     }
 
     String childIndentStr = "";
@@ -42,27 +41,21 @@ public class TDJSONWriter {
       childIndentStr = indentStr + opt.getIndentStr();
 
     switch (node.getType()) {
-      case MAP:
-        writeMap(out, node, opt, indentStr, childIndentStr);
-        return;
-      case ARRAY:
-        writeArray(out, node, opt, indentStr, childIndentStr);
-        return;
-      default:
-        writeSimple(out, node, opt);
+      case MAP: return writeMap(out, node, opt, indentStr, childIndentStr);
+      case ARRAY: return writeArray(out, node, opt, indentStr, childIndentStr);
+      default: return writeSimple(out, node, opt);
     }
   }
 
   @SneakyThrows
-  private void writeMap(Appendable out, TDNode node, TDJSONWriterOption opt, String indentStr, String childIndentStr) {
+  <T extends Appendable> T writeMap(T out, TDNode node, TDJSONWriterOption opt, String indentStr, String childIndentStr) {
     out.append('{');
     if (node.getChildren() != null) {
       for (int i = 0; i < node.getChildrenSize(); i++){
         TDNode cn = node.getChild(i);
-        if (opt.hasIndent()) {
-          out.append('\n');
-          out.append(childIndentStr);
-        }
+        if (opt.hasIndent())
+          out.append('\n').append(childIndentStr);
+
         if (!StringUtil.isJavaIdentifier(cn.getKey()) || opt.alwaysQuoteName)  // Quote the key in case  it's not valid java identifier
           writeQuotedString(out, cn.getKey(), opt.quoteChar);
         else
@@ -73,57 +66,48 @@ public class TDJSONWriter {
           out.append(",");
       }
 
-      if (opt.hasIndent() && node.hasChildren()) {
-        out.append('\n');
-        out.append(indentStr);
-      }
+      if (opt.hasIndent() && node.hasChildren())
+        out.append('\n').append(indentStr);
     }
 
-    out.append('}');
+    return (T)out.append('}');
   }
 
   @SneakyThrows
-  private void writeArray(Appendable out, TDNode node, TDJSONWriterOption opt, String indentStr, String childIndentStr) {
+  <T extends Appendable> T writeArray(T out, TDNode node, TDJSONWriterOption opt, String indentStr, String childIndentStr) {
     out.append('[');
     if (node.hasChildren()) {
       for (int i = 0; i < node.getChildrenSize(); i++) {
         TDNode cn = node.getChild(i);
-        if (opt.hasIndent()) {
-          out.append('\n');
-          out.append(childIndentStr);
-        }
+        if (opt.hasIndent())
+          out.append('\n').append(childIndentStr);
+
         write(out, cn, opt, childIndentStr);
         if (i < node.getChildrenSize() - 1) // No need "," for last entry
           out.append(",");
       }
 
-      if (opt.hasIndent() && node.hasChildren()) {
-        out.append('\n');
-        out.append(indentStr);
-      }
+      if (opt.hasIndent() && node.hasChildren())
+        out.append('\n').append(indentStr);
     }
 
-    out.append(']');
+    return (T)out.append(']');
   }
 
   @SneakyThrows
-  private void writeSimple(Appendable out, TDNode node, TDJSONWriterOption opt) {
-    if (node.getValue() instanceof String) {
-      writeQuotedString(out, (String)node.getValue(), opt.quoteChar);
-      return;
-    }
+  <T extends Appendable> T writeSimple(T out, TDNode node, TDJSONWriterOption opt) {
+    if (node.getValue() instanceof String)
+      return writeQuotedString(out, (String)node.getValue(), opt.quoteChar);
 
-    if (node.getValue() instanceof Character) {
-      writeQuotedString(out, String.valueOf(node.getValue()), opt.quoteChar);
-      return;
-    }
+    if (node.getValue() instanceof Character)
+      return writeQuotedString(out, String.valueOf(node.getValue()), opt.quoteChar);
 
-    out.append(String.valueOf(node.getValue()));
+    return (T)out.append(String.valueOf(node.getValue()));
   }
 
-  private void writeQuotedString(Appendable out, String str, char quoteChar) throws IOException {
-    out.append(quoteChar);
-    out.append(StringUtil.cEscape(str, quoteChar, true));
-    out.append(quoteChar);
+  <T extends Appendable> T writeQuotedString(T out, String str, char quoteChar) throws IOException {
+    return (T) out.append(quoteChar)
+        .append(StringUtil.cEscape(str, quoteChar, true))
+        .append(quoteChar);
   }
 }
