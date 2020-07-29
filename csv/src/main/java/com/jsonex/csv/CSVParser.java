@@ -32,7 +32,7 @@ public class CSVParser {
   }
 
   void readRecord(CharSource src, CSVOption opt, TDNode root) {
-    TDNode row = new TDNode(root.getDoc(), null);
+    TDNode row = new TDNode(root.getDoc(), null).setType(TDNode.Type.ARRAY);
     row.setStart(src.getBookmark());
     while (!src.isEof() && src.peek() != opt.recordSep) {
       if (!src.skipChars(SPACE_CHARS))
