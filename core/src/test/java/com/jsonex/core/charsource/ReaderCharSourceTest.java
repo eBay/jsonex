@@ -1,4 +1,4 @@
-package com.jsonex.treedoc.json;
+package com.jsonex.core.charsource;
 
 import org.junit.Test;
 

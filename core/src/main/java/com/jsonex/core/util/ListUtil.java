@@ -22,12 +22,23 @@ import java.util.function.Predicate;
  */
 public class ListUtil {
   public static <C extends Collection<? super TDest>, TSrc, TDest> C map(
-      Collection<? extends TSrc> source, Function<? super TSrc, ? extends TDest> func, C dest) {
+      Collection<? extends TSrc> source, BiFunction<? super TSrc, Integer, ? extends TDest> func, C dest) {
     if (source == null)
       return null;
+    int idx = 0;
     for (TSrc src : source)
-      dest.add(func.apply(src));
+      dest.add(func.apply(src, idx++));
     return dest;
+  }
+
+  public static <C extends Collection<? super TDest>, TSrc, TDest> C map(
+      Collection<? extends TSrc> source, Function<? super TSrc, ? extends TDest> func, C dest) {
+    return map(source, (e, i) ->  func.apply(e), dest);
+  }
+
+  public static <TSrc, TDest> List<TDest> map(
+      Collection<? extends TSrc> source, BiFunction<? super TSrc, Integer, ? extends TDest> func) {
+    return map(source, func, new ArrayList<>());
   }
 
   public static <TSrc, TDest> List<TDest> map(
@@ -39,7 +50,7 @@ public class ListUtil {
     return map(identifiables, param -> param.getId());
   }
 
-  public static <K, E> Map<K, List<E>>  groupBy(
+  public static <K, E> Map<K, List<E>> groupBy(
       Collection<? extends E> source, Function<? super E, ? extends K> classifier) {
     Map<K, List<E>> result = new LinkedHashMap<>();
     for (E e : source) {
@@ -84,10 +95,7 @@ public class ListUtil {
   }
 
   public static <K, V> Map<K, V> toMap(Collection<V> source, Function<? super V, ? extends K> keyFunc) {
-    Map<K, V> map = new LinkedHashMap<>();
-    for (V s : source)
-      map.put(keyFunc.apply(s), s);
-    return map;
+    return toMap(source, keyFunc, Function.identity());
   }
 
   public static <S, K, V> Map<K, V> toMap(
@@ -135,9 +143,10 @@ public class ListUtil {
   }
 
   public static boolean contains(long[] longs, long match) {
-    for (long l : longs)
-      if (match == l)
-        return true;
+    if (longs != null)
+      for (long l : longs)
+        if (match == l)
+          return true;
     return false;
   }
 
@@ -153,28 +162,35 @@ public class ListUtil {
   }
 
   public static <V, C extends Collection<V>> boolean exists(C source, Predicate<? super V> pred) {
-    for (V s : source) {
-      if (pred.test(s))
-        return true;
-    }
-    return false;
+    return first(source, pred) != null;
   }
 
   public static <V, C extends Collection<V>> V first(C source, Predicate<? super V> pred) {
-    for (V s : source) {
-      if (pred.test(s))
-        return s;
-    }
+    if (source != null)
+      for (V s : source) {
+        if (pred.test(s))
+          return s;
+      }
     return null;
+  }
+
+  public static <V, C extends List<V>> int indexOf(C source, Predicate<? super V> pred) {
+    if (source != null)
+      for (int i = 0; i < source.size(); i++) {
+        if (pred.test(source.get(i)))
+          return i;
+      }
+    return -1;
   }
 
   public static <V, S extends Collection<? extends V>, D extends Collection<? super V>> D takeWhile(
       S source, Predicate<? super V> pred, D dest) {
-    for (V s : source) {
-      if (!pred.test(s))
-        break;
-      dest.add(s);
-    }
+    if (source != null)
+      for (V s : source) {
+        if (!pred.test(s))
+          break;
+        dest.add(s);
+      }
     return dest;
   }
 
@@ -188,10 +204,11 @@ public class ListUtil {
   }
 
   public static <T> boolean containsAny(Collection<T> list, T... elements) {
-    for (T e : elements) {
-      if (list.contains(e))
-        return true;
-    }
+    if (list != null)
+      for (T e : elements) {
+        if (list.contains(e))
+          return true;
+      }
     return false;
   }
 

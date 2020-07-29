@@ -1,8 +1,8 @@
 package com.jsonex.treedoc.json;
 
+import com.jsonex.core.charsource.ArrayCharSource;
 import com.jsonex.treedoc.TDNode;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.Reader;
@@ -67,8 +67,7 @@ public class TDJsonParserTest {
 
   @Test public void testParseProto() {
     Reader reader = TestUtil.loadResource(this.getClass(), "testdata.textproto");
-    TDNode node = TDJSONParser.get().parse(
-        new TDJSONParserOption(reader).setDefaultRootType(TDNode.Type.MAP));
+    TDNode node = TDJSONParser.get().parse(reader, new TDJSONParserOption().setDefaultRootType(TDNode.Type.MAP));
     log.info("testParseProto: Node=" + TestUtil.toJSON(node));
     String json = TDJSONWriter.get().writeAsString(node, new TDJSONWriterOption().setIndentFactor(2));
     log.info("testParseProto: formatted json: " + json);
@@ -81,7 +80,7 @@ public class TDJsonParserTest {
 
   @Test public void testParseJson5() {
     Reader reader = TestUtil.loadResource(this.getClass(), "testdata.json5");
-    TDNode node = TDJSONParser.get().parse(new TDJSONParserOption(reader).setDefaultRootType(TDNode.Type.MAP));
+    TDNode node = TDJSONParser.get().parse(reader, new TDJSONParserOption().setDefaultRootType(TDNode.Type.MAP));
     log.info("testParseJson5: Node=" + TestUtil.toJSON(node));
     String json = TDJSONWriter.get().writeAsString(node, new TDJSONWriterOption().setIndentFactor(2));
     log.info("testParseJson5: formatted json: " + json);
@@ -92,16 +91,15 @@ public class TDJsonParserTest {
   }
 
   @Test public void testRootMap() {
-    TDNode node = TDJSONParser.get().parse(
-        new TDJSONParserOption("'a':1\nb:2").setDefaultRootType(TDNode.Type.MAP));
+    TDNode node = TDJSONParser.get().parse("'a':1\nb:2",
+        new TDJSONParserOption().setDefaultRootType(TDNode.Type.MAP));
     assertEquals(1, node.getValueByPath("a"));
     assertEquals(2, node.getValueByPath("b"));
   }
 
   @Test public void testRootArray() {
     Reader reader = TestUtil.loadResource(this.getClass(), "rootArray.json");
-    TDNode node = TDJSONParser.get().parse(
-        new TDJSONParserOption(reader).setDefaultRootType(TDNode.Type.ARRAY));
+    TDNode node = TDJSONParser.get().parse(reader, new TDJSONParserOption().setDefaultRootType(TDNode.Type.ARRAY));
     log.info("testParseJson5: Node=" + TestUtil.toJSON(node));
     String json = TDJSONWriter.get().writeAsString(node, new TDJSONWriterOption().setIndentFactor(2));
     log.info("testParseJson5: formatted json: " + json);
@@ -155,5 +153,21 @@ public class TDJsonParserTest {
         "streetLine:2nd st,city:san jose,},createdAt:2017-07-14T17:17:33.010Z,},Multiple line literal\n" +
         "    Line2,],objRef:{$ref:1,},5:lastValueWithoutKey,}";
     assertEquals(expected, str3);
+  }
+
+  @Test public void testSwap() {
+    Reader reader = TestUtil.loadResource(this.getClass(), "simple.json");
+    TDNode node = TDJSONParser.get().parse(reader);
+    String str1 = node.toString();
+    TDNode node0 = node.getByPath("/data/0/address0");
+    TDNode node1 = node.getByPath("/data/1/address1");
+    node0.swapWith(node1);
+    log.info("node: " + node.toString());
+    assertEquals("2nd st", node.getValueByPath("/data/0/address0/streetLine"));
+    assertEquals("san jose", node.getValueByPath("/data/0/address0/city"));
+    assertEquals("1st st", node.getValueByPath("/data/1/address1/streetLine"));
+    node0.swapWith(node1);
+    log.info("node: " + node.toString());
+    assertEquals(str1, node.toString());
   }
 }

@@ -1,4 +1,4 @@
-package com.jsonex.treedoc.json;
+package com.jsonex.core.charsource;
 
 public class ArrayCharSourceTest extends BaseCharSourceTest {
   protected CharSource createCharSource(String str, int startIndex, int endIndex) {

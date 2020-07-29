@@ -10,17 +10,16 @@
 package com.jsonex.jsoncoder.coder;
 
 import com.jsonex.core.factory.InjectableInstance;
-import com.jsonex.jsoncoder.BeanCoderContext;
-import com.jsonex.jsoncoder.BeanCoderException;
-import com.jsonex.jsoncoder.ICoder;
-import com.jsonex.jsoncoder.JSONCoderOption;
-import com.jsonex.treedoc.json.TDJSONWriter;
-import com.jsonex.treedoc.TDNode;
 import com.jsonex.core.util.BeanProperty;
 import com.jsonex.core.util.ClassUtil;
 import com.jsonex.core.util.ListUtil;
 import com.jsonex.core.util.StringUtil;
-import lombok.Getter;
+import com.jsonex.jsoncoder.BeanCoderContext;
+import com.jsonex.jsoncoder.BeanCoderException;
+import com.jsonex.jsoncoder.ICoder;
+import com.jsonex.jsoncoder.JSONCoderOption;
+import com.jsonex.treedoc.TDNode;
+import com.jsonex.treedoc.json.TDJSONWriter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,7 +29,6 @@ import java.lang.reflect.Type;
 import java.util.Date;
 import java.util.Map;
 
-import static com.jsonex.jsoncoder.BeanCoder.ID_KEY;
 import static com.jsonex.core.util.ClassUtil.isSimpleType;
 import static com.jsonex.core.util.StringUtil.toTrimmedStr;
 
@@ -86,18 +84,18 @@ public class CoderObject implements ICoder<Object> {
   }
 
   @Override @SneakyThrows
-  public Object decode(TDNode jsonNode, Type type, Object targetObj, BeanCoderContext ctx) {
+  public Object decode(TDNode tdNode, Type type, Object targetObj, BeanCoderContext ctx) {
     Class<?> cls = ClassUtil.getGenericClass(type);
 
-    if (jsonNode.getType() != TDNode.Type.MAP) {
-      if (jsonNode.getValue() != null && cls.isAssignableFrom(jsonNode.getValue().getClass()))
-        return jsonNode.getValue();  // SIMPLE type
+    if (tdNode.getType() != TDNode.Type.MAP) {
+      if (tdNode.getValue() != null && cls.isAssignableFrom(tdNode.getValue().getClass()))
+        return tdNode.getValue();  // SIMPLE type
       if (cls.isAssignableFrom(TDNode.class))
-        return jsonNode;  // If cls is Object.class, we don't do further decoding
-      throw new BeanCoderException("Expect an Map object, but actual type=" + jsonNode.getType() +
-          ";o=" + toTrimmedStr(TDJSONWriter.get().writeAsString(jsonNode) + ": pos=" + jsonNode.getStart(), 500));
+        return tdNode;  // If cls is Object.class, we don't do further decoding
+      throw new BeanCoderException("Expect an Map object, but actual type=" + tdNode.getType() +
+          ";o=" + toTrimmedStr(TDJSONWriter.get().writeAsString(tdNode) + ": pos=" + tdNode.getStart(), 500));
     }
-    Object subType = jsonNode.getChildValue(TYPE_KEY);
+    Object subType = tdNode.getChildValue(TYPE_KEY);
     if (subType instanceof String) {
       try {
         cls = Class.forName((String) subType);
@@ -108,7 +106,7 @@ public class CoderObject implements ICoder<Object> {
 
     // TODO: confirm the test case
     if (cls.isAssignableFrom(TDNode.class))
-      return jsonNode;
+      return tdNode;
 
     Object result = targetObj;
     if (result == null) {
@@ -117,18 +115,15 @@ public class CoderObject implements ICoder<Object> {
       result = cstr.newInstance();
     }
 
-    ctx.getObjectPath().push(result);
-    String hash = (String) jsonNode.getChildValue(ID_KEY);
-    if (hash != null)
-      ctx.getHashToObjectMap().put(hash, result);
+    ctx.getNodeToObjectMap().put(tdNode, result);
 
     Map<String, BeanProperty> pds = ClassUtil.getProperties(cls);
 
     JSONCoderOption opt = ctx.getOption();
-    if (jsonNode.getChildren() == null)
+    if (tdNode.getChildren() == null)
       return result;  // Empty object
 
-    for(TDNode nc : jsonNode.getChildren()){
+    for(TDNode nc : tdNode.getChildren()){
       BeanProperty prop = pds.get(nc.getKey());
       if(prop == null)  // Certain serializer does't follow java bean naming convention, the attribute name is capitalized
         prop = pds.get(StringUtil.lowerFirst(nc.getKey()));

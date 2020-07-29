@@ -25,7 +25,7 @@ import static java.lang.Integer.parseInt;
  * 2. URL only:  http://a.com
  * 3. Anchor only:  #/p1/p2
  * 4. Relative with number: 2/p1/p2
- * 5. Relative with anchor: ../p1/p2
+ * 5. Relative with parent: ../p1/p2
  * 6. Anchor with $id reference:  [http://a.com/path]#nodeId
  * </pre>
  */

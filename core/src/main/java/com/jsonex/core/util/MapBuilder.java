@@ -9,15 +9,17 @@
 
 package com.jsonex.core.util;
 
+import lombok.Getter;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import lombok.Getter;
-
 public class MapBuilder<K, V> {
-  @Getter final Map<K, V> map = new LinkedHashMap<>();//NOPMD
-  public MapBuilder<K, V> put(K key, V value) {
-    map.put(key,  value);
+  @Getter final Map<K, V> map = new LinkedHashMap<>(); //NOPMD
+  public MapBuilder<K, V> put(K key, V val) {
+    map.put(key,  val);
     return this;
   }
+  public MapBuilder() {}
+  public MapBuilder(K key, V val) { put(key, val); }
 }

@@ -7,7 +7,7 @@
  https://opensource.org/licenses/MIT.
  ************************************************************/
 
-package com.jsonex.treedoc.json;
+package com.jsonex.core.charsource;
 
 import lombok.RequiredArgsConstructor;
 

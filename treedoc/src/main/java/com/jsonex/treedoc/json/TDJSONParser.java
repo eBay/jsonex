@@ -9,6 +9,9 @@
 
 package com.jsonex.treedoc.json;
 
+import com.jsonex.core.charsource.ArrayCharSource;
+import com.jsonex.core.charsource.CharSource;
+import com.jsonex.core.charsource.ReaderCharSource;
 import com.jsonex.core.factory.InjectableInstance;
 import com.jsonex.treedoc.TDNode;
 import com.jsonex.treedoc.TreeDoc;
@@ -19,11 +22,14 @@ public class TDJSONParser {
   public final static InjectableInstance<TDJSONParser> instance = InjectableInstance.of(TDJSONParser.class);
   public static TDJSONParser get() { return instance.get(); }
 
-  public TDNode parse(TDJSONParserOption opt) { return parse(opt.source, opt, new TreeDoc(opt.uri).getRoot()); }
-  public TDNode parse(String str) { return parse(new TDJSONParserOption(str)); }
-  public TDNode parse(Reader reader) { return parse(new TDJSONParserOption(reader)); }
+  public TDNode parse(String str) { return parse(str, new TDJSONParserOption()); }
+  public TDNode parse(String str, TDJSONParserOption opt) { return parse(new ArrayCharSource(str), opt); }
 
-  private TDNode parse(CharSource src, TDJSONParserOption opt, TDNode node) {
+  public TDNode parse(Reader reader) { return parse(reader, new TDJSONParserOption()); }
+  public TDNode parse(Reader reader, TDJSONParserOption opt) { return parse(new ReaderCharSource(reader), opt); }
+  public TDNode parse(CharSource src, TDJSONParserOption opt) { return parse(src, opt, new TreeDoc(opt.uri).getRoot()); }
+
+  public TDNode parse(CharSource src, TDJSONParserOption opt, TDNode node) {
     char c = skipSpaceAndComments(src);
     if (c == EOF)
       return node;
@@ -75,7 +81,7 @@ public class TDJSONParser {
     }
   }
 
-  private void readContinuousString(CharSource src, StringBuilder sb) {
+  void readContinuousString(CharSource src, StringBuilder sb) {
     char c;
     while((c = skipSpaceAndComments(src)) != EOF) {
       if ("\"`'".indexOf(c) < 0)
@@ -88,8 +94,8 @@ public class TDJSONParser {
   /**
    * @return char next char to read (peeked), if '\uFFFF' indicate it's EOF
    */
-  public static char skipSpaceAndComments(CharSource src) {
-    while (src.skipSpaces()) {
+  static char skipSpaceAndComments(CharSource src) {
+    while (src.skipSpacesAndReturns()) {
       char c = src.peek();
       if (c == '#') {
         if (src.skipUntil("\n"))
@@ -116,7 +122,7 @@ public class TDJSONParser {
     return EOF;
   }
 
-  public TDNode parseMap(CharSource src, TDJSONParserOption opt, TDNode node, boolean withStartBracket) {
+  TDNode parseMap(CharSource src, TDJSONParserOption opt, TDNode node, boolean withStartBracket) {
     node.setType(TDNode.Type.MAP);
     if (withStartBracket)
       src.read();
@@ -168,7 +174,7 @@ public class TDJSONParser {
     return node;
   }
 
-  private TDNode parseArray(CharSource src, TDJSONParserOption opt, TDNode node, boolean withStartBracket) {
+  TDNode parseArray(CharSource src, TDJSONParserOption opt, TDNode node, boolean withStartBracket) {
     node.setType(TDNode.Type.ARRAY);
     if (withStartBracket)
       src.read();
@@ -194,7 +200,7 @@ public class TDJSONParser {
     return node;
   }
 
-  private Object parseNumber(String str, boolean isHex) {
+  Object parseNumber(String str, boolean isHex) {
     if (!isHex && str.indexOf('.') >= 0) {
       try {
         return Double.parseDouble(str);

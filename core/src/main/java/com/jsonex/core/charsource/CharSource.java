@@ -7,9 +7,8 @@
  https://opensource.org/licenses/MIT.
  ************************************************************/
 
-package com.jsonex.treedoc.json;
+package com.jsonex.core.charsource;
 
-import com.jsonex.treedoc.Bookmark;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -18,7 +17,7 @@ import java.util.function.Predicate;
 @Slf4j
 public abstract class CharSource {
   private final static int MAX_STRING_LEN = 20000;
-  private final static String SPACE_CHARS =" \n\r\t";
+  private final static String SPACE_RETURN_CHARS =" \n\r\t";
 
   final Bookmark bookmark = new Bookmark();
 
@@ -39,23 +38,39 @@ public abstract class CharSource {
    * @return true The terminate condition matches. otherwise, could be EOF or length matches
    */
   public abstract boolean readUntil(Predicate<CharSource> predicate, StringBuilder target, int minLen, int maxLen);
-  public boolean readUntil(Predicate<CharSource> predicate, StringBuilder target) { return readUntil(predicate, target, 0, MAX_STRING_LEN); }
-  public boolean skipUntil(Predicate<CharSource> predicate) { return readUntil(predicate, null, 0, Integer.MAX_VALUE); }
-
-  public boolean readUntil(final String terminator, final boolean include, StringBuilder target, int minLen, int maxLen) {
-    return readUntil(s -> terminator.indexOf(s.peek(0)) >= 0 == include, target, minLen, maxLen);
+  public boolean readUntil(Predicate<CharSource> predicate, StringBuilder target) {
+    return readUntil(predicate, target, 0, MAX_STRING_LEN);
   }
-  public boolean readUntil(final String terminator, StringBuilder target) { return readUntil(terminator, true, target, 0, MAX_STRING_LEN); }
+  public boolean skipUntil(Predicate<CharSource> predicate) {
+    return readUntil(predicate, null, 0, Integer.MAX_VALUE);
+  }
+  /** @return true Terminal conditions matches  */
+  public boolean readUntil(String chars, StringBuilder target, boolean include, int minLen, int maxLen) {
+    return readUntil(s -> chars.indexOf(s.peek(0)) >= 0 == include, target, minLen, maxLen);
+  }
+  /** @return true Terminal conditions matches  */
+  public boolean readUntil(String terminator, StringBuilder target) {
+    return readUntil(terminator, target, true, 0, MAX_STRING_LEN);
+  }
+  /** @return true Terminal conditions matches  */
   public String readUntil(final String terminator) { return readUntil(terminator, 0, Integer.MAX_VALUE); }
+  /** @return true Terminal conditions matches  */
   public String readUntil(final String terminator, int minLen, int maxLen) {
     StringBuilder sb = new StringBuilder();
-    readUntil(terminator, true, sb, minLen, maxLen);
+    readUntil(terminator, sb, true, minLen, maxLen);
     return sb.toString();
   }
 
-  public boolean skipUntil(final String terminator, final boolean include) { return readUntil(terminator, include, null, 0, Integer.MAX_VALUE); }
+  /** @return true Indicates more character in the stream  */
+  public boolean skipUntil(final String chars, final boolean include) {
+    return readUntil(chars, null, include, 0, Integer.MAX_VALUE);
+  }
+  /** @return true Indicates more character in the stream  */
   public boolean skipUntil(final String terminator) { return skipUntil(terminator, true); }
-  public boolean skipSpaces() { return skipUntil(SPACE_CHARS, false); }
+  /** @return true Indicates more character in the stream  */
+  public boolean skipSpacesAndReturns() { return skipUntil(SPACE_RETURN_CHARS, false); }
+  /** @return true Indicates more character in the stream  */
+  public boolean skipChars(String chars) { return skipUntil(chars, false); }
 
   public boolean read(StringBuilder target, int len) {
     return readUntil(s -> true, target, len, len);
@@ -67,8 +82,8 @@ public abstract class CharSource {
     return sb.toString();
   }
 
+  public boolean skip() { return read(null, 1); }
   public boolean skip(int len) { return read(null, len); }
-
 
   public boolean readUntilMatch(final String str, final boolean skipStr, StringBuilder target, int minLen, int maxLen) {
     boolean matches = readUntil(s -> startsWidth(str), target, minLen, maxLen);

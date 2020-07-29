@@ -7,10 +7,8 @@
  https://opensource.org/licenses/MIT.
  ************************************************************/
 
-package com.jsonex.treedoc.json;
+/**
+ * Parser friendly character oriented stream (similar to Reader)
+ */
+package com.jsonex.core.charsource;
 
-@SuppressWarnings("serial")
-public class EOFRuntimeException extends RuntimeException{
-  public EOFRuntimeException(){}
-  public EOFRuntimeException(String msg){super(msg);}
-}

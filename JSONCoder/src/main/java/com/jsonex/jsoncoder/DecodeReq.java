@@ -9,9 +9,9 @@
 
 package com.jsonex.jsoncoder;
 
-import com.jsonex.treedoc.json.ArrayCharSource;
-import com.jsonex.treedoc.json.CharSource;
-import com.jsonex.treedoc.json.ReaderCharSource;
+import com.jsonex.core.charsource.ArrayCharSource;
+import com.jsonex.core.charsource.CharSource;
+import com.jsonex.core.charsource.ReaderCharSource;
 import com.jsonex.treedoc.TDNode;
 import lombok.Getter;
 import lombok.Setter;
