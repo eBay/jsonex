@@ -10,6 +10,7 @@
 package com.jsonex.treedoc;
 
 import com.jsonex.core.charsource.Bookmark;
+import com.jsonex.core.type.Lazy;
 import com.jsonex.core.util.ListUtil;
 import com.jsonex.core.util.StringUtil;
 import com.jsonex.treedoc.TDPath.Part;
@@ -44,8 +45,8 @@ public class TDNode {
   @Getter @Setter Bookmark end;
   /** indicate this node is a deduped Array node for textproto which allows duplicated keys */
   transient private boolean deduped;
-  transient private int hash;
-  transient private String str;
+  transient private final Lazy<Integer> hash = new Lazy<>();
+  transient private final Lazy<String> str = new Lazy<>();
 
   public TDNode(TDNode parent, String key) {
     this(parent.doc);
@@ -192,17 +193,15 @@ public class TDNode {
   public boolean isLeaf() { return getChildrenSize() == 0; }
 
   private TDNode touch() {
-    this.hash = 0;
-    this.str = null;
+    hash.clear();;
+    str.clear();;
     if (parent != null)
       parent.touch();
     return this;
   }
 
   @Override public String toString() {
-    if (str == null)
-      str = toString(new StringBuilder(), 100000).toString();
-    return str;
+    return str.getOrCompute(() -> toString(new StringBuilder(), 100000).toString());
   }
 
   public StringBuilder toString(StringBuilder sb, int limit) {
@@ -239,8 +238,6 @@ public class TDNode {
   }
 
   @Override public int hashCode() {
-    if (hash == 0)
-      hash = Objects.hash(key, value, children);
-    return hash;
+    return hash.getOrCompute(() -> Objects.hash(key, value, children));
   }
 }

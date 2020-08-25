@@ -25,13 +25,13 @@ public class TimeProviderTest {
 
   @Test public void testMock() {
     TimeProvider.Mock mock = new TimeProvider.Mock();
-    TimeProvider.instance.setInstance(mock);
+    TimeProvider.it.setInstance(mock);
     mock.setTimeMillis(1000);
     assertEquals(1000, TimeProvider.get().getTimeMillis());
 
     mock.add(1000);
     assertEquals(2000, TimeProvider.get().getTimeMillis());
     assertEquals(2000, TimeProvider.get().getDate().getTime());
-    TimeProvider.instance.reset();
+    TimeProvider.it.reset();
   }
 }
