@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class CacheThreadLocal<T> implements CacheProvider<T> {
-  private  static InjectableInstance<CacheThreadLocal> it = InjectableInstance.of(CacheThreadLocal.class);
+  public final static InjectableInstance<CacheThreadLocal> it = InjectableInstance.of(CacheThreadLocal.class);
   public static <T> CacheThreadLocal<T> get() { return it.get(); }
 
   // Seems ThreadLocal.withInitial() is not synchronized when create initial, so potentially it could be called multiple times in race condition

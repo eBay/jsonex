@@ -30,7 +30,6 @@ import java.util.function.Supplier;
  */
 @Accessors(chain = true)
 public class InjectableFactory<TP, TI> {
-
   private Function<? super TP, ? extends TI> objectCreator;
   @Getter private static List<Function<Object, Object>> globalCreateHandlers = new ArrayList<>();
   @Getter private List<Function<TI, TI>> createHandlers = new ArrayList<>();
