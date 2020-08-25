@@ -20,8 +20,8 @@ import java.util.Date;
  * which allows injection of mock time provider for testing
  */
 public interface TimeProvider {
-  InjectableInstance<TimeProvider> instance = InjectableInstance.of(Impl.class);
-  static TimeProvider get() { return instance.get(); }
+  InjectableInstance<TimeProvider> it = InjectableInstance.of(Impl.class);
+  static TimeProvider get() { return it.get(); }
 
   class Impl implements TimeProvider {
     @Override public Date getDate() { return new Date(); }

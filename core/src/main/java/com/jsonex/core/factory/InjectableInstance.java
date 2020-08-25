@@ -67,9 +67,8 @@ public class InjectableInstance<TI> {
     return instance;
   }
   
-  @SuppressWarnings("unchecked")
   @SneakyThrows
-  private synchronized void createInstance() {//NOPMD
+  private synchronized void createInstance() {
     if (instance == null)  // Double null check
       instance = objectCreator != null ? objectCreator.get() : (TI)newInstance(implClass);
   }

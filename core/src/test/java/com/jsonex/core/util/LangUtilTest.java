@@ -3,14 +3,13 @@ package com.jsonex.core.util;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.ExtensionMethod;
-import org.junit.Assert;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-@ExtensionMethod(BeanUtil.class)
-public class BeanUtilTest {
+@ExtensionMethod(LangUtil.class)
+public class LangUtilTest {
   @Data @RequiredArgsConstructor
   static class A {
     final B b;
@@ -31,6 +30,6 @@ public class BeanUtilTest {
     a = new A(new B(new C("v")));
     assertEquals("v", a.safe(A::getB).safe(B::getC).safe(C::getValue));
 
-    assertEquals("v", BeanUtil.safe(a, A::getB, B::getC, C::getValue));
+    assertEquals("v", LangUtil.safe(a, A::getB, B::getC, C::getValue));
   }
 }

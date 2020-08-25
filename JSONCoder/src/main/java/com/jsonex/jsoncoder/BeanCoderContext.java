@@ -9,9 +9,9 @@
 
 package com.jsonex.jsoncoder;
 
-import com.jsonex.core.factory.InjectableFactory.CacheScope;
-import com.jsonex.treedoc.TDNode;
+import com.jsonex.core.factory.CacheThreadLocal;
 import com.jsonex.core.factory.InjectableFactory;
+import com.jsonex.treedoc.TDNode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -31,7 +31,7 @@ import static com.jsonex.core.factory.InjectableFactory.of;
 @RequiredArgsConstructor
 public class BeanCoderContext {
   // For performance reason, we need to cache SimpleDateFormat in the same thread as SimpleDateFormat is not threadsafe
-  public static final InjectableFactory<String, SimpleDateFormat> dateFormatCache = of(SimpleDateFormat::new, CacheScope.THREAD_LOCAL);
+  public static final InjectableFactory<String, SimpleDateFormat> dateFormatCache = of(SimpleDateFormat::new, CacheThreadLocal.get());
   private int nextId = 1;   // The next id for $ref
   @Getter final JSONCoderOption option;
 
