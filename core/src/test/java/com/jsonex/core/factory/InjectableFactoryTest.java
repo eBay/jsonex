@@ -91,9 +91,9 @@ public class InjectableFactoryTest {
     InjectableFactory._0<I1> i1Fact = InjectableFactory._0.of(C::new);
     i1Fact.getGlobalCreateHandlers().add((i1) -> new CWrapper((I1)i1, "global"));
     i1Fact.getCreateHandlers().add((i1) -> new CWrapper(i1, "local"));
-
     I1 obj = i1Fact.get();
-    assertTrue(obj instanceof  CWrapper);
+    i1Fact.getGlobalCreateHandlers().clear(); // Clear global handler to avoid interfere other tests
+    assertTrue(obj instanceof CWrapper);
     CWrapper localWrapp = (CWrapper)obj;
     assertEquals("local", localWrapp.name);
     CWrapper globalWrapper = (CWrapper)localWrapp.i1;
