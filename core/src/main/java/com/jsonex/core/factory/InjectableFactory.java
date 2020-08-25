@@ -18,6 +18,8 @@ import lombok.experimental.Accessors;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -38,6 +40,7 @@ public class InjectableFactory<TP, TI> {
   @Getter private List<Function<TI, TI>> createHandlers = new ArrayList<>();
   private final @NonNull CacheProvider<TI> cacheProvider;
   
+  private final ThreadLocal<Map<Object, TI>> threadLocalCache = ThreadLocal.withInitial(ConcurrentHashMap::new);
   private final Function<? super TP, ? extends TI> initialCreator;
 
   protected InjectableFactory(Function<? super TP, ? extends TI> creator, CacheProvider<TI> cacheProvider) {
