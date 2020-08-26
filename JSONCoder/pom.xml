@@ -6,7 +6,7 @@
   <parent>
     <groupId>com.jsonex</groupId>
     <artifactId>jcParent</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.1.5</version>
     <relativePath>..</relativePath>
   </parent>
   <artifactId>JSONCoder</artifactId>
