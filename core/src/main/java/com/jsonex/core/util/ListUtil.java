@@ -16,6 +16,8 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import static com.jsonex.core.util.LangUtil.safe;
+
 /**
  * A collection of utilities related to Collection classes. Many methods here are a better alternative
  * to Java8 stream with more concise expression
@@ -65,12 +67,25 @@ public class ListUtil {
     return result;
   }
 
-  public static <K, V, T> Map<K, T> mapValues(
-      Map<? extends K, ? extends V> source, Function<? super V, ? extends T> func) {
-    Map<K, T> result = new HashMap<>();
-    for (K k : source.keySet())
-      result.put(k, func.apply(source.get(k)));
+  public static <K, V, TK, TV> Map<TK, TV> map(
+      Map<? extends K, ? extends V> source,
+      Function<? super K, ? extends TK> keyFunc, Function<? super V, ? extends TV> valFunc) {
+    if (source == null)
+      return null;
+    Map<TK, TV> result = new HashMap<>();
+    for (Map.Entry<? extends K, ? extends V> entry : source.entrySet())
+      result.put(safe(entry.getKey(), keyFunc), safe(entry.getValue(), valFunc));
     return result;
+  }
+
+  public static <K, V, TV> Map<K, TV> mapValues(
+      Map<? extends K, ? extends V> source, Function<? super V, ? extends TV> valFunc) {
+    return map(source, Function.identity(), valFunc);
+  }
+
+  public static <K, V, TK> Map<TK, V> mapKeys(
+      Map<? extends K, ? extends V> source, Function<? super K, ? extends TK> keyFunc) {
+    return map(source, keyFunc, Function.identity());
   }
 
   /**

@@ -86,6 +86,11 @@ public class ListUtilTest {
 
     assertSame(3, result.get("key1"));
     assertSame(2, result.get("key2"));
+
+    Map<String, List<Integer>> result1 = ListUtil.mapKeys(map, String::toUpperCase);
+
+    assertSame(map.get("key1"), result1.get("KEY1"));
+    assertSame(map.get("key2"), result1.get("KEY2"));
   }
 
   @SuppressWarnings("unchecked")
