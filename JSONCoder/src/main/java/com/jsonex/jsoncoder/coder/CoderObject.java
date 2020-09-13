@@ -12,12 +12,9 @@ package com.jsonex.jsoncoder.coder;
 import com.jsonex.core.factory.InjectableInstance;
 import com.jsonex.core.util.BeanProperty;
 import com.jsonex.core.util.ClassUtil;
-import com.jsonex.core.util.ListUtil;
 import com.jsonex.core.util.StringUtil;
-import com.jsonex.jsoncoder.BeanCoderContext;
-import com.jsonex.jsoncoder.BeanCoderException;
-import com.jsonex.jsoncoder.ICoder;
-import com.jsonex.jsoncoder.JSONCoderOption;
+import com.jsonex.jsoncoder.*;
+import com.jsonex.jsoncoder.FieldTransformer.FieldInfo;
 import com.jsonex.treedoc.TDNode;
 import com.jsonex.treedoc.json.TDJSONWriter;
 import lombok.SneakyThrows;
@@ -30,6 +27,8 @@ import java.util.Date;
 import java.util.Map;
 
 import static com.jsonex.core.util.ClassUtil.isSimpleType;
+import static com.jsonex.core.util.LangUtil.orElse;
+import static com.jsonex.core.util.ListUtil.removeLast;
 import static com.jsonex.core.util.StringUtil.toTrimmedStr;
 
 @Slf4j
@@ -49,34 +48,35 @@ public class CoderObject implements ICoder<Object> {
     if (opt.isIgnoreSubClassFields(cls) && type != null)
       cls = ClassUtil.getGenericClass(type);
 
-    if(opt.isShowType() || cls != obj.getClass())
+    if (opt.isShowType() || cls != obj.getClass())
       target.createChild(TYPE_KEY).setValue(obj.getClass().getName());
 
     Map<String, BeanProperty> pds = ClassUtil.getProperties(cls);
-    for(BeanProperty pd : pds.values()){
-      if(!pd.isReadable(opt.isShowPrivateField()))
+    for (BeanProperty pd : pds.values()) {
+      if (!pd.isReadable(opt.isShowPrivateField()))
         continue;
 
-      if(pd.isImmutable(opt.isShowPrivateField()) && opt.isIgnoreReadOnly())
+      if (pd.isImmutable(opt.isShowPrivateField()) && opt.isIgnoreReadOnly())
         continue;  // Only mutable attribute will be encoded
 
-      if(pd.isTransient())
-        continue;
-
-      if(opt.isFieldSkipped(cls, pd.getName()))
+      if (pd.isTransient())
         continue;
 
       // V3DAL will cause Lazy load exception, we have to catch it
-      try{
-        Type childType = pd.getGenericType();
-        Object co = pd.get(obj);
-        if (co != null) {
-          TDNode cn = ctx.encode(co, childType, target.createChild(pd.getName()));
+      try {
+        FieldInfo fieldInfo =
+            orElse(opt.transformField(cls, obj, pd, ctx), () -> FieldTransformer.it.get().apply(obj, pd, ctx));
+
+        if (fieldInfo.getName() == null)  // Skipped
+          continue;
+
+        if (fieldInfo.getObj() != null) {
+          TDNode cn = ctx.encode(fieldInfo.getObj(), fieldInfo.getType(), target.createChild(pd.getName()));
           if (cn.getType() == TDNode.Type.SIMPLE && cn.getValue() == null)
-            ListUtil.removeLast(target.getChildren());
+            removeLast(target.getChildren());
         }
-      }catch(Exception e) {
-        log.info("warning during encoding", e);
+      } catch(Exception e) {
+        opt.getWarnLogLevel().log(log, "warning during encoding", e);
         // ignore this exception
       }
     }
@@ -95,10 +95,19 @@ public class CoderObject implements ICoder<Object> {
       throw new BeanCoderException("Expect an Map object, but actual type=" + tdNode.getType() +
           ";o=" + toTrimmedStr(TDJSONWriter.get().writeAsString(tdNode) + ": pos=" + tdNode.getStart(), 500));
     }
+
     Object subType = tdNode.getChildValue(TYPE_KEY);
     if (subType instanceof String) {
+      if (!ctx.getOption().isAllowPolymorphicClasses())
+        throw new BeanCoderException(
+            "allowPolymorphicClasses is not enabled in option while there's $type attributes: " + subType);
       try {
-        cls = Class.forName((String) subType);
+        Class<?> loadedClass = Class.forName((String) subType);
+        if (!cls.isAssignableFrom(loadedClass)) {
+          throw new BeanCoderException(
+              "Specified class:" + loadedClass.getName() + " is incompatible to destination class:" + cls.getName());
+        }
+        cls = loadedClass;
       } catch(ClassNotFoundException e) {
         throw new BeanCoderException("Incorrect $type:" + subType, e);
       }
@@ -123,27 +132,27 @@ public class CoderObject implements ICoder<Object> {
     if (tdNode.getChildren() == null)
       return result;  // Empty object
 
-    for(TDNode nc : tdNode.getChildren()){
+    for (TDNode nc : tdNode.getChildren()) {
       BeanProperty prop = pds.get(nc.getKey());
-      if(prop == null)  // Certain serializer does't follow java bean naming convention, the attribute name is capitalized
+      if (prop == null)  // Certain serializer does't follow java bean naming convention, the attribute name is capitalized
         prop = pds.get(StringUtil.lowerFirst(nc.getKey()));
 
-      if(prop == null){
+      if (prop == null) {
         if(opt.isErrorOnUnknownProperty())
           throw new BeanCoderException("No such attribute:" + nc.getKey() + ",class:" + cls);
         continue;
       }
 
       int mod = prop.getModifier();
-      if(Modifier.isStatic(mod) || prop.isTransient()){
-        if(opt.isErrorOnUnknownProperty())
+      if (Modifier.isStatic(mod) || prop.isTransient()) {
+        if (opt.isErrorOnUnknownProperty())
           throw new BeanCoderException("Field is static or transient:" + nc.getKey() + ",class:" + cls);
         continue;  // None public, or static, transient
       }
 
       Object childTargetObj = null;
 
-      if(prop.isReadable(true)
+      if (prop.isReadable(true)
           && !isSimpleType(prop.getType())
           && !Enum.class.isAssignableFrom(prop.getType())
           && !Date.class.isAssignableFrom(prop.getType()))
@@ -163,7 +172,7 @@ public class CoderObject implements ICoder<Object> {
 
       Type childType = prop.getGenericType();
       Object child = ctx.decode(nc, childType, childTargetObj, nc.getKey());
-      if(childTargetObj != child)
+      if (childTargetObj != child)
         prop.set(result, child);
     }
     return result;

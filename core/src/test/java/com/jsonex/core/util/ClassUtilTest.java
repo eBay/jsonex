@@ -30,11 +30,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 @Slf4j
 public class ClassUtilTest {
@@ -58,9 +54,17 @@ public class ClassUtilTest {
     public String fieldB3;
     public String fieldB4;
     public String fieldB5;
-
     @Getter(onMethod = @__({@Transient})) @Setter private boolean fieldB6;
     public String getFieldB1() { return fieldB1; }
+  }
+
+  @SuppressWarnings({"CanBeFinal", "SameReturnValue", "WeakerAccess"})
+  class C {
+    public String getMethodReadOnly() { return "readonly"; }
+    public void setMethodSetOnly(String str) {
+      if (str == null)  // Simulate exception in setter
+        throw new NullPointerException();
+    }
   }
 
   @SneakyThrows
@@ -71,6 +75,7 @@ public class ClassUtilTest {
     // Java compiler will mass up the order of the getter methods, field order is preserved in most of the java versions
     assertArrayEquals(exp, properties.keySet().toArray());
 
+    // Field with setter/getters
     BeanProperty prop = properties.get("fieldB6");
     assertEquals("fieldB6", prop.getName());
     B b = new B();
@@ -81,11 +86,54 @@ public class ClassUtilTest {
     assertEquals(Boolean.TYPE, prop.getType());
     assertEquals(Boolean.TYPE, prop.getGenericType());
     assertEquals(B.class.getMethod("setFieldB6", new Class[]{Boolean.TYPE}), prop.getSetter());
-
     assertEquals(B.class.getMethod("isFieldB6", new Class[0]), prop.getGetter());
     assertTrue(prop.isTransient());
     assertFalse(prop.isFieldAccessible(false));
     assertNotNull("Transient is annotated", prop.getAnnotation(Transient.class));
+
+    // Field without setter/getters
+    prop = properties.get("fieldB2");
+    prop.set(b, "str");
+    assertNull(prop.getSetter());
+    assertNull(prop.getGetter());
+    assertNotNull(prop.getField());
+    assertEquals("str", prop.get(b));
+  }
+
+  @Test public void testGetPropertiesWithExceptions () {
+    Map<String, BeanProperty> properties = ClassUtil.getProperties(C.class);
+    C c = new C();
+
+    // Reader only method
+    BeanProperty prop = properties.get("methodReadOnly");
+    assertNull(prop.getSetter());
+    assertTrue(prop.isImmutable(true));
+    assertEquals("readonly", prop.get(c));
+    try {
+      prop.set(c, "str");
+    } catch(InvokeRuntimeException e) {
+      assertEquals("field is not mutable: methodReadOnly,class:class com.jsonex.core.util.ClassUtilTest$C",
+          e.getMessage());
+    }
+
+    // Set only method
+    prop = properties.get("methodSetOnly");
+    assertNull(prop.getGetter());
+    assertFalse(prop.isReadable(true));
+    prop.set(c, "str");
+    try {
+      prop.get(c);
+    } catch(InvokeRuntimeException e) {
+      assertEquals("field is not readable: methodSetOnly,class:class com.jsonex.core.util.ClassUtilTest$C",
+          e.getMessage());
+    }
+
+    try {
+      prop.set(c, null);
+    } catch(InvokeRuntimeException e) {
+      assertEquals("error set value:methodSetOnly,class=class com.jsonex.core.util.ClassUtilTest$C,value=null",
+          e.getMessage());
+    }
   }
 
   @Test public void testFindCallerStack() {

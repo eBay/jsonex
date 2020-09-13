@@ -9,33 +9,33 @@
 
 package com.jsonex.jsoncoder;
 
+import com.jsonex.core.util.BeanProperty;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.experimental.Accessors;
-
 @SuppressWarnings("UnusedReturnValue")
-@Setter @Getter @Accessors(chain=true)
-public class SimpleFilter implements IFilter {
-  @Getter private final Class<?> type;
-  @Getter @Setter boolean include;  // Default is excluded
+@Setter @Getter @Accessors(chain=true) @RequiredArgsConstructor(staticName = "of")
+public class SimpleFilter implements FieldTransformer {
+  @Getter final boolean include;  // Default is excluded
   private Set<String> properties = new HashSet<>();
 
-  private SimpleFilter(Class<?> type) { this.type = type; }
-  public static SimpleFilter of(Class<?> type) { return new SimpleFilter(type); }
+  public static SimpleFilter of() { return of(false); }
+  public static SimpleFilter exclude( String... props) {
+    return of().addProperties(props);
+  }
 
-  @Override
-  public Boolean isFieldSkipped(String field) {
-    if (properties.contains(field))
-      return !include;   // If explicitly defined in properties, no further checks
-    
-    if (include && !properties.contains(field))
-      return true;
-    
-    return null;
+  public static SimpleFilter include(String... props) {
+    return of(true).addProperties(props);
+  }
+
+  private boolean isFieldSkipped(String field) {
+    return isInclude() ? !properties.contains(field) : properties.contains(field);
   }
   
   public SimpleFilter addProperties(String... props) {
@@ -46,5 +46,12 @@ public class SimpleFilter implements IFilter {
   public SimpleFilter removeProperties(String... props) {
     properties.removeAll(Arrays.asList(props));
     return this;
+  }
+
+  @Override
+  public FieldInfo apply(Object o, BeanProperty property, BeanCoderContext beanCoderContext) {
+    if(isFieldSkipped(property.getName()))
+      return new FieldInfo(null, null, null);
+    return null;
   }
 }

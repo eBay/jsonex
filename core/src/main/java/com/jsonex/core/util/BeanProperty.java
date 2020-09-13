@@ -19,6 +19,10 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 
+/**
+ * Wrapper around class getter, setter and field to provide convenient access of a bean property so that clients don't
+ * need to worry about the actual representation (field or getter/setter) of the property.
+ */
 @SuppressWarnings("WeakerAccess")
 @RequiredArgsConstructor @ToString
 public class BeanProperty {
@@ -47,33 +51,31 @@ public class BeanProperty {
       if(setter != null){
         setter.setAccessible(true);
         setter.invoke(obj, value);
-      }else if(field != null){
+        return;
+      }else if(field != null) {
         field.setAccessible(true);
         field.set(obj, value);
-      }else
-        throw new InvokeRuntimeException("field is not mutable: " + name + ",class:" + obj.getClass());
+        return;
+      }
     }catch(Exception e){
-      throw new InvokeRuntimeException(
-          "error set value obj=" + obj + ";setter=" + setter + ";name=" + name + ";value=" + value, e);
+      throw new InvokeRuntimeException("error set value:" + name + ",class=" + obj.getClass() + ",value=" + value, e);
     }
+    throw new InvokeRuntimeException("field is not mutable: " + name + ",class:" + obj.getClass());
   }
   
   public Object get(Object obj){
-    try{
-      if(getter != null){
+    try {
+      if(getter != null) {
         getter.setAccessible(true);
         return getter.invoke(obj);
-      }
-      
-      if(field != null){
+      } else if(field != null) {
         field.setAccessible(true);
         return field.get(obj);
       }
-
-      throw new InvokeRuntimeException("field is not readable: " + name + ",class:" + obj.getClass());
-    }catch(Exception e){
-      throw new InvokeRuntimeException("error set value", e);
+    }catch(Exception e) {
+      throw new InvokeRuntimeException("error get value:" + name + ",class:" + obj.getClass(), e);
     }
+    throw new InvokeRuntimeException("field is not readable: " + name + ",class:" + obj.getClass());
   }
   
   public <T extends Annotation> Annotation getAnnotation(Class<T> cls) {
@@ -85,7 +87,6 @@ public class BeanProperty {
     }
     
     if(field != null) {
-
       result = field.getAnnotation(cls);
       if (result != null)
         return result;

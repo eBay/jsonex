@@ -45,7 +45,7 @@ public class CoderMap implements ICoder<Map> {
 
     Type childKeyType = null;
     Type childValueType = null;
-    if(actualTypeParameters != null){
+    if (actualTypeParameters != null) {
       childKeyType = actualTypeParameters[0];
       childValueType = actualTypeParameters[1];
     }
@@ -53,10 +53,11 @@ public class CoderMap implements ICoder<Map> {
     Class<?> childKeyCls = ClassUtil.getGenericClass(childKeyType);
     if (childKeyCls == null)
       childKeyCls = Object.class;
-    if(isSimpleType(childKeyCls) || Enum.class.isAssignableFrom(childKeyCls) || childKeyCls == Object.class || opt.isAlwaysMapKeyAsString()) {
+    if (isSimpleType(childKeyCls) || Enum.class.isAssignableFrom(childKeyCls) || childKeyCls == Object.class
+        || opt.isAlwaysMapKeyAsString()) {
       target.setType(TDNode.Type.MAP);
       // Handle it as Map and put the key as String key
-      for(Map.Entry<?, ?> entry : map.entrySet()){
+      for (Map.Entry<?, ?> entry : map.entrySet()) {
         String key = String.valueOf(entry.getKey());
         ctx.encode(entry.getValue(), childValueType, target.createChild(key));
       }
@@ -68,10 +69,10 @@ public class CoderMap implements ICoder<Map> {
     // com.jsonex.dsf.dom.AttributeMap
     // it just return null which breaks the interface contract.
     //noinspection ConstantConditions
-    if(map.entrySet() != null){
+    if (map.entrySet() != null) {
       target.setType(TDNode.Type.ARRAY);
       TDNode child = target.createChild(null);
-      for(Map.Entry<?, ?> entry : map.entrySet()){
+      for (Map.Entry<?, ?> entry : map.entrySet()) {
         Map<String, Object> entryMap = new LinkedHashMap<>(2);//NOPMD
         ctx.encode(entry.getKey(), childKeyType, child.createChild("key"));
         ctx.encode(entry.getValue(), childValueType, child.createChild("value"));
@@ -97,8 +98,7 @@ public class CoderMap implements ICoder<Map> {
     Map<Object,Object> result = (Map<Object,Object>)targetObj;
     if (result == null) {
       int modifier = cls.getModifiers();
-      if (Modifier.isAbstract(modifier)||
-          Modifier.isInterface(modifier)) {
+      if (Modifier.isAbstract(modifier) || Modifier.isInterface(modifier)) {
         //Use the default implementation HashMap
         result = new LinkedHashMap<>();
       } else
@@ -125,7 +125,7 @@ public class CoderMap implements ICoder<Map> {
         }
         return result;
     }
-    throw new BeanCoderException("Incorrect input, the input for type:" + cls + " has to be an array or map,  got"
+    throw new BeanCoderException("Incorrect input, the input for type:" + cls + " has to be an array or map, got"
         + toTrimmedStr(TDJSONWriter.get().writeAsString(tdNode), 500));
   }
 }

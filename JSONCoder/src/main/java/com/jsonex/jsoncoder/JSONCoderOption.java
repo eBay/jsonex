@@ -9,28 +9,22 @@
 
 package com.jsonex.jsoncoder;
 
-import com.jsonex.jsoncoder.coder.CoderDate;
-import com.jsonex.jsoncoder.coder.CoderXMLGregorianCalendar;
-import com.jsonex.jsoncoder.coder.CoderAtomicInteger;
-import com.jsonex.jsoncoder.coder.CoderBigInteger;
-import com.jsonex.jsoncoder.coder.CoderClass;
-import com.jsonex.jsoncoder.coder.CoderEnum;
-import com.jsonex.treedoc.json.TDJSONWriterOption;
+import com.jsonex.core.type.Tuple;
+import com.jsonex.core.type.Tuple.Pair;
+import com.jsonex.core.util.BeanProperty;
+import com.jsonex.jsoncoder.coder.*;
+import com.jsonex.treedoc.json.TDJSONOption;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import lombok.experimental.Delegate;
+import org.slf4j.Logger;
 
 import java.text.Format;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+
+import static com.jsonex.core.util.LangUtil.doIfElse;
 
 @SuppressWarnings("UnusedReturnValue")
 @Accessors(chain=true)
@@ -67,7 +61,6 @@ public class JSONCoderOption {
    * If true, subclass field won't be encoded
    */
   @Getter @Setter Boolean ignoreSubClassFields;
-
     
   /**
    * If true, enum name will be encoded
@@ -108,7 +101,7 @@ public class JSONCoderOption {
   @Getter private final Set<Class<?>> ignoreSubClassFieldsClasses = new HashSet<>();
 
 
-  @Getter private final List<IFilter> filters = new ArrayList<>();
+  @Getter private final List<Pair<Class<?>, FieldTransformer>> filters = new ArrayList<>();
   @Getter private final List<ICoder<?>> coderList = new ArrayList<>();
   
   /**
@@ -123,11 +116,30 @@ public class JSONCoderOption {
   @Getter private final List<EqualsWrapper<?>> equalsWrapper = new ArrayList<>();
   
   // JSON coder config
-  @Getter @Setter @Delegate private TDJSONWriterOption jsonOption = new TDJSONWriterOption();
+  @Getter @Setter private TDJSONOption jsonOption = new TDJSONOption();
+
+  public enum LogLevel {
+    OFF { public void log(Logger log, String msg, Exception e) { /* Noop */ }},
+    DEBUG { public void log(Logger log, String msg, Exception e) { log.debug(msg, e); }},
+    INFO { public void log(Logger log, String msg, Exception e) { log.info(msg, e); }},
+    WARN { public void log(Logger log, String msg, Exception e) { log.warn(msg, e); }},
+    ERROR { public void log(Logger log, String msg, Exception e) { log.error(msg, e); }},
+    ;
+    public abstract void log(Logger logger, String message, Exception e);
+  }
+  @Getter @Setter private LogLevel warnLogLevel = LogLevel.INFO;
+
+  /**
+   * Accept specified sub-class using `$type` attribute. This feature is disabled by default for security reason
+   */
+  @Getter @Setter private boolean allowPolymorphicClasses = false;
 
   public JSONCoderOption() { this(global); }
   private JSONCoderOption(JSONCoderOption parent) { this.parent = parent; }
-  public static JSONCoderOption create() { return new JSONCoderOption(); }
+  public static JSONCoderOption of() { return new JSONCoderOption(); }
+  public static JSONCoderOption withIndentFactor(int factor) {
+    return new JSONCoderOption().setJsonOption(TDJSONOption.withIndentFactor(factor));
+  }
   
   ICoder<?> findCoder(Class<?> cls){
     for (ICoder<?> bc : coderList){
@@ -146,15 +158,17 @@ public class JSONCoderOption {
     return parent != null && parent.isClassSkipped(cls);
   }
   
-  public  boolean isFieldSkipped(Class<?> cls, String field) {
-    for (IFilter filter : filters) {
-      if (!filter.getType().isAssignableFrom(cls))
+  public FieldTransformer.FieldInfo transformField(
+      Class<?> cls, Object o, BeanProperty property, BeanCoderContext beanCoderContext) {
+    for (Pair<Class<?>, FieldTransformer> filter : filters) {
+      if (!filter._1.isAssignableFrom(cls))
         continue;
-      if (filter.isFieldSkipped(field) == Boolean.TRUE) 
-        return true;
+      FieldTransformer.FieldInfo fieldInfo = filter._2.apply(o, property, beanCoderContext);
+      if (fieldInfo != null)
+        return fieldInfo;
     }
     
-    return parent != null && parent.isFieldSkipped(cls, field);
+    return parent == null ? null : parent.transformField(cls, o, property, beanCoderContext);
   }
   
   @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -191,16 +205,26 @@ public class JSONCoderOption {
   
   public SimpleFilter getDefaultFilter() { return getSimpleFilterFor(Object.class); }
   public SimpleFilter getSimpleFilterFor(Class<?> cls) {
-    for (IFilter filter : filters) {
-      if (!(filter instanceof SimpleFilter) || filter.getType() != cls)
+    for (Pair<Class<?>, FieldTransformer> filter : filters) {
+      if (!(filter._2 instanceof SimpleFilter) || filter._1 != cls)
         continue;
-      return (SimpleFilter) filter;
+      return (SimpleFilter) filter._2;
     }
-    SimpleFilter result = SimpleFilter.of(cls);
-    filters.add(0, result);
+    SimpleFilter result = SimpleFilter.of();
+    filters.add(0, Tuple.of(cls, result));
     return result;
   }
-  
+
+  public JSONCoderOption addFilterFor(Class<?> cls, FieldTransformer filter) {
+    return addFilterFor(cls, filter, false);
+  }
+
+  public JSONCoderOption addFilterFor(Class<?> cls, FieldTransformer filter, boolean last) {
+    Pair<Class<?>, FieldTransformer> clsToFilter = Tuple.of(cls, filter);
+    doIfElse(last, () -> filters.add(clsToFilter), () -> filters.add(0, clsToFilter));
+    return this;
+  }
+
   public JSONCoderOption addSkippedClasses(Class<?>... cls) {
     skippedClasses.addAll(Arrays.asList(cls));
     return this;
@@ -222,5 +246,4 @@ public class JSONCoderOption {
         .setIndentFactor(indentFactor);
     return this;
   }
-
 }

@@ -48,6 +48,11 @@ public class ListUtil {
     return map(source, func, new ArrayList<>());
   }
 
+  public static <TSrc, TDest> Set<TDest> unique(
+      Collection<? extends TSrc> source, Function<? super TSrc, ? extends TDest> func) {
+    return map(source, func, new HashSet<>());
+  }
+
   public static <TId> List<TId> getIds(Collection<? extends Identifiable<TId>> identifiables) {
     return map(identifiables, param -> param.getId());
   }
@@ -67,8 +72,7 @@ public class ListUtil {
     return result;
   }
 
-  public static <K, V, TK, TV> Map<TK, TV> map(
-      Map<? extends K, ? extends V> source,
+  public static <K, V, TK, TV> Map<TK, TV> map(Map<? extends K, ? extends V> source,
       Function<? super K, ? extends TK> keyFunc, Function<? super V, ? extends TV> valFunc) {
     if (source == null)
       return null;

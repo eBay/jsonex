@@ -21,17 +21,17 @@ public class TDJSONWriter {
   public final static InjectableInstance<TDJSONWriter> instance = InjectableInstance.of(TDJSONWriter.class);
   public static TDJSONWriter get() { return instance.get(); }
 
-  public String writeAsString(TDNode node) { return writeAsString(node, new TDJSONWriterOption()); }
-  public String writeAsString(TDNode node, TDJSONWriterOption opt) {
+  public String writeAsString(TDNode node) { return writeAsString(node, new TDJSONOption()); }
+  public String writeAsString(TDNode node, TDJSONOption opt) {
     return write(new StringBuilder(), node, opt).toString();
   }
 
-  public <T extends Appendable> T write(T out, TDNode node, TDJSONWriterOption opt) {
+  public <T extends Appendable> T write(T out, TDNode node, TDJSONOption opt) {
     return write(out, node, opt, "");
   }
 
   @SneakyThrows
-  public <T extends Appendable> T write(T out, TDNode node, TDJSONWriterOption opt, String indentStr) {
+  public <T extends Appendable> T write(T out, TDNode node, TDJSONOption opt, String indentStr) {
     if (node == null) {
       return (T)out.append("null");
     }
@@ -48,7 +48,7 @@ public class TDJSONWriter {
   }
 
   @SneakyThrows
-  <T extends Appendable> T writeMap(T out, TDNode node, TDJSONWriterOption opt, String indentStr, String childIndentStr) {
+  <T extends Appendable> T writeMap(T out, TDNode node, TDJSONOption opt, String indentStr, String childIndentStr) {
     out.append('{');
     if (node.getChildren() != null) {
       for (int i = 0; i < node.getChildrenSize(); i++){
@@ -74,7 +74,7 @@ public class TDJSONWriter {
   }
 
   @SneakyThrows
-  <T extends Appendable> T writeArray(T out, TDNode node, TDJSONWriterOption opt, String indentStr, String childIndentStr) {
+  <T extends Appendable> T writeArray(T out, TDNode node, TDJSONOption opt, String indentStr, String childIndentStr) {
     out.append('[');
     if (node.hasChildren()) {
       for (int i = 0; i < node.getChildrenSize(); i++) {
@@ -95,7 +95,7 @@ public class TDJSONWriter {
   }
 
   @SneakyThrows
-  <T extends Appendable> T writeSimple(T out, TDNode node, TDJSONWriterOption opt) {
+  <T extends Appendable> T writeSimple(T out, TDNode node, TDJSONOption opt) {
     if (node.getValue() instanceof String)
       return writeQuotedString(out, (String)node.getValue(), opt.quoteChar);
 

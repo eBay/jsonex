@@ -2,26 +2,26 @@
 [![Build Status](https://travis-ci.org/eBay/jsonex.svg?branch=master)](https://travis-ci.org/eBay/jsonex)
 [![codecov](https://codecov.io/gh/eBay/jsonex/branch/master/graph/badge.svg)](https://codecov.io/gh/eBay/jsonex)
 ## Description
-JSONCoder is a light weight generic object serialization / deserialization library similar to Jackson or FastJson. This library has been widely used in various eBay domain projects for years. It does not mean to be a replacement for other popular libraries. But it solves some specific problems which are not available or not well supported in other alternatives. 
+Jsonex JSONCoder is a light-weight generic object serialization / deserialization library similar to Jackson, GSON or FastJson. This library has been widely used in various eBay domain projects for years. It's not a replacement for other popular libraries. But it solves some specific problems which are not available or not well supported in other alternatives.
 
 ## Why JSONCoder
-There are plenty of options for JSON serialization/deserialization libraries, why we need another one? If you are also a fan of JSON , but hate the restrictions by JSON standards that make it so hard to be used as a configuration language, but still don't want to give up JSON to YAML (JSON is nice, why need Yet Another Markup Language). You can have a try of this library. This library focuses on solving following problems well:  
+There are plenty of options for JSON serialization/deserialization libraries, why we need another one? If you are also a fan of JSON, but hate the restrictions by JSON standards that make it so hard to be used as a configuration language, but still don't want to give up JSON to YAML (JSON is nice, why need Yet Another Markup Language). You can have a try of this library. This library focuses on solving following problems well:
 
 * Supports JSON extension proposal ([JSONEX](./JSONEX.md)) which will make it friendly for configuration, such as
     * comments support
     * quote of key is optional
-    * customize quote characters (Avoid un-necessary escapes by choosing different quote characters) 
+    * customize quote characters (Avoid un-necessary escapes by choosing different quote characters like Javascript) 
     * multi-line string literal as in ES6
     * Merge of config files (e.g. environment specific config override common config)
 * Supports serialization of arbitrary java objects out of box by detecting cyclic object references. You don't have to write serializer friendly classes. Whatever you have, it's supported.
-* Make sensible default over configuration. Minimize annotation or configuration usage. Such as it silently ignores unknown properties by default for forward compatibility
+* Make sensible default over configuration. **Minimize annotation** or configuration usage. Such as it silently ignores unknown properties by default for forward compatibility
 * Focuses on developer friendly APIs at the same time still provides flexible configurations  
 
 ## Features
 * Auto-detect cyclic references and serialize the reference to avoid stack overflow
 * Options to include class fields in addition to getters
-* Plugable custom encoder and decoder 
-* Plugable custom filter to filter out/in certain fields based on particular types
+* Pluggable custom encoder and decoder 
+* Pluggable custom filter to filter out/in certain fields based on particular types
 * Options to skip certain classes
 * Options to skip sub-class fields
 * Options to filter fields based on certain attributes such as: private fields, enum names, readonly fields, etc

@@ -41,7 +41,9 @@ public class JSONCoderTest {
     return JSONCoder.encode(obj, option);
   }
 
-  private static String toJSONString(Object obj){ return JSONCoder.global.encode(obj); }
+  private static String toJSONString(Object obj) {
+    return JSONCoder.global.encode(obj, JSONCoderOption.withIndentFactor(2).setWarnLogLevel(JSONCoderOption.LogLevel.DEBUG));
+  }
 
   @SneakyThrows
   private TestBean buildTestBean() {
@@ -131,7 +133,7 @@ public class JSONCoderTest {
     tb.bean2List = Collections.singletonList(tb2);
     tb2.setInts(tb.getInts());  // Duplicated arrays
 
-    String str = toJSONString(tb, JSONCoderOption.create().setDedupWithRef(true).setJsonOption(false, '"', 2));
+    String str = toJSONString(tb, JSONCoderOption.of().setDedupWithRef(true).setJsonOption(false, '"', 2));
     log("JSONStr=" + str);
 
     assertTrue("Generate ref if dedupWithRef is set", str.contains("$ref"));
@@ -141,7 +143,7 @@ public class JSONCoderTest {
   }
 
   @Test public void testEnumNameOption() {
-    JSONCoderOption codeOption = JSONCoderOption.create().setShowEnumName(true);
+    JSONCoderOption codeOption = JSONCoderOption.of().setShowEnumName(true);
     String str = toJSONString(buildTestBean(), codeOption);
     log("JSON str=" + str);
     assertTrue("Should contain both enum id and name when showEnumName is set", str.indexOf("12345-value1") > 0);
@@ -149,7 +151,7 @@ public class JSONCoderTest {
   }
 
   @Test public void testCustomQuote() {
-    JSONCoderOption codeOption = JSONCoderOption.create();
+    JSONCoderOption codeOption = JSONCoderOption.of();
     codeOption.getJsonOption().setQuoteChar('\'');
     String str = toJSONString(buildTestBean(), codeOption);
     log("testCustomQuote: strWithSingleQuote=" + str);
@@ -170,7 +172,7 @@ public class JSONCoderTest {
   }
 
   @Test public void testIgnoreReadOnly() {
-    JSONCoderOption opt = JSONCoderOption.create().setIgnoreReadOnly(true);
+    JSONCoderOption opt = JSONCoderOption.of().setIgnoreReadOnly(true);
     String str = toJSONString(buildTestBean(), opt);
     assertTrue(str.indexOf("readonly") < 0);
   }
@@ -178,7 +180,7 @@ public class JSONCoderTest {
   @SneakyThrows
   @Test public void testDumpOnlyOptions() {
     // Set following attributes will make it's for dump only, can't be parse back to original class
-    JSONCoderOption codeOption = JSONCoderOption.create()
+    JSONCoderOption codeOption = JSONCoderOption.of()
         .setShowEnumName(true);
     codeOption.getJsonOption().setIndentFactor(4);
 
@@ -199,15 +201,16 @@ public class JSONCoderTest {
     assertTrue("jsonStr should contain $type if showType flag is set", str.contains("$type"));
 
     try {
-      JSONCoder.global.decode(str, TestBean.class);
+      JSONCoder.global.decode(str, TestBean.class, JSONCoderOption.of().setAllowPolymorphicClasses(true));
     } catch(Exception e) {
       log.error("", e);
     }
   }
 
   @Test public void testPolymorphicType() {
+    JSONCoderOption opt = JSONCoderOption.of().setAllowPolymorphicClasses(true);
     String str1 = "{intField:1, $type:'com.jsonex.jsoncoder.TestBean'}";
-    TestBean obj = (TestBean)JSONCoder.global.decode(str1, Object.class);
+    TestBean obj = (TestBean)JSONCoder.global.decode(str1, Object.class, opt);
 
     String str2 = toJSONString(obj);
     log("str2=" + str2);
@@ -216,12 +219,17 @@ public class JSONCoderTest {
 
     // Invalid class
     str1 = "{intField:1, $type:'InvalidClass'}";
-    try {
-      JSONCoder.global.decode(str1, Object.class);
-      fail("Shouldn't be success when class is not found");
-    } catch(BeanCoderException e) {
-      assertEquals("Incorrect $type:InvalidClass", e.getCause().getMessage());
-    }
+    expectDecodeWithException(str1, Object.class, opt, "Incorrect $type:InvalidClass");
+
+    // Class not assignable class
+    str1 = "{intField:1, $type:'com.jsonex.jsoncoder.TestBean'}";
+    expectDecodeWithException(str1, TestBean2.class, opt,
+        "Specified class:com.jsonex.jsoncoder.TestBean is incompatible to destination class:com.jsonex.jsoncoder.TestBean2");
+
+    // allowPolymorphicClasses is not enabled
+    str1 = "{intField:1, $type:'com.jsonex.jsoncoder.TestBean'}";
+    expectDecodeWithException(str1, TestBean2.class,
+        "allowPolymorphicClasses is not enabled in option while there's $type attributes: com.jsonex.jsoncoder.TestBean");
   }
 
   @Test public void testObjectType() {
@@ -315,36 +323,44 @@ public class JSONCoderTest {
     TestBean2 bean = new TestBean2();
     bean.enumField2 = IdentifiableEnum.value1;
     bean.setStrField("str1");
+    bean.setInts(new int[]{ 1, 2 });
     bean.testBean = new TestBean();
     bean.testBean.setStrField("str2");
     bean.testBean.publicStrField = "publicStr";
-    JSONCoderOption opt = JSONCoderOption.create();
-    opt.getSimpleFilterFor(TestBean2.class).setInclude(true).addProperties("enumField2", "testBean");
-    opt.getSimpleFilterFor(TestBean.class).addProperties("publicStrField");
-    opt.getDefaultFilter().addProperties("fieldInAnyClass");
+
+    JSONCoderOption opt = JSONCoderOption.withIndentFactor(2);
+
+    opt.addFilterFor(TestBean2.class, SimpleFilter.include("enumField2", "testBean"));
+    opt.getSimpleFilterFor(TestBean2.class).addProperties("ints");
+
+    opt.addFilterFor(TestBean.class, SimpleFilter.exclude("publicStrField"));
+
+    opt.addFilterFor(Object.class, SimpleFilter.exclude("fieldInAnyClass"));
+
     String result = JSONCoder.encode(bean, opt);
-    log("result=" + result);
+    log("result(filtered)=" + result);
     assertTrue("shouldn't contain 'str1'", !result.contains("str1"));
+    assertTrue("should include 'testBean'", result.contains("testBean"));
+    assertTrue("should include 'ints'", result.contains("ints"));
     assertTrue("should contain 'enumField2'", result.contains("enumField2"));
     assertTrue("should 'str2'", result.contains("str2"));
     assertTrue("shouldn't contain 'publicStrField'", !result.contains("publicStrField"));
 
+    opt.addFilterFor(TestBean2.class, MaskFilterByName.of().add("strField", str -> "hash:" + str.hashCode()));
+    result = JSONCoder.encode(bean, opt);
+    log("result(masked) =" + result);
+    assertTrue("should include str1 hashCode'", result.contains("\"strField\":\"hash:3541024\""));
+
     opt.addSkippedClasses(TestBean.class);
     result = JSONCoder.encode(bean, opt);
-    log("result=" + result);
+    log("result=(skipClasses)" + result);
     assertTrue("shouldn't contain class TestBean", !result.contains("testBean"));
   }
 
   @Test public void testInvalidClass() {
     // Invalid class
     String str = "{someClass: 'InvalidClass'}";
-    try {
-      JSONCoder.getGlobal().decode(str, TestBean.class);
-      fail("Shouldn't be success when class is not found");
-    } catch(BeanCoderException e) {
-      e.printStackTrace();
-      assertEquals("Can't load class: InvalidClass", e.getCause().getCause().getMessage());
-    }
+    expectDecodeWithException(str, TestBean.class, "Can't load class: InvalidClass");
   }
 
   @Test public void testDateFormat() {
@@ -362,12 +378,8 @@ public class JSONCoderTest {
     assertEquals("1900-01-01 11:11:11", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(bean.getDateField()));
 
     str = "{dateField: 'invalidDateFormat'}";
-    try {
-      JSONCoder.getGlobal().decode(str, TestBean.class);
-      fail("Shouldn't be success when date format is not correct");
-    } catch (BeanCoderException e) {
-      assertEquals("java.text.ParseException: Unparseable date: \"invalidDateFormat\"", e.getCause().getCause().getMessage());
-    }
+    expectDecodeWithException(str, TestBean.class,
+        "java.text.ParseException: Unparseable date: \"invalidDateFormat\"");
   }
 
   @Test public void testDeepClone() {
@@ -404,7 +416,7 @@ public class JSONCoderTest {
   }
 
   @Test public void testShowPrivateField() {
-    String str = toJSONString(new TestBean(), JSONCoderOption.create().setShowPrivateField(true));
+    String str = toJSONString(new TestBean(), JSONCoderOption.of().setShowPrivateField(true));
     assertTrue("privateField should be encoded when showPrivateField is set", str.contains("privateFieldValue"));
   }
 
@@ -412,20 +424,11 @@ public class JSONCoderTest {
     String str = "{intField: 1234, unknownField: 'test'}";
     TestBean tb = JSONCoder.global.decode(str, TestBean.class);
     assertEquals(1234, tb.getIntField());
-
-    try {
-      JSONCoder.decode(str, TestBean.class, JSONCoderOption.create().setErrorOnUnknownProperty(true));
-      fail("Should fail when errorOnUnknownProperty is set and unknownField is detected");
-    } catch (BeanCoderException e) {
-      assertEquals("No such attribute:unknownField,class:class com.jsonex.jsoncoder.TestBean", e.getCause().getMessage());
-    }
-
-    try {
-      JSONCoder.decode("{transientField: 'some value'}", TestBean.class, JSONCoderOption.create().setErrorOnUnknownProperty(true));
-      fail("Should fail when errorOnUnknownProperty is set and unknownField is detected");
-    } catch (BeanCoderException e) {
-      assertEquals("Field is static or transient:transientField,class:class com.jsonex.jsoncoder.TestBean", e.getCause().getMessage());
-    }
+    expectDecodeWithException(str, TestBean.class, JSONCoderOption.of().setErrorOnUnknownProperty(true),
+        "No such attribute:unknownField,class:class com.jsonex.jsoncoder.TestBean");
+    expectDecodeWithException("{transientField: 'some value'}", TestBean.class,
+        JSONCoderOption.of().setErrorOnUnknownProperty(true),
+        "Field is static or transient:transientField,class:class com.jsonex.jsoncoder.TestBean");
   }
 
   @Test public void testEncodeToWriter() {
@@ -450,6 +453,26 @@ public class JSONCoderTest {
     TestBean testBean = JSONCoder.global.decode(DecodeReq.of(TestBean.class).setJson(jsonStr).setNodePath("response/data"));
     assertEquals(2.0, testBean.getFloatField(), 0.0001);
     assertEquals("publicStrVal", testBean.publicStrField);
+  }
+
+  private void expectDecodeWithException(String str, Class<?> cls, String expectedError) {
+    expectDecodeWithException(str, cls, JSONCoderOption.global, expectedError);
+  }
+
+  private void expectDecodeWithException(String str, Class<?> cls, JSONCoderOption opt, String expectedError) {
+    try {
+      JSONCoder.decode(str, cls, opt);
+      fail("Decode should fail.");
+    } catch (BeanCoderException e) {
+      assertEquals(expectedError, getLastCauseOfType(e, BeanCoderException.class).getMessage());
+    }
+  }
+
+  private static Throwable getLastCauseOfType(Throwable e, Class<? extends Exception> cls) {
+    for(;;e = e.getCause()) {
+      if (e.getCause() == null || e.getCause().getClass() != cls)
+        return e;
+    }
   }
 }
 

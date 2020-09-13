@@ -9,15 +9,15 @@
 
 package com.jsonex.jsoncoder.coder;
 
-import java.lang.reflect.Type;
-import java.util.GregorianCalendar;
-
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
 import com.jsonex.jsoncoder.BeanCoderContext;
 import com.jsonex.jsoncoder.BeanCoderException;
 import com.jsonex.jsoncoder.ICoder;
 import com.jsonex.treedoc.TDNode;
+
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
+import java.lang.reflect.Type;
+import java.util.GregorianCalendar;
 
 public class CoderXMLGregorianCalendar implements ICoder<XMLGregorianCalendar>{
   @Override public Class<XMLGregorianCalendar> getType() {return XMLGregorianCalendar.class;}
@@ -27,11 +27,11 @@ public class CoderXMLGregorianCalendar implements ICoder<XMLGregorianCalendar>{
   }
 
   public XMLGregorianCalendar decode(TDNode jsonNode, Type type, Object targetObj, BeanCoderContext context) {
-    try{
+    try {
       GregorianCalendar gc = new GregorianCalendar();
       gc.setTime(CoderDate._decode(jsonNode.getValue(), context));
       return DatatypeFactory.newInstance().newXMLGregorianCalendar(gc);
-    }catch(Exception e){
+    } catch(Exception e) {
       throw new BeanCoderException(e);
     }
   }

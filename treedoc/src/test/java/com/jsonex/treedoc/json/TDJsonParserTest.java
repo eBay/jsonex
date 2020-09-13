@@ -51,7 +51,7 @@ public class TDJsonParserTest {
     TDNode node1 = TDJSONParser.get().parse(json);
     assertEquals(node, node1);
 
-    json = TDJSONWriter.get().writeAsString(node, new TDJSONWriterOption().setIndentFactor(2));
+    json = TDJSONWriter.get().writeAsString(node, new TDJSONOption().setIndentFactor(2));
     log.info("formatted json: " + json);
   }
 
@@ -69,7 +69,7 @@ public class TDJsonParserTest {
     Reader reader = TestUtil.loadResource(this.getClass(), "testdata.textproto");
     TDNode node = TDJSONParser.get().parse(reader, new TDJSONParserOption().setDefaultRootType(TDNode.Type.MAP));
     log.info("testParseProto: Node=" + TestUtil.toJSON(node));
-    String json = TDJSONWriter.get().writeAsString(node, new TDJSONWriterOption().setIndentFactor(2));
+    String json = TDJSONWriter.get().writeAsString(node, new TDJSONOption().setIndentFactor(2));
     log.info("testParseProto: formatted json: " + json);
     assertEquals(Boolean.FALSE, node.getValueByPath("n/n1/0/n11/1/n111"));
     assertEquals(4, node.getValueByPath("n/n1/1/[d.e.f]"));
@@ -82,7 +82,7 @@ public class TDJsonParserTest {
     Reader reader = TestUtil.loadResource(this.getClass(), "testdata.json5");
     TDNode node = TDJSONParser.get().parse(reader, new TDJSONParserOption().setDefaultRootType(TDNode.Type.MAP));
     log.info("testParseJson5: Node=" + TestUtil.toJSON(node));
-    String json = TDJSONWriter.get().writeAsString(node, new TDJSONWriterOption().setIndentFactor(2));
+    String json = TDJSONWriter.get().writeAsString(node, new TDJSONOption().setIndentFactor(2));
     log.info("testParseJson5: formatted json: " + json);
     assertEquals("and you can quote me on that", node.getValueByPath( "unquoted"));
     assertEquals(912559, node.getValueByPath( "hexadecimal"));
@@ -101,7 +101,7 @@ public class TDJsonParserTest {
     Reader reader = TestUtil.loadResource(this.getClass(), "rootArray.json");
     TDNode node = TDJSONParser.get().parse(reader, new TDJSONParserOption().setDefaultRootType(TDNode.Type.ARRAY));
     log.info("testParseJson5: Node=" + TestUtil.toJSON(node));
-    String json = TDJSONWriter.get().writeAsString(node, new TDJSONWriterOption().setIndentFactor(2));
+    String json = TDJSONWriter.get().writeAsString(node, new TDJSONOption().setIndentFactor(2));
     log.info("testParseJson5: formatted json: " + json);
     assertEquals(7, node.getChildrenSize());
     assertEquals(2, node.getValueByPath("2"));

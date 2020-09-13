@@ -2,6 +2,7 @@ package com.jsonex.core.util;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class LangUtil {
   /**
@@ -17,5 +18,13 @@ public class LangUtil {
   public static <T> void safeConsume(T obj, Consumer<T> action) { if (obj != null)  action.accept(obj); }
 
   public static void doIf(boolean condition, Runnable action) { if (condition) action.run(); }
+  public static void doIfElse(boolean condition, Runnable ifAction, Runnable elseAction) {
+    if (condition)
+      ifAction.run();
+    else
+      elseAction.run();
+  }
+
   public static <T> T orElse(T value, T fullBack) { return value == null ? fullBack : value; }
+  public static <T> T orElse(T value, Supplier<T> fullBack) { return value == null ? fullBack.get() : value; }
 }
