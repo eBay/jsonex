@@ -19,7 +19,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-@SuppressWarnings("UnusedReturnValue")
 @Setter @Getter @Accessors(chain=true) @RequiredArgsConstructor(staticName = "of")
 public class SimpleFilter implements FieldTransformer {
   @Getter final boolean include;  // Default is excluded

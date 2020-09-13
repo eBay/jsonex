@@ -9,17 +9,17 @@
 
 package com.jsonex.jsoncoder.coder;
 
-import java.lang.reflect.Type;
-
 import com.jsonex.jsoncoder.BeanCoderContext;
 import com.jsonex.jsoncoder.BeanCoderException;
 import com.jsonex.jsoncoder.ICoder;
 import com.jsonex.treedoc.TDNode;
 
+import java.lang.reflect.Type;
+
 @SuppressWarnings("rawtypes")
 public class CoderClass implements ICoder<Class> {
-  @Override public Class<Class> getType() {return Class.class;}
-  
+  @Override public Class<Class> getType() { return Class.class; }
+
   @Override public TDNode encode(Class obj, Type type, BeanCoderContext context, TDNode target) {
     return target.setValue(obj.getCanonicalName());
   }

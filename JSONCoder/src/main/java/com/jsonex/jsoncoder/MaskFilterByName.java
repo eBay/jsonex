@@ -21,6 +21,7 @@ import java.util.*;
 @Setter @Getter @Accessors(chain=true) @RequiredArgsConstructor(staticName = "of")
 public class MaskFilterByName implements FieldTransformer {
   private Map<String, MaskStrategy> fieldToStrategyMap = new HashMap<>();
+
   public MaskFilterByName add(String name, MaskStrategy strategy) {
     fieldToStrategyMap.put(name, strategy);
     return this;

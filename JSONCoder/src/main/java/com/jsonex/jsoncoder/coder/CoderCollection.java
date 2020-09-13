@@ -27,17 +27,17 @@ public class CoderCollection implements ICoder<Collection> {
   public static final InjectableInstance<CoderCollection> it = InjectableInstance.of(CoderCollection.class);
   public static CoderCollection get() { return it.get(); }
 
-  @Override public Class<Collection> getType() {return Collection.class;}
+  @Override public Class<Collection> getType() { return Collection.class; }
 
   @Override public TDNode encode(Collection obj, Type type, BeanCoderContext ctx, TDNode target) {
     target.setType(TDNode.Type.ARRAY);
 
     Type[] actualTypeParameters = ClassUtil.getGenericTypeActualParams(type);
     Type childType = null;
-    if(actualTypeParameters != null)
+    if (actualTypeParameters != null)
       childType = actualTypeParameters[0];
 
-    for(Object o1 : (Collection<?>)obj)
+    for (Object o1 : (Collection<?>)obj)
       ctx.encode(o1, childType, target.createChild(null));
 
     return target;

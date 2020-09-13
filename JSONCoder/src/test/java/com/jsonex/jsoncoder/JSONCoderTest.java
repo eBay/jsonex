@@ -30,6 +30,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static com.jsonex.jsoncoder.JSONCoderOption.*;
 import static org.junit.Assert.*;
 
 @Slf4j
@@ -42,7 +43,7 @@ public class JSONCoderTest {
   }
 
   private static String toJSONString(Object obj) {
-    return JSONCoder.global.encode(obj, JSONCoderOption.withIndentFactor(2).setWarnLogLevel(JSONCoderOption.LogLevel.DEBUG));
+    return JSONCoder.global.encode(obj, withIndentFactor(2).setWarnLogLevel(LogLevel.DEBUG));
   }
 
   @SneakyThrows
@@ -133,7 +134,7 @@ public class JSONCoderTest {
     tb.bean2List = Collections.singletonList(tb2);
     tb2.setInts(tb.getInts());  // Duplicated arrays
 
-    String str = toJSONString(tb, JSONCoderOption.of().setDedupWithRef(true).setJsonOption(false, '"', 2));
+    String str = toJSONString(tb, of().setDedupWithRef(true).setJsonOption(false, '"', 2));
     log("JSONStr=" + str);
 
     assertTrue("Generate ref if dedupWithRef is set", str.contains("$ref"));
@@ -143,7 +144,7 @@ public class JSONCoderTest {
   }
 
   @Test public void testEnumNameOption() {
-    JSONCoderOption codeOption = JSONCoderOption.of().setShowEnumName(true);
+    JSONCoderOption codeOption = of().setShowEnumName(true);
     String str = toJSONString(buildTestBean(), codeOption);
     log("JSON str=" + str);
     assertTrue("Should contain both enum id and name when showEnumName is set", str.indexOf("12345-value1") > 0);
@@ -151,7 +152,7 @@ public class JSONCoderTest {
   }
 
   @Test public void testCustomQuote() {
-    JSONCoderOption codeOption = JSONCoderOption.of();
+    JSONCoderOption codeOption = of();
     codeOption.getJsonOption().setQuoteChar('\'');
     String str = toJSONString(buildTestBean(), codeOption);
     log("testCustomQuote: strWithSingleQuote=" + str);
@@ -172,7 +173,7 @@ public class JSONCoderTest {
   }
 
   @Test public void testIgnoreReadOnly() {
-    JSONCoderOption opt = JSONCoderOption.of().setIgnoreReadOnly(true);
+    JSONCoderOption opt = of().setIgnoreReadOnly(true);
     String str = toJSONString(buildTestBean(), opt);
     assertTrue(str.indexOf("readonly") < 0);
   }
@@ -180,7 +181,7 @@ public class JSONCoderTest {
   @SneakyThrows
   @Test public void testDumpOnlyOptions() {
     // Set following attributes will make it's for dump only, can't be parse back to original class
-    JSONCoderOption codeOption = JSONCoderOption.of()
+    JSONCoderOption codeOption = of()
         .setShowEnumName(true);
     codeOption.getJsonOption().setIndentFactor(4);
 
@@ -201,14 +202,14 @@ public class JSONCoderTest {
     assertTrue("jsonStr should contain $type if showType flag is set", str.contains("$type"));
 
     try {
-      JSONCoder.global.decode(str, TestBean.class, JSONCoderOption.of().setAllowPolymorphicClasses(true));
+      JSONCoder.global.decode(str, TestBean.class, of().setAllowPolymorphicClasses(true));
     } catch(Exception e) {
       log.error("", e);
     }
   }
 
   @Test public void testPolymorphicType() {
-    JSONCoderOption opt = JSONCoderOption.of().setAllowPolymorphicClasses(true);
+    JSONCoderOption opt = of().setAllowPolymorphicClasses(true);
     String str1 = "{intField:1, $type:'com.jsonex.jsoncoder.TestBean'}";
     TestBean obj = (TestBean)JSONCoder.global.decode(str1, Object.class, opt);
 
@@ -328,7 +329,7 @@ public class JSONCoderTest {
     bean.testBean.setStrField("str2");
     bean.testBean.publicStrField = "publicStr";
 
-    JSONCoderOption opt = JSONCoderOption.withIndentFactor(2);
+    JSONCoderOption opt = withIndentFactor(2);
 
     opt.addFilterFor(TestBean2.class, SimpleFilter.include("enumField2", "testBean"));
     opt.getSimpleFilterFor(TestBean2.class).addProperties("ints");
@@ -416,7 +417,7 @@ public class JSONCoderTest {
   }
 
   @Test public void testShowPrivateField() {
-    String str = toJSONString(new TestBean(), JSONCoderOption.of().setShowPrivateField(true));
+    String str = toJSONString(new TestBean(), of().setShowPrivateField(true));
     assertTrue("privateField should be encoded when showPrivateField is set", str.contains("privateFieldValue"));
   }
 
@@ -424,10 +425,10 @@ public class JSONCoderTest {
     String str = "{intField: 1234, unknownField: 'test'}";
     TestBean tb = JSONCoder.global.decode(str, TestBean.class);
     assertEquals(1234, tb.getIntField());
-    expectDecodeWithException(str, TestBean.class, JSONCoderOption.of().setErrorOnUnknownProperty(true),
+    expectDecodeWithException(str, TestBean.class, of().setErrorOnUnknownProperty(true),
         "No such attribute:unknownField,class:class com.jsonex.jsoncoder.TestBean");
     expectDecodeWithException("{transientField: 'some value'}", TestBean.class,
-        JSONCoderOption.of().setErrorOnUnknownProperty(true),
+        of().setErrorOnUnknownProperty(true),
         "Field is static or transient:transientField,class:class com.jsonex.jsoncoder.TestBean");
   }
 
@@ -456,7 +457,7 @@ public class JSONCoderTest {
   }
 
   private void expectDecodeWithException(String str, Class<?> cls, String expectedError) {
-    expectDecodeWithException(str, cls, JSONCoderOption.global, expectedError);
+    expectDecodeWithException(str, cls, global, expectedError);
   }
 
   private void expectDecodeWithException(String str, Class<?> cls, JSONCoderOption opt, String expectedError) {

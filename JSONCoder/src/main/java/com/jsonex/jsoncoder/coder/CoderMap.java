@@ -35,7 +35,7 @@ public class CoderMap implements ICoder<Map> {
 
   @Getter private static final CoderMap instance = new CoderMap();
 
-  @Override public Class<Map> getType() {return Map.class;}
+  @Override public Class<Map> getType() { return Map.class; }
 
   @Override public TDNode encode(Map obj, Type type, BeanCoderContext ctx, TDNode target) {
     JSONCoderOption opt = ctx.getOption();

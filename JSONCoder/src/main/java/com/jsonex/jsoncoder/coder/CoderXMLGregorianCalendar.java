@@ -20,7 +20,7 @@ import java.lang.reflect.Type;
 import java.util.GregorianCalendar;
 
 public class CoderXMLGregorianCalendar implements ICoder<XMLGregorianCalendar>{
-  @Override public Class<XMLGregorianCalendar> getType() {return XMLGregorianCalendar.class;}
+  @Override public Class<XMLGregorianCalendar> getType() { return XMLGregorianCalendar.class; }
   @Override public TDNode encode(XMLGregorianCalendar obj, Type type, BeanCoderContext ctx, TDNode target) {
     String str = ctx.getCachedDateFormat(ctx.getOption().getDateFormat()).format(obj.toGregorianCalendar().getTime());
     return target.setValue(str);
