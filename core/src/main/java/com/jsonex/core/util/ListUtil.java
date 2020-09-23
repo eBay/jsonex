@@ -202,19 +202,44 @@ public class ListUtil {
     return -1;
   }
 
-  public static <V, S extends Collection<? extends V>, D extends Collection<? super V>> D takeWhile(
-      S source, Predicate<? super V> pred, D dest) {
-    if (source != null)
+  public static <V, S extends Collection<? extends V>, D extends Collection<? super V>> D takeBetween(
+      S source, Predicate<? super V> dropPred, Predicate<? super V> whilePred, D dest) {
+    if (source != null) {
+      boolean startTaking = false;
       for (V s : source) {
-        if (!pred.test(s))
+        if (!startTaking && dropPred.test(s))
+          continue;
+        startTaking = true;
+        if (!whilePred.test(s))
           break;
         dest.add(s);
       }
+    }
     return dest;
+  }
+
+  /** This is a combination of dropWhile and takeWhile */
+  public static <V, S extends Collection<? extends V>> List<V> takeBetween(
+      S source, Predicate<? super V> dropPred, Predicate<? super V> whilePred) {
+    return takeBetween(source, dropPred, whilePred, new ArrayList<>());
+  }
+
+  public static <V, S extends Collection<? extends V>, D extends Collection<? super V>> D takeWhile(
+      S source, Predicate<? super V> pred, D dest) {
+    return takeBetween(source, (v) -> false, pred, dest);
   }
 
   public static <V, S extends Collection<? extends V>> List<V> takeWhile(S source, Predicate<? super V> pred) {
     return takeWhile(source, pred, new ArrayList<>());
+  }
+
+  public static <V, S extends Collection<? extends V>, D extends Collection<? super V>> D dropWhile(
+      S source, Predicate<? super V> pred, D dest) {
+    return takeBetween(source, pred, (v) -> true, dest);
+  }
+
+  public static <V, S extends Collection<? extends V>> List<V> dropWhile(S source, Predicate<? super V> pred) {
+    return dropWhile(source, pred, new ArrayList<>());
   }
 
   public static <T> T last(List<T> list) { return list == null ? null : list.get(list.size() - 1); }
