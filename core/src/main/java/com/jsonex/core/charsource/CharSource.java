@@ -17,7 +17,8 @@ import java.util.function.Predicate;
 @Slf4j
 public abstract class CharSource {
   private final static int MAX_STRING_LEN = 20000;
-  private final static String SPACE_RETURN_CHARS =" \n\r\t";
+  // HTML &nbsp; will be converted to \u00a0, that's why it need to be supported here
+  private final static String SPACE_RETURN_CHARS =" \n\r\t\u00a0";
 
   final Bookmark bookmark = new Bookmark();
 
