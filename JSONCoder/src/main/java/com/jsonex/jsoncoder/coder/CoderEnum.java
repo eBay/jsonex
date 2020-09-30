@@ -9,18 +9,18 @@
 
 package com.jsonex.jsoncoder.coder;
 
-import java.lang.reflect.Type;
-
-import com.jsonex.jsoncoder.BeanCoderContext;
-import com.jsonex.treedoc.TDNode;
 import com.jsonex.core.type.Identifiable;
 import com.jsonex.core.util.ClassUtil;
 import com.jsonex.core.util.EnumUtil;
+import com.jsonex.jsoncoder.BeanCoderContext;
 import com.jsonex.jsoncoder.ICoder;
+import com.jsonex.treedoc.TDNode;
+
+import java.lang.reflect.Type;
 
 @SuppressWarnings("rawtypes")
 public class CoderEnum implements ICoder<Enum> {
-  @Override public Class<Enum> getType() {return Enum.class;}
+  @Override public Class<Enum> getType() { return Enum.class; }
 
   @Override public TDNode encode(Enum obj, Type type, BeanCoderContext context, TDNode target) { return target.setValue(encode(obj, context)); }
 

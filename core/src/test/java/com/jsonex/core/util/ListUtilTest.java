@@ -86,6 +86,11 @@ public class ListUtilTest {
 
     assertSame(3, result.get("key1"));
     assertSame(2, result.get("key2"));
+
+    Map<String, List<Integer>> result1 = ListUtil.mapKeys(map, String::toUpperCase);
+
+    assertSame(map.get("key1"), result1.get("KEY1"));
+    assertSame(map.get("key2"), result1.get("KEY2"));
   }
 
   @SuppressWarnings("unchecked")
@@ -195,12 +200,21 @@ public class ListUtilTest {
     assertFalse("Should return false for null source: ", containsAny(null, 0));
   }
 
-  @Test public void testTakeWhile() {
+  @Test public void testTakeBetween() {
     List list = asList(2, 4, 5, 6, 8);
+    // takeWhile
     assertEquals(asList(2, 4), ListUtil.takeWhile(list, (Integer n) -> (n % 2 == 0)));
-    assertEquals(asList(), ListUtil.takeWhile(list, (Integer n) -> (n < 0)));
-    assertEquals(list, ListUtil.takeWhile(list, (Integer n) -> (n > 0)));
-    assertEquals(0, ListUtil.takeWhile(null, (Integer n) -> (n > 0)).size());
+    assertEquals(asList(), ListUtil.takeWhile(list, (Integer n) -> n < 0));
+    assertEquals(list, ListUtil.takeWhile(list, (Integer n) -> n > 0));
+    assertEquals(0, ListUtil.takeWhile(null, (Integer n) -> n > 0).size());
+
+    // dropWhile
+    assertEquals(asList(6, 8), ListUtil.dropWhile(list, (Integer n) -> n <= 5));
+    assertEquals(asList(), ListUtil.dropWhile(list, (Integer n) -> n <= 8));
+    assertEquals(list, ListUtil.dropWhile(list, (Integer n) -> n < 2));
+
+    // takeBetween
+    assertEquals(asList(5, 6), ListUtil.takeBetween(list, (Integer n) -> (n % 2 == 0), (Integer n) -> n < 8));
   }
 
   @Test public void testMergeWith() {

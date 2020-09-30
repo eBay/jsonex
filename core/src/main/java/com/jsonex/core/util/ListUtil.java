@@ -16,6 +16,8 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import static com.jsonex.core.util.LangUtil.safe;
+
 /**
  * A collection of utilities related to Collection classes. Many methods here are a better alternative
  * to Java8 stream with more concise expression
@@ -46,6 +48,11 @@ public class ListUtil {
     return map(source, func, new ArrayList<>());
   }
 
+  public static <TSrc, TDest> Set<TDest> unique(
+      Collection<? extends TSrc> source, Function<? super TSrc, ? extends TDest> func) {
+    return map(source, func, new HashSet<>());
+  }
+
   public static <TId> List<TId> getIds(Collection<? extends Identifiable<TId>> identifiables) {
     return map(identifiables, param -> param.getId());
   }
@@ -65,12 +72,24 @@ public class ListUtil {
     return result;
   }
 
-  public static <K, V, T> Map<K, T> mapValues(
-      Map<? extends K, ? extends V> source, Function<? super V, ? extends T> func) {
-    Map<K, T> result = new HashMap<>();
-    for (K k : source.keySet())
-      result.put(k, func.apply(source.get(k)));
+  public static <K, V, TK, TV> Map<TK, TV> map(Map<? extends K, ? extends V> source,
+      Function<? super K, ? extends TK> keyFunc, Function<? super V, ? extends TV> valFunc) {
+    if (source == null)
+      return null;
+    Map<TK, TV> result = new HashMap<>();
+    for (Map.Entry<? extends K, ? extends V> entry : source.entrySet())
+      result.put(safe(entry.getKey(), keyFunc), safe(entry.getValue(), valFunc));
     return result;
+  }
+
+  public static <K, V, TV> Map<K, TV> mapValues(
+      Map<? extends K, ? extends V> source, Function<? super V, ? extends TV> valFunc) {
+    return map(source, Function.identity(), valFunc);
+  }
+
+  public static <K, V, TK> Map<TK, V> mapKeys(
+      Map<? extends K, ? extends V> source, Function<? super K, ? extends TK> keyFunc) {
+    return map(source, keyFunc, Function.identity());
   }
 
   /**
@@ -183,19 +202,44 @@ public class ListUtil {
     return -1;
   }
 
-  public static <V, S extends Collection<? extends V>, D extends Collection<? super V>> D takeWhile(
-      S source, Predicate<? super V> pred, D dest) {
-    if (source != null)
+  public static <V, S extends Collection<? extends V>, D extends Collection<? super V>> D takeBetween(
+      S source, Predicate<? super V> dropPred, Predicate<? super V> whilePred, D dest) {
+    if (source != null) {
+      boolean startTaking = false;
       for (V s : source) {
-        if (!pred.test(s))
+        if (!startTaking && dropPred.test(s))
+          continue;
+        startTaking = true;
+        if (!whilePred.test(s))
           break;
         dest.add(s);
       }
+    }
     return dest;
+  }
+
+  /** This is a combination of dropWhile and takeWhile */
+  public static <V, S extends Collection<? extends V>> List<V> takeBetween(
+      S source, Predicate<? super V> dropPred, Predicate<? super V> whilePred) {
+    return takeBetween(source, dropPred, whilePred, new ArrayList<>());
+  }
+
+  public static <V, S extends Collection<? extends V>, D extends Collection<? super V>> D takeWhile(
+      S source, Predicate<? super V> pred, D dest) {
+    return takeBetween(source, (v) -> false, pred, dest);
   }
 
   public static <V, S extends Collection<? extends V>> List<V> takeWhile(S source, Predicate<? super V> pred) {
     return takeWhile(source, pred, new ArrayList<>());
+  }
+
+  public static <V, S extends Collection<? extends V>, D extends Collection<? super V>> D dropWhile(
+      S source, Predicate<? super V> pred, D dest) {
+    return takeBetween(source, pred, (v) -> true, dest);
+  }
+
+  public static <V, S extends Collection<? extends V>> List<V> dropWhile(S source, Predicate<? super V> pred) {
+    return dropWhile(source, pred, new ArrayList<>());
   }
 
   public static <T> T last(List<T> list) { return list == null ? null : list.get(list.size() - 1); }

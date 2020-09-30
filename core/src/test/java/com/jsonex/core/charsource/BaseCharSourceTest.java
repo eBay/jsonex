@@ -28,7 +28,7 @@ public abstract class BaseCharSourceTest {
   }
 
   @Test public void testParseText() {
-    CharSource cs = createCharSource("  Text before /* some comments */ Text after");
+    CharSource cs = createCharSource(" \u00a0Text before /* some comments */ Text after");
     cs.skipSpacesAndReturns();
     assertEquals(2, cs.getPos());
 

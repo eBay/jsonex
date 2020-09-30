@@ -9,18 +9,18 @@
 
 package com.jsonex.jsoncoder.coder;
 
+import com.jsonex.jsoncoder.BeanCoderContext;
+import com.jsonex.jsoncoder.BeanCoderException;
+import com.jsonex.jsoncoder.ICoder;
+import com.jsonex.jsoncoder.JSONCoderOption;
+import com.jsonex.treedoc.TDNode;
+
 import java.lang.reflect.Type;
 import java.text.ParseException;
 import java.util.Date;
 
-import com.jsonex.jsoncoder.BeanCoderContext;
-import com.jsonex.jsoncoder.BeanCoderException;
-import com.jsonex.jsoncoder.JSONCoderOption;
-import com.jsonex.jsoncoder.ICoder;
-import com.jsonex.treedoc.TDNode;
-
 public class CoderDate implements ICoder<Date> {
-  @Override public Class<Date> getType() {return Date.class;}
+  @Override public Class<Date> getType() { return Date.class; }
   
   @Override public TDNode encode(Date obj, Type type, BeanCoderContext ctx, TDNode target) {
     String dateFormat = ctx.getOption().getDateFormat();

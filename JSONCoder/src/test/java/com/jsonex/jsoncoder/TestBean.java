@@ -69,4 +69,6 @@ public class TestBean extends BaseTestBean {
   transient public String transientField = "transientField";
   private String privateField = "privateFieldValue";
   public static String staticField = "staticFieldValue";
+
+  public String getWithException() { throw new RuntimeException(); }
 }

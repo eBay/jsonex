@@ -1,5 +1,6 @@
 package com.jsonex.core.util;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.ExtensionMethod;
@@ -10,9 +11,10 @@ import static org.junit.Assert.assertNull;
 
 @ExtensionMethod(LangUtil.class)
 public class LangUtilTest {
-  @Data @RequiredArgsConstructor
+  @Data @AllArgsConstructor
   static class A {
-    final B b;
+    B b;
+    public void clearB() { b = null; }
   }
   @Data @RequiredArgsConstructor
   static class B {
@@ -31,5 +33,14 @@ public class LangUtilTest {
     assertEquals("v", a.safe(A::getB).safe(B::getC).safe(C::getValue));
 
     assertEquals("v", LangUtil.safe(a, A::getB, B::getC, C::getValue));
+  }
+
+  @Test public void testSafeConsume() {
+    A a = new A(new B(null));
+    LangUtil.safeConsume(a, A::clearB);
+    assertNull(a.b);
+
+    a = null;
+    LangUtil.safeConsume(a, A::clearB);
   }
 }
