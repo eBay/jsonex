@@ -73,7 +73,8 @@ public class Operator {
   }
 
   /** Compose methods are null-safe. i.e. It won't throw NPE if input is null, but just transform to null */
-  public static<T, R1, R2>  Function<T, R2> compose(Function<T, R1> f1, Function<R1, R2> f2) { return t -> safe(t, f1, f2); }
-  public static <T, R1, R2, R3> Function<T, R3> compose(Function<T, R1> f1, Function<R1, R2> f2, Function<R2, R3> f3) { return t -> safe(t, f1, f2, f3); }
-  public static <T, R1, R2, R3, R4> Function<T, R4> compose(Function<T, R1> f1, Function<R1, R2> f2, Function<R2, R3> f3, Function<R3, R4> f4) { return t -> safe(t, f1, f2, f3, f4); }
+  public static<T, R1>  Function<T, R1> safeOf(Function<T, R1> f1) { return t -> safe(t, f1); }
+  public static<T, R1, R2>  Function<T, R2> safeOf(Function<T, R1> f1, Function<R1, R2> f2) { return t -> safe(t, f1, f2); }
+  public static <T, R1, R2, R3> Function<T, R3> safeOf(Function<T, R1> f1, Function<R1, R2> f2, Function<R2, R3> f3) { return t -> safe(t, f1, f2, f3); }
+  public static <T, R1, R2, R3, R4> Function<T, R4> safeOf(Function<T, R1> f1, Function<R1, R2> f2, Function<R2, R3> f3, Function<R3, R4> f4) { return t -> safe(t, f1, f2, f3, f4); }
 }

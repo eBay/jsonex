@@ -17,17 +17,14 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.ExtensionMethod;
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.*;
-import java.util.function.Predicate;
 
 import static com.jsonex.core.type.Operator.*;
 import static com.jsonex.core.util.ListUtil.containsAny;
 import static com.jsonex.core.util.ListUtil.setOf;
 import static com.jsonex.core.util.ListUtilTest.TestCls.*;
-import static java.util.Arrays.asList;
 import static org.junit.Assert.*;
 
 @ExtensionMethod({Operator.class, ListUtil.class})
@@ -65,7 +62,7 @@ public class ListUtilTest {
     result = ListUtil.map(buildList(), TestCls::getName);
     assertArrayEquals(new String[]{null, "name1", null, "name3"}, result.toArray());
 
-    List<Integer> lengths = ListUtil.map(buildList(), compose(TestCls::getName, String::length));
+    List<Integer> lengths = ListUtil.map(buildList(), safeOf(TestCls::getName, String::length));
     assertArrayEquals(new Integer[]{null, 5, null, 5}, lengths.toArray());
 
     assertNull("should be null if pass null", ListUtil.map(null, F_NAME));

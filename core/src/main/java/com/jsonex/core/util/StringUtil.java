@@ -78,6 +78,8 @@ public class StringUtil {
   
   public static String cEscape(String str) { return cEscape(str, '"', false); }
 
+  public static String cEscape(String str, char quoteChar) { return cEscape(str, quoteChar, false); }
+
   /**
    * Escape a String using the C style
    * e.g. for string "It's a example" escape to "It\'s a example");
