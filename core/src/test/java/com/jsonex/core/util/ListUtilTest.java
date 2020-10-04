@@ -37,10 +37,12 @@ public class ListUtilTest {
     final Integer id;
     final String name;
     final int type;
+    final List<String> tags;
 
     public final static Field<TestCls, String> F_NAME = new Field<>("name", TestCls::getName);
     public final static Field<TestCls, Integer> F_ID = new Field<>("id", TestCls::getId);
     public final static Field<TestCls, Integer> F_TYPE = new Field<>("type", TestCls::getType);
+    public final static Field<TestCls, List<String>> F_TAGS = new Field<>("tags", TestCls::getTags);
   }
 
   private static <T> List<T> asList(T... values) {
@@ -49,10 +51,10 @@ public class ListUtilTest {
 
   private List<TestCls> buildList() {
     return asList(
-        new TestCls(0, null, 0),
-        new TestCls(1, "name1", 1),
-        new TestCls(2, null, 2),
-        new TestCls(3, "name3", 2)
+        new TestCls(0, null, 0, Arrays.asList("a", "b")),
+        new TestCls(1, "name1", 1, Arrays.asList("c", "d", "e")),
+        new TestCls(2, null, 2, Arrays.asList()),
+        new TestCls(3, "name3", 2, null)
     );
   }
 
@@ -63,7 +65,15 @@ public class ListUtilTest {
     result = ListUtil.map(buildList(), TestCls::getName);
     assertArrayEquals(new String[]{null, "name1", null, "name3"}, result.toArray());
 
+    List<Integer> lengths = ListUtil.map(buildList(), compose(TestCls::getName, String::length));
+    assertArrayEquals(new Integer[]{null, 5, null, 5}, lengths.toArray());
+
     assertNull("should be null if pass null", ListUtil.map(null, F_NAME));
+  }
+
+  @Test public void testFlatMap() {
+    List<String> result = ListUtil.flatMap(buildList(), F_TAGS);
+    assertArrayEquals(new String[]{"a", "b", "c", "d", "e"}, result.toArray());
   }
 
   @Test public void testGetIds() {
@@ -206,7 +216,7 @@ public class ListUtilTest {
     assertEquals(asList(2, 4), ListUtil.takeWhile(list, (Integer n) -> (n % 2 == 0)));
     assertEquals(asList(), ListUtil.takeWhile(list, (Integer n) -> n < 0));
     assertEquals(list, ListUtil.takeWhile(list, (Integer n) -> n > 0));
-    assertEquals(0, ListUtil.takeWhile(null, (Integer n) -> n > 0).size());
+    assertNull(ListUtil.takeWhile(null, (Integer n) -> n > 0));
 
     // dropWhile
     assertEquals(asList(6, 8), ListUtil.dropWhile(list, (Integer n) -> n <= 5));
