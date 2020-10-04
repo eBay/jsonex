@@ -1,6 +1,7 @@
 // Some comments
 {
   "total": 100000000000000000000,
+  "maxSafeInt": 9007199254740991,
   "limit": 10,
   "valueWithoutKey",
   /* block comments */

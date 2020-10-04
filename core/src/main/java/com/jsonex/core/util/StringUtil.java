@@ -43,6 +43,8 @@ public class StringUtil {
    * Escape Str using SQL way, assume str is not null.
    */
   public static String SQLEscape(String str) {
+    if (str == null)
+      return null;
     StringBuilder sb = new StringBuilder();
     for (char c : str.toCharArray()) {
       if (c == '\'')
@@ -75,9 +77,8 @@ public class StringUtil {
   private final static String C_ESC_CHAR = "'\"`\\\b\f\n\r\t";
   private final static String C_ESC_SYMB = "'\"`\\bfnrt";
   private final static char MIN_PRINTABLE_CHAR = ' ';
-  
-  public static String cEscape(String str) { return cEscape(str, '"', false); }
 
+  public static String cEscape(String str) { return cEscape(str, '"', false); }
   public static String cEscape(String str, char quoteChar) { return cEscape(str, quoteChar, false); }
 
   /**
@@ -85,10 +86,7 @@ public class StringUtil {
    * e.g. for string "It's a example" escape to "It\'s a example");
    * This is used by (Java/Javascript/C/C++)Code generator
    *
-   * @param str the string to be escaped
-   * @param quoteChar The quote char
    * @param isWchar  Is wide character (Unicode)
-   * @return The escaped String
    */
   public static String cEscape(String str, char quoteChar, boolean isWchar) {
     if (str == null)

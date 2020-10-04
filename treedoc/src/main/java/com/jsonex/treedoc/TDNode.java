@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static com.jsonex.core.util.ListUtil.last;
+
 /** A Node in TreeDoc */
 @RequiredArgsConstructor
 // @Getter @Setter
@@ -206,10 +208,19 @@ public class TDNode {
 
   public StringBuilder toString(StringBuilder sb, boolean includeRootKey, boolean includeReservedKeys, int limit) {
     if (parent != null && parent.type == Type.MAP && includeRootKey)
-      sb.append(key + ":");
+      sb.append(key + ": ");
 
-    if (value != null)
-      sb.append(value instanceof String ? ('\'' + StringUtil.cEscape((String) value, '\'') + '\'') : value);
+    if (value != null) {
+      if (!(value instanceof String)) {
+        sb.append(value);
+      } else {
+        String str = StringUtil.cEscape((String) value, '\'');
+        int remainLen = limit - sb.length();
+        if (str.length() > remainLen)
+          str = str.substring(0, remainLen) + "...";
+        sb.append('\'' + str + '\'');
+      }
+    }
 
     if (this.children == null)
       return sb;
@@ -218,11 +229,13 @@ public class TDNode {
     for (TDNode n : this.children) {
       if (!includeReservedKeys && n.key != null && n.key.startsWith("$"))
         continue;
-      n.toString(sb, true, includeReservedKeys, limit).append(',');
       if (sb.length() > limit) {
         sb.append("...");
         break;
       }
+      n.toString(sb, true, includeReservedKeys, limit);
+      if (n != last(this.children))
+        sb.append(", ");
     }
     sb.append(type == Type.ARRAY ? ']' : '}');
     return sb;
