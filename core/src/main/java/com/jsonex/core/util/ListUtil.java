@@ -21,15 +21,19 @@ import static com.jsonex.core.util.LangUtil.safe;
 /**
  * A collection of utilities related to Collection classes. Many methods here are a better alternative
  * to Java8 stream with more concise expression
+ *
+ * Regarding null input, for most of the list transformation methods, it will keep as silent as possible. That
+ * means if you give null, I'll give back you null without NPE. The principle is I just don't make it worse,
+ * but won't complain it's already bad, I'm just a transformer but not a validator.
  */
 public class ListUtil {
   public static <C extends Collection<? super TDest>, TSrc, TDest> C map(
       Collection<? extends TSrc> source, BiFunction<? super TSrc, Integer, ? extends TDest> func, C dest) {
-    if (source == null)
-      return null;
-    int idx = 0;
-    for (TSrc src : source)
-      dest.add(func.apply(src, idx++));
+    if (source != null) {
+      int idx = 0;
+      for (TSrc src : source)
+        dest.add(func.apply(src, idx++));
+    }
     return dest;
   }
 
@@ -40,17 +44,45 @@ public class ListUtil {
 
   public static <TSrc, TDest> List<TDest> map(
       Collection<? extends TSrc> source, BiFunction<? super TSrc, Integer, ? extends TDest> func) {
-    return map(source, func, new ArrayList<>());
+    return source == null ? null : map(source, func, new ArrayList<>());
   }
 
   public static <TSrc, TDest> List<TDest> map(
       Collection<? extends TSrc> source, Function<? super TSrc, ? extends TDest> func) {
-    return map(source, func, new ArrayList<>());
+    return source == null ? null : map(source, func, new ArrayList<>());
+  }
+
+  public static <C extends Collection<? super TDest>, TSrc, TDest> C flatMap(Collection<? extends TSrc> source,
+      BiFunction<? super TSrc, Integer, ? extends Collection< ? extends TDest>> func, C dest) {
+    if (source != null) {
+      int idx = 0;
+      for (TSrc src : source) {
+        Collection<? extends TDest> vals = func.apply(src, idx++);
+        if (vals != null)
+          dest.addAll(vals);
+      }
+    }
+    return dest;
+  }
+
+  public static <C extends Collection<? super TDest>, TSrc, TDest> C flatMap(
+      Collection<? extends TSrc> source, Function<? super TSrc, ? extends Collection< ? extends TDest>> func, C dest) {
+    return flatMap(source, (e, i) ->  func.apply(e), dest);
+  }
+
+  public static <TSrc, TDest> List<TDest> flatMap(Collection<? extends TSrc> source,
+      BiFunction<? super TSrc, Integer, ? extends Collection< ? extends TDest>> func) {
+    return source == null ? null : flatMap(source, func, new ArrayList<>());
+  }
+
+  public static <TSrc, TDest> List<TDest> flatMap(
+      Collection<? extends TSrc> source, Function<? super TSrc, ? extends Collection< ? extends TDest>> func) {
+    return source == null ? null : flatMap(source, func, new ArrayList<>());
   }
 
   public static <TSrc, TDest> Set<TDest> unique(
       Collection<? extends TSrc> source, Function<? super TSrc, ? extends TDest> func) {
-    return map(source, func, new HashSet<>());
+    return source == null ? null : map(source, func, new HashSet<>());
   }
 
   public static <TId> List<TId> getIds(Collection<? extends Identifiable<TId>> identifiables) {
@@ -59,16 +91,11 @@ public class ListUtil {
 
   public static <K, E> Map<K, List<E>> groupBy(
       Collection<? extends E> source, Function<? super E, ? extends K> classifier) {
+    if (source == null)
+      return null;
     Map<K, List<E>> result = new LinkedHashMap<>();
-    for (E e : source) {
-      K k = classifier.apply(e);
-      List<E> v = result.get(k);
-      if (v == null) {
-        v = new ArrayList<>();
-        result.put(k, v);
-      }
-      v.add(e);
-    }
+    for (E e : source)
+      result.computeIfAbsent(classifier.apply(e), key -> new ArrayList<>()).add(e);
     return result;
   }
 
@@ -96,6 +123,8 @@ public class ListUtil {
    * The list should contain Long values. Otherwise ClassCastException will be thrown.
    */
   public static long[] toLongArray(Collection<Object> list) {
+    if (list == null)
+      return null;
     long[] result = new long[list.size()];
     int i = 0;
     for (Object e : list) {
@@ -119,6 +148,8 @@ public class ListUtil {
 
   public static <S, K, V> Map<K, V> toMap(
       Collection<S> source, Function<? super S, ? extends K> keyFunc, Function<? super S, ? extends V> valFunc) {
+    if (source == null)
+      return null;
     Map<K, V> map = new LinkedHashMap<>();
     for (S s : source)
       map.put(keyFunc.apply(s), valFunc.apply(s));
@@ -127,15 +158,15 @@ public class ListUtil {
 
   public static <V, S extends Collection<? extends V>, D extends Collection<? super V>> D filter(
       S source, Predicate<? super V> pred, D dest) {
-    for (V s : source) {
-      if (pred.test(s))
-        dest.add(s);
-    }
+    if (source != null)
+      for (V s : source)
+        if (pred.test(s))
+          dest.add(s);
     return dest;
   }
 
   public static <V, C extends Collection<? extends V>> List<V> filter(C source, Predicate<? super V> pred) {
-    return filter(source, pred, new ArrayList<>());
+    return source == null ? null : filter(source, pred, new ArrayList<>());
   }
 
   public static <V, C extends Collection<? extends V>> List<V> orderBy(
@@ -145,6 +176,8 @@ public class ListUtil {
 
   public static <V, C extends Collection<? extends V>, K extends Comparable<K>> List<V> orderBy(
       C src, final Function<? super V, K> by, final boolean desc) {
+    if (src == null)
+      return null;
     List<V> dest = new ArrayList<>(src.size());
     dest.addAll(src);  // clone
     Collections.sort(dest, (o1, o2) -> {
@@ -153,9 +186,8 @@ public class ListUtil {
       int result;
       if (v1 == null)
         result = v2 == null ? 0 : -1;
-      else {
+      else
         result = v2 == null ? 1 : v1.compareTo(v2);
-      }
       return desc ? - result : result;
     });
     return dest;
@@ -181,24 +213,22 @@ public class ListUtil {
   }
 
   public static <V, C extends Collection<V>> boolean exists(C source, Predicate<? super V> pred) {
-    return first(source, pred) != null;
+    return source == null ? false : first(source, pred) != null;
   }
 
   public static <V, C extends Collection<V>> V first(C source, Predicate<? super V> pred) {
     if (source != null)
-      for (V s : source) {
+      for (V s : source)
         if (pred.test(s))
           return s;
-      }
     return null;
   }
 
   public static <V, C extends List<V>> int indexOf(C source, Predicate<? super V> pred) {
     if (source != null)
-      for (int i = 0; i < source.size(); i++) {
+      for (int i = 0; i < source.size(); i++)
         if (pred.test(source.get(i)))
           return i;
-      }
     return -1;
   }
 
@@ -221,7 +251,7 @@ public class ListUtil {
   /** This is a combination of dropWhile and takeWhile */
   public static <V, S extends Collection<? extends V>> List<V> takeBetween(
       S source, Predicate<? super V> dropPred, Predicate<? super V> whilePred) {
-    return takeBetween(source, dropPred, whilePred, new ArrayList<>());
+    return source == null ? null : takeBetween(source, dropPred, whilePred, new ArrayList<>());
   }
 
   public static <V, S extends Collection<? extends V>, D extends Collection<? super V>> D takeWhile(
@@ -230,29 +260,37 @@ public class ListUtil {
   }
 
   public static <V, S extends Collection<? extends V>> List<V> takeWhile(S source, Predicate<? super V> pred) {
-    return takeWhile(source, pred, new ArrayList<>());
+    return source == null ? null : takeWhile(source, pred, new ArrayList<>());
   }
 
   public static <V, S extends Collection<? extends V>, D extends Collection<? super V>> D dropWhile(
       S source, Predicate<? super V> pred, D dest) {
-    return takeBetween(source, pred, (v) -> true, dest);
+    return takeBetween(source, pred, v -> true, dest);
   }
 
   public static <V, S extends Collection<? extends V>> List<V> dropWhile(S source, Predicate<? super V> pred) {
     return dropWhile(source, pred, new ArrayList<>());
   }
 
-  public static <T> T last(List<T> list) { return list == null ? null : list.get(list.size() - 1); }
+  public static <T> T last(List<T> list) {
+    if (list == null)
+      return null;
+    Assert.isTrue(!list.isEmpty(), () -> "list is null or empty:" + list);
+    return list.get(list.size() - 1);
+  }
+
   public static <T> T first(Collection<T> list) {
-    return list == null || list.size() == 0 ? null : list.iterator().next();
+    if (list == null)
+      return null;
+    Assert.isTrue(!list.isEmpty(), () -> "list is null or empty:" + list);
+    return list.iterator().next();
   }
 
   public static <T> boolean containsAny(Collection<T> list, T... elements) {
     if (list != null)
-      for (T e : elements) {
+      for (T e : elements)
         if (list.contains(e))
           return true;
-      }
     return false;
   }
 

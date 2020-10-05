@@ -31,8 +31,8 @@ public class TDJsonParserTest {
     TDNode node = TDJSONParser.get().parse(reader);
 
     log.info("testParse: Node=" + TestUtil.toJSON(node));
-    assertEquals("valueWithoutKey", node.getChildValue("2"));
-    assertEquals("lastValueWithoutKey", node.getChildValue("5"));
+    assertEquals("valueWithoutKey", node.getChildValue("3"));
+    assertEquals("lastValueWithoutKey", node.getChildValue("6"));
     assertEquals(10, node.getChildValue("limit"));
     assertEquals("100000000000000000000", node.getChildValue("total"));
     assertEquals("Some Name 1", node.getValueByPath("data/0/name"));
@@ -148,11 +148,14 @@ public class TDJsonParserTest {
     String str3 = node.toString();
     log.info("testToString:str=" + str3);
     assertFalse("toString should return different value when node value changed", str.equals(str3));
-    String expected = "{total:100000000000000000000,limit:10,2:valueWithoutKey,data:[{$id:1,name:Some Name 1,address:" +
-        "{streetLine:1st st,city:other city,},createdAt:2017-07-14T17:17:33.010Z,ip:10.1.22.22,},{$id:2,name:Some Name 2,address:{" +
-        "streetLine:2nd st,city:san jose,},createdAt:2017-07-14T17:17:33.010Z,},Multiple line literal\n" +
-        "    Line2,],objRef:{$ref:1,},5:lastValueWithoutKey,}";
-    assertEquals(expected, str3);
+    assertEquals("{total: '100000000000000000000', maxSafeInt: 9007199254740991, limit: 10, 3: 'valueWithoutKey', data: [{$id: '1', name: 'Some Name 1', address: {streetLine: '1st st', city: 'other city'}, createdAt: '2017-07-14T17:17:33.010Z', ip: '10.1.22.22'}, {$id: '2', name: 'Some Name 2', address: {streetLine: '2nd st', city: 'san jose'}, createdAt: '2017-07-14T17:17:33.010Z'}, 'Multiple line literal\\n    Line2'], objRef: {$ref: '1'}, 6: 'lastValueWithoutKey'}",
+        str3);
+
+    String strWithoutRootKey = node.getChild("data").toString(new StringBuilder(), false, false, 100).toString();
+    assertEquals("[{name: 'Some Name 1', address: {streetLine: '1st st', city: 'other city'}, createdAt: '2017-07-14T17...', ...}, ...]", strWithoutRootKey);
+
+    String strWithoutRootKeyLimited = node.getChild("data").toString(new StringBuilder(), false, false, 10).toString();
+    assertEquals("[{name: 'So...', ...}, ...]", strWithoutRootKeyLimited);
   }
 
   @Test public void testSwap() {

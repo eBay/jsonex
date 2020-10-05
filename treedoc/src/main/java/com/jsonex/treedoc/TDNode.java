@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static com.jsonex.core.util.ListUtil.last;
+
 /** A Node in TreeDoc */
 @RequiredArgsConstructor
 // @Getter @Setter
@@ -201,26 +203,39 @@ public class TDNode {
   }
 
   @Override public String toString() {
-    return str.getOrCompute(() -> toString(new StringBuilder(), 100000).toString());
+    return str.getOrCompute(() -> toString(new StringBuilder(), true, true, 100000).toString());
   }
 
-  public StringBuilder toString(StringBuilder sb, int limit) {
-    if (parent != null && parent.type == Type.MAP)
-      sb.append(key + ":");
+  public StringBuilder toString(StringBuilder sb, boolean includeRootKey, boolean includeReservedKeys, int limit) {
+    if (parent != null && parent.type == Type.MAP && includeRootKey)
+      sb.append(key + ": ");
 
-    if (value != null)
-      sb.append(value);
+    if (value != null) {
+      if (!(value instanceof String)) {
+        sb.append(value);
+      } else {
+        String str = StringUtil.cEscape((String) value, '\'');
+        int remainLen = limit - sb.length();
+        if (str.length() > remainLen)
+          str = str.substring(0, remainLen) + "...";
+        sb.append('\'' + str + '\'');
+      }
+    }
 
     if (this.children == null)
       return sb;
 
     sb.append(type == Type.ARRAY ? '[' : '{');
     for (TDNode n : this.children) {
-      n.toString(sb, limit).append(',');
+      if (!includeReservedKeys && n.key != null && n.key.startsWith("$"))
+        continue;
       if (sb.length() > limit) {
         sb.append("...");
         break;
       }
+      n.toString(sb, true, includeReservedKeys, limit);
+      if (n != last(this.children))
+        sb.append(", ");
     }
     sb.append(type == Type.ARRAY ? ']' : '}');
     return sb;
