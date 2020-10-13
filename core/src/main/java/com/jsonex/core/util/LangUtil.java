@@ -21,7 +21,7 @@ public class LangUtil {
 
   public static <T,R1, R2, R3, R4, R5> R5 safe(T obj, Function<T,R1> getter1, Function<R1,R2> getter2, Function<R2,R3> getter3, Function<R3,R4> getter4, Function<R4,R5> getter5) { return safeOrElse(obj, getter1, getter2, getter3, getter4, getter5, null); }
 
-  public static <T> void safeConsume(T obj, Consumer<T> action) { if (obj != null)  action.accept(obj); }
+  public static <T> void doIfNotNull(T obj, Consumer<? super T> action) { if (obj != null)  action.accept(obj); }
 
   public static void doIf(boolean condition, Runnable action) { if (condition) action.run(); }
   public static void doIfElse(boolean condition, Runnable ifAction, Runnable elseAction) {

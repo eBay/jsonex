@@ -37,10 +37,10 @@ public class LangUtilTest {
 
   @Test public void testSafeConsume() {
     A a = new A(new B(null));
-    LangUtil.safeConsume(a, A::clearB);
+    LangUtil.doIfNotNull(a, A::clearB);
     assertNull(a.b);
 
     a = null;
-    LangUtil.safeConsume(a, A::clearB);
+    LangUtil.doIfNotNull(a, A::clearB);
   }
 }
