@@ -9,6 +9,8 @@
 
 package com.jsonex.core.util;
 
+import com.jsonex.core.annotation.DefaultEnum;
+import com.jsonex.core.type.Nullable;
 import com.jsonex.core.type.TypeRef;
 import com.jsonex.core.util.TestClass.TestSubClass;
 import lombok.Getter;
@@ -20,6 +22,8 @@ import org.junit.Test;
 import java.beans.Transient;
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
@@ -50,12 +54,17 @@ public class ClassUtilTest {
   @SuppressWarnings({"CanBeFinal", "SameReturnValue", "WeakerAccess"})
   public static class B extends A {
     public String fieldB1;
-    public String fieldB2;
+    @Nullable
+    public transient String fieldB2;
     public String fieldB3;
     public String fieldB4;
     public String fieldB5;
     @Getter(onMethod = @__({@Transient})) @Setter private boolean fieldB6;
     public String getFieldB1() { return fieldB1; }
+    public String get() { return "emptyName"; }
+
+    @Nullable @Transient
+    public void setWriteOnly(String str) { fieldB5 = str; }
   }
 
   @SuppressWarnings({"CanBeFinal", "SameReturnValue", "WeakerAccess"})
@@ -71,7 +80,7 @@ public class ClassUtilTest {
   @Test public void testGetProperties() {
     Map<String, BeanProperty> properties = ClassUtil.getProperties(B.class);
     log.info("Properties.keySet():" + properties.keySet());
-    String[] exp = {"fieldA1", "fieldA2", "fieldA3", "fieldA4", "fieldB1", "fieldB2", "fieldB3", "fieldB4", "fieldB5", "fieldB6"};
+    String[] exp = {"fieldA1", "fieldA2", "fieldA3", "fieldA4", "fieldB1", "fieldB2", "fieldB3", "fieldB4", "fieldB5", "fieldB6", "^", "writeOnly"};
     // Java compiler will mass up the order of the getter methods, field order is preserved in most of the java versions
     assertArrayEquals(exp, properties.keySet().toArray());
 
@@ -89,6 +98,7 @@ public class ClassUtilTest {
     assertEquals(B.class.getMethod("isFieldB6", new Class[0]), prop.getGetter());
     assertTrue(prop.isTransient());
     assertFalse(prop.isFieldAccessible(false));
+    assertEquals(Modifier.PUBLIC, prop.getModifier());
     assertNotNull("Transient is annotated", prop.getAnnotation(Transient.class));
 
     // Field without setter/getters
@@ -98,6 +108,23 @@ public class ClassUtilTest {
     assertNull(prop.getGetter());
     assertNotNull(prop.getField());
     assertEquals("str", prop.get(b));
+    assertEquals(String.class, prop.getType());
+    assertEquals(String.class, prop.getGenericType());
+    assertNotNull(prop.getAnnotation(Nullable.class));
+    assertNull(prop.getAnnotation(DefaultEnum.class));
+    assertEquals(Modifier.PUBLIC | Modifier.TRANSIENT, prop.getModifier());
+    assertTrue(prop.isTransient());
+
+    // Set only field
+    prop = properties.get("writeOnly");
+    prop.set(b, "str");
+    assertEquals("str", b.fieldB5);
+    assertEquals(String.class, prop.getType());
+    assertEquals(String.class, prop.getGenericType());
+    assertNotNull(prop.getAnnotation(Nullable.class));
+    assertNull(prop.getAnnotation(DefaultEnum.class));
+    assertEquals(Modifier.PUBLIC, prop.getModifier());
+    assertTrue(prop.isTransient());
   }
 
   @Test public void testGetPropertiesWithExceptions () {
@@ -164,9 +191,35 @@ public class ClassUtilTest {
     assertNotNull("get path should return value", val);
   }
 
+  @Test public void testGetPropertyValue() {
+    List<Integer> ints = ListUtil.listOf(0, 1, 2, 3, 4);
+    assertEquals(3, ClassUtil.getPropertyValue(ints, "3"));
+
+    assertEquals(new Date().getTime(),
+        ((Long)ClassUtil.getPropertyValue(Date.class, "time")), 1000.);
+
+    assertEquals(System.err,
+        ClassUtil.getPropertyValue(System.class, "err"));
+  }
+
+  static class GenericTypeTestCls<T extends Integer> {
+    public T boundedInt;  // Test for WildcardType
+    public Collection<? extends Integer> wildCollection;  // Test for WildcardType
+  }
+
+  @SneakyThrows
   @Test public void testGetGenericClass() {
+    assertNull(ClassUtil.getGenericClass(null));
     assertEquals(List.class, ClassUtil.getGenericClass(List.class));
     assertEquals(List.class, ClassUtil.getGenericClass(new TypeRef<List<Integer>>() {}.getType()));
+    assertEquals((new int[0]).getClass(), ClassUtil.getGenericClass(new TypeRef<int[]>() {}.getType()));
+    assertEquals(Integer.class, ClassUtil.getGenericClass(GenericTypeTestCls.class.getField("boundedInt").getGenericType()));
+
+    Type collectionType = GenericTypeTestCls.class.getField("wildCollection").getGenericType();
+    Type paramType = ((ParameterizedType)collectionType).getActualTypeArguments()[0];
+    assertEquals(Integer.class, ClassUtil.getGenericClass(paramType));
+
+    assertEquals(new Class<?>[0].getClass(), ClassUtil.getGenericClass(new TypeRef<Class<?>[]>() {}.getType()));
   }
 
   @SneakyThrows
@@ -217,5 +270,4 @@ public class ClassUtilTest {
     assertEquals((Integer)100, ClassUtil.objectToSimpleType(100, Integer.class));
     assertEquals((Float)(float)100.1, ClassUtil.objectToSimpleType(100.1, float.class));
   }
-
 }

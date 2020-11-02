@@ -22,8 +22,7 @@ import org.junit.Test;
 import java.util.*;
 
 import static com.jsonex.core.type.Operator.*;
-import static com.jsonex.core.util.ListUtil.containsAny;
-import static com.jsonex.core.util.ListUtil.setOf;
+import static com.jsonex.core.util.ListUtil.*;
 import static com.jsonex.core.util.ListUtilTest.TestCls.*;
 import static org.junit.Assert.*;
 
@@ -172,21 +171,21 @@ public class ListUtilTest {
     //   2. User static import for assertXXX or multiple lines of statement with lambada
     //Assert.assertTrue("should contains type of 1", ListUtil.exists(buildList(), obj -> obj.getType() == 1));
     //Assert.assertFalse("shouldn't contains type of 3", ListUtil.exists(buildList(), obj -> obj.getType() == 3));
-    assertTrue("should contains type of 1", ListUtil.exists(buildList(), eq(F_TYPE, 1)));
-    assertFalse("shouldn't contains type of 3", ListUtil.exists(buildList(), eq(F_TYPE, 3)));
-    assertFalse("shouldn return false for null source", ListUtil.exists(null, eq(F_TYPE, 3)));
+    assertTrue("should contain type of 1", ListUtil.exists(buildList(), eq(F_TYPE, 1)));
+    assertFalse("shouldn't contain type of 3", ListUtil.exists(buildList(), eq(F_TYPE, 3)));
+    assertFalse("should return false for null source", ListUtil.exists(null, eq(F_TYPE, 3)));
   }
 
   @Test public void testFirstLastIndexOf() {
     List<TestCls> list = buildList();
-    assertEquals(list.get(0), ListUtil.first(list));
-    assertEquals(list.get(3), ListUtil.last(list));
+    assertEquals(list.get(0), ListUtil.first(list).get());
+    assertEquals(list.get(3), ListUtil.last(list).get());
 
-    assertEquals(list.get(2), ListUtil.first(list, eq(F_TYPE, 2)));
+    assertEquals(list.get(2), ListUtil.first(list, eq(F_TYPE, 2)).get());
     assertEquals(2, ListUtil.indexOf(list, eq(F_TYPE, 2)));
 
-    assertEquals(null, ListUtil.first(list, eq(F_TYPE, 3)));
-    assertEquals(null, ListUtil.first(null, eq(F_TYPE, 3)));
+    assertEquals(Optional.empty(), ListUtil.first(list, eq(F_TYPE, 3)));
+    assertEquals(Optional.empty(), ListUtil.first(null, eq(F_TYPE, 3)));
     assertEquals(-1, ListUtil.indexOf(null, eq(F_TYPE, 2)));
   }
 

@@ -48,16 +48,16 @@ public class BeanProperty {
   
   public void set(Object obj, Object value){
     try{
-      if(setter != null){
+      if (setter != null){
         setter.setAccessible(true);
         setter.invoke(obj, value);
         return;
-      }else if(field != null) {
+      } else if (field != null) {
         field.setAccessible(true);
         field.set(obj, value);
         return;
       }
-    }catch(Exception e){
+    } catch(Exception e){
       throw new InvokeRuntimeException("error set value:" + name + ",class=" + obj.getClass() + ",value=" + value, e);
     }
     throw new InvokeRuntimeException("field is not mutable: " + name + ",class:" + obj.getClass());
@@ -65,14 +65,14 @@ public class BeanProperty {
   
   public Object get(Object obj){
     try {
-      if(getter != null) {
+      if (getter != null) {
         getter.setAccessible(true);
         return getter.invoke(obj);
-      } else if(field != null) {
+      } else if (field != null) {
         field.setAccessible(true);
         return field.get(obj);
       }
-    }catch(Exception e) {
+    } catch(Exception e) {
       throw new InvokeRuntimeException("error get value:" + name + ",class:" + obj.getClass(), e);
     }
     throw new InvokeRuntimeException("field is not readable: " + name + ",class:" + obj.getClass());
@@ -80,47 +80,46 @@ public class BeanProperty {
   
   public <T extends Annotation> Annotation getAnnotation(Class<T> cls) {
     Annotation result;
-    if(getter != null) {
+    if (getter != null) {
       result = getter.getAnnotation(cls);
       if (result != null)
         return result;
     }
     
-    if(field != null) {
+    if (field != null) {
       result = field.getAnnotation(cls);
       if (result != null)
         return result;
     }
     
-    if( setter != null)
+    if ( setter != null)
       return setter.getAnnotation(cls);
     
     return null;
   }
   
   public Type getGenericType(){
-    if(getter != null)
+    if (getter != null)
       return getter.getGenericReturnType();
-    else if(field != null)
+    else if (field != null)
       return field.getGenericType();
     else
       return setter.getGenericParameterTypes()[0];
   }
   
   public Class<?> getType(){
-    if(getter != null)
+    if (getter != null)
       return getter.getReturnType();
-    else if(field != null)
+    else if (field != null)
       return field.getType();
     else
       return setter.getParameterTypes()[0];
-    
   }
   
   public int getModifier(){
-    if(getter != null)
+    if (getter != null)
       return getter.getModifiers();
-    else if(field != null)
+    else if (field != null)
       return field.getModifiers();
     else
       return setter.getModifiers();

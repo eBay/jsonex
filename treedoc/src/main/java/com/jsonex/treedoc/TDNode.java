@@ -234,7 +234,7 @@ public class TDNode {
         break;
       }
       n.toString(sb, true, includeReservedKeys, limit);
-      if (n != last(this.children))
+      if (n != last(this.children).get())
         sb.append(", ");
     }
     sb.append(type == Type.ARRAY ? ']' : '}');

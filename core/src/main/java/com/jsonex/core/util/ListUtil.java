@@ -119,6 +119,7 @@ public class ListUtil {
     return map(source, keyFunc, Function.identity());
   }
 
+
   /**
    * The list should contain Long values. Otherwise ClassCastException will be thrown.
    */
@@ -213,15 +214,15 @@ public class ListUtil {
   }
 
   public static <V, C extends Collection<V>> boolean exists(C source, Predicate<? super V> pred) {
-    return source == null ? false : first(source, pred) != null;
+    return source == null ? false : first(source, pred).isPresent();
   }
 
-  public static <V, C extends Collection<V>> V first(C source, Predicate<? super V> pred) {
+  public static <V, C extends Collection<V>> Optional<V> first(C source, Predicate<? super V> pred) {
     if (source != null)
       for (V s : source)
         if (pred.test(s))
-          return s;
-    return null;
+          return Optional.of(s);
+    return Optional.empty();
   }
 
   public static <V, C extends List<V>> int indexOf(C source, Predicate<? super V> pred) {
@@ -272,18 +273,16 @@ public class ListUtil {
     return dropWhile(source, pred, new ArrayList<>());
   }
 
-  public static <T> T last(List<T> list) {
+  public static <T> Optional<T> last(List<T> list) {
     if (list == null)
       return null;
-    Assert.isTrue(!list.isEmpty(), () -> "list is null or empty:" + list);
-    return list.get(list.size() - 1);
+    return list.isEmpty() ? Optional.empty() : Optional.of(list.get(list.size() - 1));
   }
 
-  public static <T> T first(Collection<T> list) {
+  public static <T> Optional<T> first(Collection<T> list) {
     if (list == null)
       return null;
-    Assert.isTrue(!list.isEmpty(), () -> "list is null or empty:" + list);
-    return list.iterator().next();
+    return list.isEmpty() ? Optional.empty() : Optional.of(list.iterator().next());
   }
 
   public static <T> boolean containsAny(Collection<T> list, T... elements) {
@@ -296,7 +295,11 @@ public class ListUtil {
 
   public static void removeLast(List<?> list) { list.remove(list.size() - 1); }
 
+  /** build a copy of mutable Set whose content will be independent with original array once created */
   public static <T> Set<T> setOf(T... e) { return new LinkedHashSet<>(Arrays.asList(e)); }
+
+  /** build a copy of mutable list whose content will be independent with original array once created */
+  public static <T> List<T> listOf(T... e) { return new ArrayList<>(Arrays.asList(e)); }
 
   public static <K, V, M extends Map<K, V>> M mergeWith(M target, Map<? extends K, ? extends V> source,
       BiFunction<? super V, ? super V, ? extends V> mergeFunc) {
