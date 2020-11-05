@@ -196,11 +196,19 @@ public class ClassUtil {
     if(relativePath.length() == 0)
       throw new IllegalArgumentException("Path should have at least one variable section");
 
-    return getObjectByPath(Class.forName(path.substring(0, p)), null, relativePath);
+    return getObjectByPath(Class.forName(path.substring(0, p)), relativePath);
   }
 
   public static Object getObjectByPath(@Nullable Class<?> cls, @Nullable Object obj, String relativePath) {
     return getObjectByPath(cls, obj, ListUtil.listOf(relativePath.split("\\.")));
+  }
+
+  public static Object getObjectByPath(Object obj, String relativePath) {
+    return getObjectByPath(null, obj, relativePath);
+  }
+
+  public static Object getObjectByPath( Class<?> cls, String relativePath) {
+    return getObjectByPath(cls, null, relativePath);
   }
 
   public static Object getObjectByPath(@Nullable Class<?> cls, @Nullable Object obj, List<String> relativePath) {
@@ -216,9 +224,10 @@ public class ClassUtil {
    * It will try getter method first, then try field
    */
   @SneakyThrows
-  public static Object getPropertyValue(@Nullable Class<?> cls, @Nullable Object obj, String propertyName)
+  public static @Nullable  Object getPropertyValue(@Nullable Class<?> cls, @Nullable Object obj, String propertyName)
   {
-    Assert.isTrue(cls != null || obj != null, () -> "cls and obj can't be both null");
+    if (cls == null && obj == null)
+      return null;
 
     if (cls == null )
       cls = obj.getClass();

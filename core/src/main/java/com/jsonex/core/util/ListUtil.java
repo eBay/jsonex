@@ -170,6 +170,10 @@ public class ListUtil {
     return source == null ? null : filter(source, pred, new ArrayList<>());
   }
 
+  public static <V, C extends Collection<? extends V>> List<V> filterNonNull(C source) {
+    return filter(source, e -> e != null);
+  }
+
   public static <V, C extends Collection<? extends V>> List<V> orderBy(
       C source, final Function<? super V, ? extends Comparable> by) {
     return orderBy(source, by, false);
