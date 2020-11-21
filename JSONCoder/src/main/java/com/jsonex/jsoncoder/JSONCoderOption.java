@@ -31,12 +31,8 @@ import static com.jsonex.core.util.LangUtil.doIfElse;
 public class JSONCoderOption {
   @Getter final static JSONCoderOption global = new JSONCoderOption(null);
   static {
-    global.coderList.add(new CoderDate());
-    global.coderList.add(new CoderEnum());
-    global.coderList.add(new CoderXMLGregorianCalendar());
-    global.coderList.add(new CoderAtomicInteger());
-    global.coderList.add(new CoderBigInteger());
-    global.coderList.add(new CoderClass());
+    global.addCoder(CoderDate.get(), CoderEnum.get(), CoderXMLGregorianCalendar.get(), CoderAtomicInteger.get(),
+        CoderBigInteger.get(), CoderClass.get(), CoderURI.get(), CoderURL.get());
 
     global.skippedClasses.add(Format.class);
 

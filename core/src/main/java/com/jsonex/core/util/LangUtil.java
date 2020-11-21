@@ -31,6 +31,17 @@ public class LangUtil {
       elseAction.run();
   }
 
-  public static <T> T orElse(T value, T fullBack) { return value == null ? fullBack : value; }
-  public static <T> T orElse(T value, Supplier<T> fullBack) { return value == null ? fullBack.get() : value; }
+  public static <T> void doIfInstanceOf(Object obj, Class<T> cls, Consumer<? super T> action) {
+    if (obj != null && cls.isAssignableFrom(obj.getClass())) {
+      action.accept(cls.cast(obj));
+    }
+  }
+
+  public static <T, T1 extends T, T2 extends T> T orElse(T1 value, T2 fullBack) {
+    return value == null ? fullBack : value;
+  }
+
+  public static <T, T1 extends T> T orElse(T1 value, Supplier<? extends T> fullBack) {
+    return value == null ? fullBack.get() : value;
+  }
 }

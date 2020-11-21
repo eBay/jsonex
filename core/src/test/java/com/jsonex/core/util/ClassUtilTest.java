@@ -61,8 +61,6 @@ public class ClassUtilTest {
     public String fieldB5;
     @Getter(onMethod = @__({@Transient})) @Setter private boolean fieldB6;
     public String getFieldB1() { return fieldB1; }
-    public String get() { return "emptyName"; }
-
     @Nullable @Transient
     public void setWriteOnly(String str) { fieldB5 = str; }
   }
@@ -74,13 +72,14 @@ public class ClassUtilTest {
       if (str == null)  // Simulate exception in setter
         throw new NullPointerException();
     }
+    public String get() { return "emptyName"; }
   }
 
   @SneakyThrows
   @Test public void testGetProperties() {
     Map<String, BeanProperty> properties = ClassUtil.getProperties(B.class);
     log.info("Properties.keySet():" + properties.keySet());
-    String[] exp = {"fieldA1", "fieldA2", "fieldA3", "fieldA4", "fieldB1", "fieldB2", "fieldB3", "fieldB4", "fieldB5", "fieldB6", "^", "writeOnly"};
+    String[] exp = {"fieldA1", "fieldA2", "fieldA3", "fieldA4", "fieldB1", "fieldB2", "fieldB3", "fieldB4", "fieldB5", "fieldB6", "writeOnly"};
     // Java compiler will mass up the order of the getter methods, field order is preserved in most of the java versions
     assertArrayEquals(exp, properties.keySet().toArray());
 

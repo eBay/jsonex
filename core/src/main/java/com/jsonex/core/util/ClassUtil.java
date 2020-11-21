@@ -196,19 +196,11 @@ public class ClassUtil {
     if(relativePath.length() == 0)
       throw new IllegalArgumentException("Path should have at least one variable section");
 
-    return getObjectByPath(Class.forName(path.substring(0, p)), relativePath);
+    return getObjectByPath(Class.forName(path.substring(0, p)), null, relativePath);
   }
 
   public static Object getObjectByPath(@Nullable Class<?> cls, @Nullable Object obj, String relativePath) {
     return getObjectByPath(cls, obj, ListUtil.listOf(relativePath.split("\\.")));
-  }
-
-  public static Object getObjectByPath(Object obj, String relativePath) {
-    return getObjectByPath(null, obj, relativePath);
-  }
-
-  public static Object getObjectByPath( Class<?> cls, String relativePath) {
-    return getObjectByPath(cls, null, relativePath);
   }
 
   public static Object getObjectByPath(@Nullable Class<?> cls, @Nullable Object obj, List<String> relativePath) {

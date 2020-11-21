@@ -9,6 +9,7 @@
 
 package com.jsonex.jsoncoder.coder;
 
+import com.jsonex.core.factory.InjectableInstance;
 import com.jsonex.jsoncoder.BeanCoderContext;
 import com.jsonex.jsoncoder.BeanCoderException;
 import com.jsonex.jsoncoder.ICoder;
@@ -20,6 +21,9 @@ import java.lang.reflect.Type;
 import java.util.GregorianCalendar;
 
 public class CoderXMLGregorianCalendar implements ICoder<XMLGregorianCalendar>{
+  public static final InjectableInstance<CoderXMLGregorianCalendar> it = InjectableInstance.of(CoderXMLGregorianCalendar.class);
+  public static CoderXMLGregorianCalendar get() { return it.get(); }
+
   @Override public Class<XMLGregorianCalendar> getType() { return XMLGregorianCalendar.class; }
   @Override public TDNode encode(XMLGregorianCalendar obj, Type type, BeanCoderContext ctx, TDNode target) {
     String str = ctx.getCachedDateFormat(ctx.getOption().getDateFormat()).format(obj.toGregorianCalendar().getTime());

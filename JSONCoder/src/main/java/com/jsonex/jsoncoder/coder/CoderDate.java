@@ -9,6 +9,7 @@
 
 package com.jsonex.jsoncoder.coder;
 
+import com.jsonex.core.factory.InjectableInstance;
 import com.jsonex.jsoncoder.BeanCoderContext;
 import com.jsonex.jsoncoder.BeanCoderException;
 import com.jsonex.jsoncoder.ICoder;
@@ -20,6 +21,9 @@ import java.text.ParseException;
 import java.util.Date;
 
 public class CoderDate implements ICoder<Date> {
+  public static final InjectableInstance<CoderDate> it = InjectableInstance.of(CoderDate.class);
+  public static CoderDate get() { return it.get(); }
+
   @Override public Class<Date> getType() { return Date.class; }
   
   @Override public TDNode encode(Date obj, Type type, BeanCoderContext ctx, TDNode target) {
