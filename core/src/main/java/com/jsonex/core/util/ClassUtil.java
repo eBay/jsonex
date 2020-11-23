@@ -126,14 +126,18 @@ public class ClassUtil {
 
       BeanProperty prop = attributeMap.get(name);
       if(prop == null){
-        prop = new BeanProperty(name);//NOPMD
+        prop = new BeanProperty(name);
         attributeMap.put(name, prop);
       }
 
       if(isSetter)
         prop.setter = m;
-      else
-        prop.getter = m;
+      else {
+        // For union type in certain framework, isXXX is to indicate if the attribute is available, we will override it
+        // with the actual getter method
+        if (prop.getter == null || prop.getter.getReturnType() == Boolean.TYPE)
+          prop.getter = m;
+      }
     }
 
     // Check fields, reorder based on field order.
