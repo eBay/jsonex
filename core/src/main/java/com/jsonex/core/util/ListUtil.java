@@ -198,11 +198,25 @@ public class ListUtil {
     return dest;
   }
 
-  public static boolean contains(long[] longs, long match) {
+  public static boolean inLong(long match, long... longs) {
     if (longs != null)
       for (long l : longs)
         if (match == l)
           return true;
+    return false;
+  }
+
+  public static <T> boolean in(T match, T... values) {
+    if (values != null)
+      for (T l : values) {
+        if (match == null) {
+          if (l == null)
+            return true;
+          continue;
+        }
+        if (match.equals(l))
+          return true;
+      }
     return false;
   }
 

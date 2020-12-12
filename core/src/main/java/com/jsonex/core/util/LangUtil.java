@@ -1,5 +1,7 @@
 package com.jsonex.core.util;
 
+import lombok.SneakyThrows;
+
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -30,6 +32,9 @@ public class LangUtil {
     else
       elseAction.run();
   }
+
+  @SneakyThrows
+  public static void throwIf(boolean condition, Supplier<Exception> exp) { if (condition) throw exp.get(); }
 
   public static <T> void doIfInstanceOf(Object obj, Class<T> cls, Consumer<? super T> action) {
     if (obj != null && cls.isAssignableFrom(obj.getClass())) {

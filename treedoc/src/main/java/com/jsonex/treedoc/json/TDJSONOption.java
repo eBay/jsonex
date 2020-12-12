@@ -1,16 +1,21 @@
 package com.jsonex.treedoc.json;
 
 import com.jsonex.core.util.StringUtil;
-import lombok.Getter;
-import lombok.Setter;
+import com.jsonex.treedoc.TDNode;
+import lombok.Data;
 import lombok.experimental.Accessors;
 
-@Accessors(chain = true)
+import java.util.function.Function;
+
+@Accessors(chain = true) @Data
 public class TDJSONOption {
-  @Getter int indentFactor;
-  @Getter @Setter boolean alwaysQuoteName = true;
-  @Getter @Setter char quoteChar = '"';
-  @Getter @Setter String indentStr = "";
+  int indentFactor;
+  boolean alwaysQuoteName = true;
+  char quoteChar = '"';
+  String indentStr = "";
+  /** Node mapper, if it returns null, node will be skipped */
+  Function<TDNode, TDNode> nodeMapper = Function.identity();
+  Function<TDNode, Object> valueMapper = null;
 
   public static TDJSONOption withIndentFactor(int factor) { return new TDJSONOption().setIndentFactor(factor); }
 

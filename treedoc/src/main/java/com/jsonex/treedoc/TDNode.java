@@ -31,8 +31,8 @@ import static com.jsonex.core.util.ListUtil.last;
 @Accessors(chain = true)
 public class TDNode {
   public enum Type { MAP, ARRAY, SIMPLE }
-  @Getter final TreeDoc doc;
-  @Getter TDNode parent;
+  @Getter TreeDoc doc;
+  @Getter @Setter TDNode parent;
   @Getter @Setter Type type = Type.SIMPLE;
   /** The key of the node, null for root */
   @Getter String key;
@@ -41,8 +41,7 @@ public class TDNode {
   /** Children of node. Use List instead of Map to avoid performance overhead of HashMap for small number of elements */
   @Getter List<TDNode> children;
   /** Start position in the source */
-  @Getter @Setter
-  Bookmark start;
+  @Getter @Setter Bookmark start;
   /** Length of this node in the source */
   @Getter @Setter Bookmark end;
   /** indicate this node is a deduped Array node for textproto which allows duplicated keys */
@@ -50,16 +49,8 @@ public class TDNode {
   transient private final Lazy<Integer> hash = new Lazy<>();
   transient private final Lazy<String> str = new Lazy<>();
 
-  public TDNode(TDNode parent, String key) {
-    this(parent.doc);
-    this.parent = parent;
-    this.key = key;
-  }
-
-  public TDNode(TreeDoc doc, String key) {
-    this(doc);
-    this.key = key;
-  }
+  public TDNode(TDNode parent, String key) { this.doc = parent.doc; this.parent = parent; this.key = key; }
+  public TDNode(TreeDoc doc, String key) { this.doc = doc; this.key = key; }
 
   public TDNode setKey(String key) {  this.key = key; return touch(); }
   public TDNode setValue(Object value) { this.value = value; return touch(); }
@@ -97,6 +88,7 @@ public class TDNode {
     if (node.key == null)  // Assume it's array element
       node.key = "" + getChildrenSize();
     children.add(node);
+    node.doc = doc;
     return touch();
   }
 

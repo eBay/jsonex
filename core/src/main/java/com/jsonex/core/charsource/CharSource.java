@@ -73,9 +73,7 @@ public abstract class CharSource {
   /** @return true Indicates more character in the stream  */
   public boolean skipChars(String chars) { return skipUntil(chars, false); }
 
-  public boolean read(StringBuilder target, int len) {
-    return readUntil(s -> true, target, len, len);
-  }
+  public boolean read(StringBuilder target, int len) { return readUntil(s -> true, target, len, len); }
 
   public String read(int len) {
     StringBuilder sb = new StringBuilder();

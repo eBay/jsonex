@@ -158,10 +158,15 @@ public class ListUtilTest {
     assertArrayEquals(new TestCls[] {list.get(0), list.get(2), list.get(1), list.get(3)}, result.toArray());
   }
 
-  @Test public void testContains() {
-    assertTrue("should contains", ListUtil.contains(new long[]{1,2,3}, 3));
-    assertFalse("should not contains", ListUtil.contains(new long[]{1,2,3}, 4));
-    assertFalse("return null if source is null", ListUtil.contains(null, 0));
+  @Test public void testIn() {
+    assertTrue("should contains", ListUtil.inLong(3, 1, 2, 3));
+    assertFalse("should not contains", ListUtil.inLong(4, 1, 2, 3));
+    assertFalse("return false if source is null", ListUtil.inLong(0, null));
+
+    assertTrue("should contains", ListUtil.in("abc","abc", "def"));
+    assertFalse("should not contains", ListUtil.in("abc","ac", "def"));
+    assertFalse("return false if null not match", ListUtil.in(null,"abc", "def"));
+    assertTrue("return true if null matches", ListUtil.in(null,"abc", null));
   }
 
   @Test public void testExits() {
