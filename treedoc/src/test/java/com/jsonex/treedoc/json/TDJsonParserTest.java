@@ -182,6 +182,7 @@ public class TDJsonParserTest {
       nodes.add(TDJSONParser.get().parse(reader));
     TDNode node = TreeDoc.ofNodes(nodes).getRoot();
     log.info("testStream=" + node.toString());
+    assertEquals("1", node.getChild(1).getKey());
     assertEquals("[{a: 1}, {b: 2}, 'a:1', 'b:2']", node.toString());
   }
 
@@ -195,7 +196,9 @@ public class TDJsonParserTest {
     assertEquals("[{a: 1}, {b: 2}, 'a:1', 'b:2']", node.toString());
 
     TreeDoc docFirstElement = TreeDoc.ofNode(node.getChild(0));
-    log.info("testStream=" + docFirstElement.getRoot().toString());
-    assertEquals("{a: 1}", docFirstElement.getRoot().toString());
+    node = docFirstElement.getRoot();
+    log.info("testStream=" + node.toString());
+    assertEquals("root", node.getKey());
+    assertEquals("{a: 1}", node.toString());
   }
 }

@@ -16,12 +16,16 @@ public class TreeDoc {
   final URI uri;
   final TDNode root;
 
+  public TreeDoc() { this(null); }
+
   public TreeDoc(URI uri) {
-    this (uri, new TDNode((TreeDoc) null, null));
-    this.root.doc = this;
+    this(uri, "root");
   }
 
-  public TreeDoc() { this(null); }
+  public TreeDoc(URI uri, String rootKey) {
+    this (uri, new TDNode((TreeDoc) null, rootKey));
+    this.root.doc = this;
+  }
 
   public static TreeDoc ofArray() {
     TreeDoc result = new TreeDoc();
@@ -38,6 +42,7 @@ public class TreeDoc {
     TreeDoc result = new TreeDoc();
     result.root.type = TDNode.Type.ARRAY;
     for (TDNode node : nodes) {
+      node.setKey(null);
       result.idMap.putAll(node.doc.idMap);
       result.root.addChild(node);
     }
@@ -50,7 +55,8 @@ public class TreeDoc {
    * doc will be in invalid state.
    */
   public static TreeDoc ofNode(TDNode node) {
-    TreeDoc result = new TreeDoc(node.doc.uri, node);
+    String key = node.getDoc().getRoot().getKey();
+    TreeDoc result = new TreeDoc(node.doc.uri, node.setKey(key));
     result.idMap.putAll(node.doc.idMap);
     node.doc = result;
     node.parent = null;
