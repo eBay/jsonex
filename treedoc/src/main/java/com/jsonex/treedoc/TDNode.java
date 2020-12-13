@@ -85,10 +85,10 @@ public class TDNode {
     if (children == null)
       children = new ArrayList<>();
     node.parent = this;
+    node.doc = doc;
     if (node.key == null)  // Assume it's array element
       node.key = "" + getChildrenSize();
     children.add(node);
-    node.doc = doc;
     return touch();
   }
 

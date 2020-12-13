@@ -8,7 +8,7 @@ import lombok.experimental.Accessors;
 import java.util.function.Function;
 
 @Accessors(chain = true) @Data
-public class TDJSONOption {
+public class TDJSONWriterOption {
   int indentFactor;
   boolean alwaysQuoteName = true;
   char quoteChar = '"';
@@ -17,9 +17,9 @@ public class TDJSONOption {
   Function<TDNode, TDNode> nodeMapper = Function.identity();
   Function<TDNode, Object> valueMapper = null;
 
-  public static TDJSONOption withIndentFactor(int factor) { return new TDJSONOption().setIndentFactor(factor); }
+  public static TDJSONWriterOption withIndentFactor(int factor) { return new TDJSONWriterOption().setIndentFactor(factor); }
 
-  public TDJSONOption setIndentFactor(int _indentFactor) {
+  public TDJSONWriterOption setIndentFactor(int _indentFactor) {
     this.indentFactor = _indentFactor;
     indentStr = StringUtil.appendRepeatedly(new StringBuilder(), ' ', indentFactor).toString();
     return this;

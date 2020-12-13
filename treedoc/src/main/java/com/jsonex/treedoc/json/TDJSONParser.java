@@ -30,11 +30,9 @@ public class TDJSONParser {
   public TDNode parse(CharSource src) { return parse(src, new TDJSONParserOption()); }
   public TDNode parse(CharSource src, TDJSONParserOption opt) { return parse(src, opt, new TreeDoc(opt.uri).getRoot()); }
 
-  public TDNode parse(CharSource src, TDJSONParserOption opt, TDNode node) {
-    return parseNode(src, opt, node, true);
-  }
+  public TDNode parse(CharSource src, TDJSONParserOption opt, TDNode node) { return parse(src, opt, node, true); }
 
-  public TDNode parseNode(CharSource src, TDJSONParserOption opt, TDNode node, boolean isRoot) {
+  public TDNode parse(CharSource src, TDJSONParserOption opt, TDNode node, boolean isRoot) {
     char c = skipSpaceAndComments(src);
     if (c == EOF)
       return node;
@@ -47,7 +45,7 @@ public class TDJSONParser {
       if (c == '[')
         return parseArray(src, opt, node, true);
 
-      if (isRoot) {  // TODO: Can't use this to determine root if parse stream of data
+      if (isRoot) {
         switch (opt.defaultRootType) {
           case MAP:
             return parseMap(src, opt, node, false);
@@ -170,7 +168,7 @@ public class TDJSONParser {
       if (c == ',' || c == '}')  // If there's no ':', we consider it as indexed value (array)
         node.createChild(i + "").setValue(key);
       else {
-        TDNode childNode = parseNode(src, opt, node.createChild(key), false);
+        TDNode childNode = parse(src, opt, node.createChild(key), false);
         if (opt.KEY_ID.equals(key) && childNode.getType() == TDNode.Type.SIMPLE)
           node.getDoc().getIdMap().put(childNode.getValue().toString(), node);
       }
@@ -196,7 +194,7 @@ public class TDJSONParser {
         break;
       }
 
-      parseNode(src, opt, node.createChild(null), false);
+      parse(src, opt, node.createChild(null), false);
       c = skipSpaceAndComments(src);
       if (c == ',') {
         src.read();
