@@ -13,7 +13,7 @@ import com.jsonex.core.type.Tuple;
 import com.jsonex.core.type.Tuple.Pair;
 import com.jsonex.core.util.BeanProperty;
 import com.jsonex.jsoncoder.coder.*;
-import com.jsonex.treedoc.json.TDJSONOption;
+import com.jsonex.treedoc.json.TDJSONWriterOption;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -31,12 +31,8 @@ import static com.jsonex.core.util.LangUtil.doIfElse;
 public class JSONCoderOption {
   @Getter final static JSONCoderOption global = new JSONCoderOption(null);
   static {
-    global.coderList.add(new CoderDate());
-    global.coderList.add(new CoderEnum());
-    global.coderList.add(new CoderXMLGregorianCalendar());
-    global.coderList.add(new CoderAtomicInteger());
-    global.coderList.add(new CoderBigInteger());
-    global.coderList.add(new CoderClass());
+    global.addCoder(CoderDate.get(), CoderEnum.get(), CoderXMLGregorianCalendar.get(), CoderAtomicInteger.get(),
+        CoderBigInteger.get(), CoderClass.get(), CoderURI.get(), CoderURL.get());
 
     global.skippedClasses.add(Format.class);
 
@@ -116,7 +112,7 @@ public class JSONCoderOption {
   @Getter private final List<EqualsWrapper<?>> equalsWrapper = new ArrayList<>();
   
   // JSON coder config
-  @Getter @Setter private TDJSONOption jsonOption = new TDJSONOption();
+  @Getter @Setter private TDJSONWriterOption jsonOption = new TDJSONWriterOption();
 
   public enum LogLevel {
     OFF { public void log(Logger log, String msg, Exception e) { /* Noop */ }},
@@ -138,7 +134,7 @@ public class JSONCoderOption {
   private JSONCoderOption(JSONCoderOption parent) { this.parent = parent; }
   public static JSONCoderOption of() { return new JSONCoderOption(); }
   public static JSONCoderOption withIndentFactor(int factor) {
-    return new JSONCoderOption().setJsonOption(TDJSONOption.withIndentFactor(factor));
+    return new JSONCoderOption().setJsonOption(TDJSONWriterOption.withIndentFactor(factor));
   }
   
   ICoder<?> findCoder(Class<?> cls){

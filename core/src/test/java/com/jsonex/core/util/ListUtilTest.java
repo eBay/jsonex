@@ -22,8 +22,7 @@ import org.junit.Test;
 import java.util.*;
 
 import static com.jsonex.core.type.Operator.*;
-import static com.jsonex.core.util.ListUtil.containsAny;
-import static com.jsonex.core.util.ListUtil.setOf;
+import static com.jsonex.core.util.ListUtil.*;
 import static com.jsonex.core.util.ListUtilTest.TestCls.*;
 import static org.junit.Assert.*;
 
@@ -159,10 +158,15 @@ public class ListUtilTest {
     assertArrayEquals(new TestCls[] {list.get(0), list.get(2), list.get(1), list.get(3)}, result.toArray());
   }
 
-  @Test public void testContains() {
-    assertTrue("should contains", ListUtil.contains(new long[]{1,2,3}, 3));
-    assertFalse("should not contains", ListUtil.contains(new long[]{1,2,3}, 4));
-    assertFalse("return null if source is null", ListUtil.contains(null, 0));
+  @Test public void testIn() {
+    assertTrue("should contains", ListUtil.inLong(3, 1, 2, 3));
+    assertFalse("should not contains", ListUtil.inLong(4, 1, 2, 3));
+    assertFalse("return false if source is null", ListUtil.inLong(0, null));
+
+    assertTrue("should contains", ListUtil.in("abc","abc", "def"));
+    assertFalse("should not contains", ListUtil.in("abc","ac", "def"));
+    assertFalse("return false if null not match", ListUtil.in(null,"abc", "def"));
+    assertTrue("return true if null matches", ListUtil.in(null,"abc", null));
   }
 
   @Test public void testExits() {
@@ -172,21 +176,21 @@ public class ListUtilTest {
     //   2. User static import for assertXXX or multiple lines of statement with lambada
     //Assert.assertTrue("should contains type of 1", ListUtil.exists(buildList(), obj -> obj.getType() == 1));
     //Assert.assertFalse("shouldn't contains type of 3", ListUtil.exists(buildList(), obj -> obj.getType() == 3));
-    assertTrue("should contains type of 1", ListUtil.exists(buildList(), eq(F_TYPE, 1)));
-    assertFalse("shouldn't contains type of 3", ListUtil.exists(buildList(), eq(F_TYPE, 3)));
-    assertFalse("shouldn return false for null source", ListUtil.exists(null, eq(F_TYPE, 3)));
+    assertTrue("should contain type of 1", ListUtil.exists(buildList(), eq(F_TYPE, 1)));
+    assertFalse("shouldn't contain type of 3", ListUtil.exists(buildList(), eq(F_TYPE, 3)));
+    assertFalse("should return false for null source", ListUtil.exists(null, eq(F_TYPE, 3)));
   }
 
   @Test public void testFirstLastIndexOf() {
     List<TestCls> list = buildList();
-    assertEquals(list.get(0), ListUtil.first(list));
-    assertEquals(list.get(3), ListUtil.last(list));
+    assertEquals(list.get(0), ListUtil.first(list).get());
+    assertEquals(list.get(3), ListUtil.last(list).get());
 
-    assertEquals(list.get(2), ListUtil.first(list, eq(F_TYPE, 2)));
+    assertEquals(list.get(2), ListUtil.first(list, eq(F_TYPE, 2)).get());
     assertEquals(2, ListUtil.indexOf(list, eq(F_TYPE, 2)));
 
-    assertEquals(null, ListUtil.first(list, eq(F_TYPE, 3)));
-    assertEquals(null, ListUtil.first(null, eq(F_TYPE, 3)));
+    assertEquals(Optional.empty(), ListUtil.first(list, eq(F_TYPE, 3)));
+    assertEquals(Optional.empty(), ListUtil.first(null, eq(F_TYPE, 3)));
     assertEquals(-1, ListUtil.indexOf(null, eq(F_TYPE, 2)));
   }
 

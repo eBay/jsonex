@@ -9,14 +9,18 @@
 
 package com.jsonex.jsoncoder.coder;
 
-import java.lang.reflect.Type;
-import java.math.BigInteger;
-
+import com.jsonex.core.factory.InjectableInstance;
 import com.jsonex.jsoncoder.BeanCoderContext;
 import com.jsonex.jsoncoder.ICoder;
 import com.jsonex.treedoc.TDNode;
 
+import java.lang.reflect.Type;
+import java.math.BigInteger;
+
 public class CoderBigInteger implements ICoder<BigInteger> {
+  public static final InjectableInstance<CoderBigInteger> it = InjectableInstance.of(CoderBigInteger.class);
+  public static CoderBigInteger get() { return it.get(); }
+
   @Override public Class<BigInteger> getType() {return BigInteger.class;}
   
   @Override public TDNode encode(BigInteger obj, Type type, BeanCoderContext context, TDNode target) { return target.setValue(obj.toString()); }

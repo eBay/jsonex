@@ -9,6 +9,7 @@
 
 package com.jsonex.core.util;
 
+import com.jsonex.core.type.Nullable;
 import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -116,8 +117,8 @@ public class ClassUtil {
       if (isSetter && m.getParameterTypes().length != 1)
         continue;
 
-      if (name.length() == 0)
-        continue;
+      if (name.length() == 0)  // JSON doesn't allow empty key, we replace it with ^
+        name = "^";
 
       name = StringUtil.lowerFirst(name);
       if(name.equals("class"))//NOPMD
@@ -125,14 +126,18 @@ public class ClassUtil {
 
       BeanProperty prop = attributeMap.get(name);
       if(prop == null){
-        prop = new BeanProperty(name);//NOPMD
+        prop = new BeanProperty(name);
         attributeMap.put(name, prop);
       }
 
       if(isSetter)
         prop.setter = m;
-      else
-        prop.getter = m;
+      else {
+        // For union type in certain framework, isXXX is to indicate if the attribute is available, we will override it
+        // with the actual getter method
+        if (prop.getter == null || prop.getter.getReturnType() == Boolean.TYPE)
+          prop.getter = m;
+      }
     }
 
     // Check fields, reorder based on field order.
@@ -143,8 +148,10 @@ public class ClassUtil {
         continue;
 
       String name = f.getName();
-      if(name.startsWith("m_"))  // Remove prefix in case it follows legacy naming convension
+      if (name.startsWith("m_"))  // Remove prefix in case it follows legacy naming convension
         name = name.substring(2);
+      if (name.startsWith("_"))  // Remove prefix in case it follows legacy naming convension
+        name = name.substring(1);
 
       // Field names may not be unique if the same name is defined in the base class
       // We skip those duplicated names for re-ordering
@@ -193,14 +200,15 @@ public class ClassUtil {
     if(relativePath.length() == 0)
       throw new IllegalArgumentException("Path should have at least one variable section");
 
-    String[] pathSectionStrs = relativePath.split("\\.");
-    List<String> pathSections = new ArrayList<String>(Arrays.asList(pathSectionStrs));
-
-    return getObjectByPath(Class.forName(path.substring(0, p)), null, pathSections);
+    return getObjectByPath(Class.forName(path.substring(0, p)), null, relativePath);
   }
 
-  public static Object getObjectByPath(Class<?> cls, Object obj, List<String> relativePath) throws Exception {
-    Object result = getObjectProperty(cls, obj, relativePath.get(0));
+  public static Object getObjectByPath(@Nullable Class<?> cls, @Nullable Object obj, String relativePath) {
+    return getObjectByPath(cls, obj, ListUtil.listOf(relativePath.split("\\.")));
+  }
+
+  public static Object getObjectByPath(@Nullable Class<?> cls, @Nullable Object obj, List<String> relativePath) {
+    Object result = getPropertyValue(cls, obj, relativePath.get(0));
     relativePath.remove(0);
     if(!relativePath.isEmpty())
       result = getObjectByPath(null, result, relativePath);
@@ -210,15 +218,12 @@ public class ClassUtil {
   /**
    * Get a property for a class or Object
    * It will try getter method first, then try field
-   * @param cls
-   * @param obj
-   * @param propertyName
-   * @return
    */
-  public static Object getObjectProperty(Class<?> cls, Object obj, String propertyName) throws Exception
+  @SneakyThrows
+  public static @Nullable  Object getPropertyValue(@Nullable Class<?> cls, @Nullable Object obj, String propertyName)
   {
     if (cls == null && obj == null)
-      throw new IllegalArgumentException("cls and obj can't be both null");
+      return null;
 
     if (cls == null )
       cls = obj.getClass();
@@ -292,8 +297,15 @@ public class ClassUtil {
     }
   }
 
-  public static Class<?> getGenericClass(Type type)
-  {
+  public static Object getPropertyValue( @Nullable Object obj, String propertyName) {
+    return getPropertyValue(null, obj, propertyName);
+  }
+
+  public static Object getPropertyValue( @Nullable Class<?> cls, String propertyName) {
+    return getPropertyValue(cls, null, propertyName);
+  }
+
+  public static @Nullable Class<?> getGenericClass(@Nullable Type type) {
     if (type == null)
       return null;
     if (type instanceof Class<?>)
@@ -311,12 +323,17 @@ public class ClassUtil {
       if(tv.getBounds().length > 0)
         return getGenericClass(tv.getBounds()[0]);
       return Object.class;
-
     }
+
+    if (type instanceof GenericArrayType) {
+      // TODO: Cache these empty arrays
+      return Array.newInstance(getGenericClass(((GenericArrayType)type).getGenericComponentType()), 0).getClass();
+    }
+
     throw new RuntimeException("Unexpected type: cls=" + type.getClass() + "; string=" + type);
   }
 
-  public static Type[] getGenericTypeActualParams(Type type) {
+  public static @Nullable Type[] getGenericTypeActualParams(@Nullable Type type) {
     if(type == null || type instanceof Class)
       return null;
     if(type instanceof ParameterizedType)
@@ -359,8 +376,8 @@ public class ClassUtil {
     for(; cls != Object.class && cls != null; cls = cls.getSuperclass())  // Interface superclass is null
       result.addAll(0, Arrays.asList(cls.getDeclaredMethods()));
     return result.toArray(new Method[0]);
-
   }
+
   public static <T extends Enum<T>> T stringToEnum(Class<T> cls, String str) {
     try{
       int i = Integer.parseInt(str);
@@ -447,7 +464,7 @@ public class ClassUtil {
    * Convert to a simple type from a matching Object
    * return null, if it's not able to convert
    */
-  public static Object objectToSimpleType(Object obj, Class<?> cls)
+  public static @Nullable Object objectToSimpleType(@Nullable Object obj, Class<?> cls)
   {
     if (cls == String.class && (obj == null || obj instanceof String))
       return obj;

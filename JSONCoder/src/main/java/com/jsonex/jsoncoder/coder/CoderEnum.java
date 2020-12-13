@@ -9,6 +9,7 @@
 
 package com.jsonex.jsoncoder.coder;
 
+import com.jsonex.core.factory.InjectableInstance;
 import com.jsonex.core.type.Identifiable;
 import com.jsonex.core.util.ClassUtil;
 import com.jsonex.core.util.EnumUtil;
@@ -20,6 +21,9 @@ import java.lang.reflect.Type;
 
 @SuppressWarnings("rawtypes")
 public class CoderEnum implements ICoder<Enum> {
+  public static final InjectableInstance<CoderEnum> it = InjectableInstance.of(CoderEnum.class);
+  public static CoderEnum get() { return it.get(); }
+
   @Override public Class<Enum> getType() { return Enum.class; }
 
   @Override public TDNode encode(Enum obj, Type type, BeanCoderContext context, TDNode target) { return target.setValue(encode(obj, context)); }

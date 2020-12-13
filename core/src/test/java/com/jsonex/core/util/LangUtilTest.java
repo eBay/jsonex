@@ -6,6 +6,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.ExtensionMethod;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
@@ -37,10 +42,20 @@ public class LangUtilTest {
 
   @Test public void testSafeConsume() {
     A a = new A(new B(null));
-    LangUtil.safeConsume(a, A::clearB);
+    LangUtil.doIfNotNull(a, A::clearB);
     assertNull(a.b);
 
     a = null;
-    LangUtil.safeConsume(a, A::clearB);
+    LangUtil.doIfNotNull(a, A::clearB);
+  }
+
+  @Test public void testDoIfInstanceOf() {
+    Collection<Integer> col = Arrays.asList(1,2,3);
+    LangUtil.doIfInstanceOf(col, List.class, list -> list.set(2, 0));
+    assertEquals(0, ((List)col).get(2));
+
+    Collection<Integer> col1 = ListUtil.setOf(1,2,3);
+    LangUtil.doIfInstanceOf(col, List.class, list -> list.set(2, 0));
+    assertEquals(ListUtil.setOf(1,2,3), col1);
   }
 }

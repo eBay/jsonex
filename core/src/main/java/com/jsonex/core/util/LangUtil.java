@@ -1,5 +1,7 @@
 package com.jsonex.core.util;
 
+import lombok.SneakyThrows;
+
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -21,7 +23,7 @@ public class LangUtil {
 
   public static <T,R1, R2, R3, R4, R5> R5 safe(T obj, Function<T,R1> getter1, Function<R1,R2> getter2, Function<R2,R3> getter3, Function<R3,R4> getter4, Function<R4,R5> getter5) { return safeOrElse(obj, getter1, getter2, getter3, getter4, getter5, null); }
 
-  public static <T> void safeConsume(T obj, Consumer<T> action) { if (obj != null)  action.accept(obj); }
+  public static <T> void doIfNotNull(T obj, Consumer<? super T> action) { if (obj != null)  action.accept(obj); }
 
   public static void doIf(boolean condition, Runnable action) { if (condition) action.run(); }
   public static void doIfElse(boolean condition, Runnable ifAction, Runnable elseAction) {
@@ -31,6 +33,20 @@ public class LangUtil {
       elseAction.run();
   }
 
-  public static <T> T orElse(T value, T fullBack) { return value == null ? fullBack : value; }
-  public static <T> T orElse(T value, Supplier<T> fullBack) { return value == null ? fullBack.get() : value; }
+  @SneakyThrows
+  public static void throwIf(boolean condition, Supplier<Exception> exp) { if (condition) throw exp.get(); }
+
+  public static <T> void doIfInstanceOf(Object obj, Class<T> cls, Consumer<? super T> action) {
+    if (obj != null && cls.isAssignableFrom(obj.getClass())) {
+      action.accept(cls.cast(obj));
+    }
+  }
+
+  public static <T, T1 extends T, T2 extends T> T orElse(T1 value, T2 fullBack) {
+    return value == null ? fullBack : value;
+  }
+
+  public static <T, T1 extends T> T orElse(T1 value, Supplier<? extends T> fullBack) {
+    return value == null ? fullBack.get() : value;
+  }
 }

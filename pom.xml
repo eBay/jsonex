@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.jsonex</groupId>
   <artifactId>jcParent</artifactId>
-  <version>0.1.7</version>
+  <version>0.1.10</version>
   <packaging>pom</packaging>
   <name>JSONCoder Parent</name>
   <description>JSONCoder Parent</description>
@@ -67,14 +67,14 @@
       <dependency>
         <groupId>org.projectlombok</groupId>
         <artifactId>lombok</artifactId>
-        <version>1.18.8</version>
+        <version>1.18.16</version>
         <scope>provided</scope>
       </dependency>
       <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
         <scope>test</scope>
-        <version>4.8.1</version>
+        <version>4.13.1</version>
       </dependency>      
       <dependency>
         <groupId>org.slf4j</groupId>

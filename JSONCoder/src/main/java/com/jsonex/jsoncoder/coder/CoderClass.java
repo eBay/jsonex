@@ -9,6 +9,7 @@
 
 package com.jsonex.jsoncoder.coder;
 
+import com.jsonex.core.factory.InjectableInstance;
 import com.jsonex.jsoncoder.BeanCoderContext;
 import com.jsonex.jsoncoder.BeanCoderException;
 import com.jsonex.jsoncoder.ICoder;
@@ -18,6 +19,9 @@ import java.lang.reflect.Type;
 
 @SuppressWarnings("rawtypes")
 public class CoderClass implements ICoder<Class> {
+  public static final InjectableInstance<CoderClass> it = InjectableInstance.of(CoderClass.class);
+  public static CoderClass get() { return it.get(); }
+
   @Override public Class<Class> getType() { return Class.class; }
 
   @Override public TDNode encode(Class obj, Type type, BeanCoderContext context, TDNode target) {
