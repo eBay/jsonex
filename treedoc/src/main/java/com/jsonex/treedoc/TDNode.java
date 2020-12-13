@@ -22,6 +22,7 @@ import lombok.experimental.Accessors;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 import static com.jsonex.core.util.ListUtil.last;
 
@@ -171,6 +172,13 @@ public class TDNode {
     for (int i = 0; i < level && result != null; i++, result = result.parent)
       ;
     return result;
+  }
+
+  public TDNode foreach(Consumer<? super TDNode> action) {
+    action.accept(this);
+    if (hasChildren())
+      children.forEach(n -> n.foreach(action));
+    return this;
   }
 
   public boolean isRoot() { return parent == null; }

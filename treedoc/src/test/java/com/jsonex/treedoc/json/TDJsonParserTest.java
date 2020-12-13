@@ -180,9 +180,10 @@ public class TDJsonParserTest {
     List<TDNode> nodes = new ArrayList<>();
     while(reader.skipSpacesAndReturns())
       nodes.add(TDJSONParser.get().parse(reader));
-    TDNode node = TreeDoc.ofNodes(nodes).getRoot();
+    TDNode node = TreeDoc.merge(nodes).getRoot();
     log.info("testStream=" + node.toString());
     assertEquals("1", node.getChild(1).getKey());
+    assertEquals(node.getDoc(), node.getChild(1).getChild(0).getDoc());
     assertEquals("[{a: 1}, {b: 2}, 'a:1', 'b:2']", node.toString());
   }
 
@@ -195,7 +196,7 @@ public class TDJsonParserTest {
     log.info("testStream=" + node.toString());
     assertEquals("[{a: 1}, {b: 2}, 'a:1', 'b:2']", node.toString());
 
-    TreeDoc docFirstElement = TreeDoc.ofNode(node.getChild(0));
+    TreeDoc docFirstElement = node.getDoc().retain(node.getChild(0));
     node = docFirstElement.getRoot();
     log.info("testStream=" + node.toString());
     assertEquals("root", node.getKey());
