@@ -7,7 +7,7 @@
     <groupId>com.jsonex</groupId>
     <artifactId>jcParent</artifactId>
     <version>0.1.10</version>
-    <relativePath>../</relativePath>
+    <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>treedoc</artifactId>
   <name>treedoc</name>

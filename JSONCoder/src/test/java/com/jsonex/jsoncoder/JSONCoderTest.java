@@ -43,7 +43,7 @@ public class JSONCoderTest {
   }
 
   private static String toJSONString(Object obj) {
-    return JSONCoder.global.encode(obj, withIndentFactor(2).setWarnLogLevel(LogLevel.DEBUG));
+    return JSONCoder.global.encode(obj, ofIndentFactor(2).setWarnLogLevel(LogLevel.DEBUG));
   }
 
   @SneakyThrows
@@ -329,7 +329,7 @@ public class JSONCoderTest {
     bean.testBean.setStrField("str2");
     bean.testBean.publicStrField = "publicStr";
 
-    JSONCoderOption opt = withIndentFactor(2);
+    JSONCoderOption opt = ofIndentFactor(2);
 
     opt.addFilterFor(TestBean2.class, SimpleFilter.include("enumField2", "testBean"));
     opt.getSimpleFilterFor(TestBean2.class).addProperties("ints");

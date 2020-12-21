@@ -195,5 +195,7 @@ public class StringUtil {
   }
 
   public static String toTrimmedStr(Object o, int len) { return StringUtil.getLeft(String.valueOf(o), len); }
+
+  public static String noNull(Object o) { return o == null ? "" : o.toString(); };
 }
 

@@ -13,7 +13,7 @@ import com.jsonex.core.type.Tuple;
 import com.jsonex.core.type.Tuple.Pair;
 import com.jsonex.core.util.BeanProperty;
 import com.jsonex.jsoncoder.coder.*;
-import com.jsonex.treedoc.json.TDJSONWriterOption;
+import com.jsonex.treedoc.json.TDJSONOption;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -112,7 +112,7 @@ public class JSONCoderOption {
   @Getter private final List<EqualsWrapper<?>> equalsWrapper = new ArrayList<>();
   
   // JSON coder config
-  @Getter @Setter private TDJSONWriterOption jsonOption = new TDJSONWriterOption();
+  @Getter @Setter private TDJSONOption jsonOption = new TDJSONOption();
 
   public enum LogLevel {
     OFF { public void log(Logger log, String msg, Exception e) { /* Noop */ }},
@@ -133,8 +133,8 @@ public class JSONCoderOption {
   public JSONCoderOption() { this(global); }
   private JSONCoderOption(JSONCoderOption parent) { this.parent = parent; }
   public static JSONCoderOption of() { return new JSONCoderOption(); }
-  public static JSONCoderOption withIndentFactor(int factor) {
-    return new JSONCoderOption().setJsonOption(TDJSONWriterOption.withIndentFactor(factor));
+  public static JSONCoderOption ofIndentFactor(int factor) {
+    return new JSONCoderOption().setJsonOption(TDJSONOption.ofIndentFactor(factor));
   }
   
   ICoder<?> findCoder(Class<?> cls){

@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+import static com.jsonex.core.util.LangUtil.orElse;
 import static com.jsonex.core.util.ListUtil.last;
 
 /** A Node in TreeDoc */
@@ -160,7 +161,7 @@ public class TDNode {
   TDNode getNextNode(Part part) {
     switch (part.type) {
       case ROOT: return doc.root;
-      case ID: return doc.idMap.get(part.key);
+      case CHILD_OR_ID: return orElse(getChild(part.key), () -> doc.idMap.get(part.id));
       case RELATIVE: return getAncestor(part.level);
       case CHILD: return getChild(part.key);
       default: return null;  // Impossible

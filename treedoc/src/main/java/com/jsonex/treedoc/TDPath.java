@@ -9,14 +9,20 @@ import java.util.List;
 
 @Getter @Setter @Accessors(chain = true) @EqualsAndHashCode @ToString
 public class TDPath {
-  public enum PathPartType { ROOT, CHILD, RELATIVE, ID }
+  public enum PathPartType {
+    ROOT,
+    CHILD,
+    RELATIVE,
+    CHILD_OR_ID,   // child or id, it will first try to find child by the key, then fallback to id.
+  }
 
   @Getter @Setter @Accessors(chain = true) @RequiredArgsConstructor @EqualsAndHashCode @ToString
   public static class Part {
     final PathPartType type;
-    String key;  // Only for Type.CHILD or TYPE.ID
-    int level;  // Only for RELATIVE
-    public static Part ofId(String id) { return new Part(PathPartType.ID).setKey(id); }
+    String key;  // Only for Type.CHILD or Type.CHILD_OR_ID
+    String id;   // Only for Type.CHILD_OR_ID
+    int level;  // Only for Type.RELATIVE
+    public static Part ofChildOrId(String key, String id) { return new Part(PathPartType.CHILD_OR_ID).setId(id).setKey(key); }
     public static Part ofChild(String key) { return new Part(PathPartType.CHILD).setKey(key); }
     public static Part ofRelative(int level) { return new Part(PathPartType.RELATIVE).setLevel(level); }
     public static Part ofRoot() { return new Part(PathPartType.ROOT); }
@@ -45,7 +51,7 @@ public class TDPath {
       else if (s.isEmpty() || s.equals("#"))
         path.addParts(Part.ofRoot());
       else if (s.startsWith("#")  && s.length() > 0)
-        path.addParts(Part.ofId(s.substring(1)));
+        path.addParts(Part.ofChildOrId(s, s.substring(1)));
       else
         path.addParts(Part.ofChild(s));
     }

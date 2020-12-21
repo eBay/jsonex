@@ -172,7 +172,6 @@ public class ClassUtil {
     return fieldMap;
   }
 
-
   /**
    * Get the object using a Object Path
    * Object path has following format

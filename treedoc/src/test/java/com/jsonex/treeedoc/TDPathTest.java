@@ -12,7 +12,9 @@ public class TDPathTest {
     assertEquals(new TDPath().addParts(ofRoot(), ofChild("p1"), ofChild("p2")), parse("/p1/p2"));
     assertEquals(new TDPath().addParts(ofRelative(1), ofChild("p1"), ofChild("p2")), parse("../p1/p2"));
     assertEquals(new TDPath().addParts(ofRelative(0), ofChild("p1"), ofChild("p2")), parse("./p1/p2"));
-    assertEquals(new TDPath().addParts(ofId("100")).addParts(ofChild("p1")).addParts(ofChild("p2")), parse("#100/p1/p2"));
+    assertEquals(
+        new TDPath().addParts(ofChildOrId("#100", "100")).addParts(ofChild("p1")).addParts(ofChild("p2")),
+        parse("#100/p1/p2"));
     assertEquals(new TDPath().addParts(ofRoot()).addParts(ofChild("p1")).addParts(ofChild("p2")), parse("#/p1/p2"));
   }
 }

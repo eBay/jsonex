@@ -78,8 +78,8 @@ public class BeanProperty {
     throw new InvokeRuntimeException("field is not readable: " + name + ",class:" + obj.getClass());
   }
   
-  public <T extends Annotation> Annotation getAnnotation(Class<T> cls) {
-    Annotation result;
+  public <T extends Annotation> T getAnnotation(Class<T> cls) {
+    T result;
     if (getter != null) {
       result = getter.getAnnotation(cls);
       if (result != null)

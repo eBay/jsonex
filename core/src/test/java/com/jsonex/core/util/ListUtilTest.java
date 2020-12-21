@@ -9,7 +9,7 @@
 
 package com.jsonex.core.util;
 
-import com.jsonex.core.type.Field;
+import com.jsonex.core.type.BeanField;
 import com.jsonex.core.type.Identifiable;
 import com.jsonex.core.type.Operator;
 import lombok.EqualsAndHashCode;
@@ -35,10 +35,10 @@ public class ListUtilTest {
     final int type;
     final List<String> tags;
 
-    public final static Field<TestCls, String> F_NAME = new Field<>("name", TestCls::getName);
-    public final static Field<TestCls, Integer> F_ID = new Field<>("id", TestCls::getId);
-    public final static Field<TestCls, Integer> F_TYPE = new Field<>("type", TestCls::getType);
-    public final static Field<TestCls, List<String>> F_TAGS = new Field<>("tags", TestCls::getTags);
+    public final static BeanField<TestCls, String> F_NAME = new BeanField<>("name", TestCls::getName);
+    public final static BeanField<TestCls, Integer> F_ID = new BeanField<>("id", TestCls::getId);
+    public final static BeanField<TestCls, Integer> F_TYPE = new BeanField<>("type", TestCls::getType);
+    public final static BeanField<TestCls, List<String>> F_TAGS = new BeanField<>("tags", TestCls::getTags);
   }
 
   private static <T> List<T> asList(T... values) {
@@ -159,14 +159,14 @@ public class ListUtilTest {
   }
 
   @Test public void testIn() {
-    assertTrue("should contains", ListUtil.inLong(3, 1, 2, 3));
-    assertFalse("should not contains", ListUtil.inLong(4, 1, 2, 3));
-    assertFalse("return false if source is null", ListUtil.inLong(0, null));
+    assertTrue("should contains", ListUtil.inLongs(3, 1, 2, 3));
+    assertFalse("should not contains", ListUtil.inLongs(4, 1, 2, 3));
+    assertFalse("return false if source is null", ListUtil.inLongs(0, null));
 
-    assertTrue("should contains", ListUtil.in("abc","abc", "def"));
-    assertFalse("should not contains", ListUtil.in("abc","ac", "def"));
-    assertFalse("return false if null not match", ListUtil.in(null,"abc", "def"));
-    assertTrue("return true if null matches", ListUtil.in(null,"abc", null));
+    assertTrue("should contains", ListUtil.isIn("abc","abc", "def"));
+    assertFalse("should not contains", ListUtil.isIn("abc","ac", "def"));
+    assertFalse("return false if null not match", ListUtil.isIn(null,"abc", "def"));
+    assertTrue("return true if null matches", ListUtil.isIn(null,"abc", null));
   }
 
   @Test public void testExits() {

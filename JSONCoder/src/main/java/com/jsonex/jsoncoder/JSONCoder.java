@@ -9,12 +9,11 @@
 
 package com.jsonex.jsoncoder;
 
-import com.jsonex.treedoc.TDPath;
 import com.jsonex.core.charsource.CharSource;
-import com.jsonex.treedoc.json.TDJSONParser;
-import com.jsonex.treedoc.json.TDJSONParserOption;
-import com.jsonex.treedoc.json.TDJSONWriter;
 import com.jsonex.treedoc.TDNode;
+import com.jsonex.treedoc.TDPath;
+import com.jsonex.treedoc.json.TDJSONParser;
+import com.jsonex.treedoc.json.TDJSONWriter;
 import lombok.Getter;
 
 import java.io.Reader;
@@ -32,7 +31,7 @@ public class JSONCoder {
     try {
       TDNode tdNode = req.tdNode;
       if (tdNode == null && req.source != null) {
-        tdNode = TDJSONParser.get().parse(req.source, new TDJSONParserOption());
+        tdNode = TDJSONParser.get().parse(req.source, opt.getJsonOption());
       }
 
       if (req.nodePath != null)

@@ -58,7 +58,9 @@ public class BeanCoderContext {
     return this;
   }
 
-  public TDNode encode(Object obj, Type type, TDNode target) { return BeanCoder.get()._encode(obj, this, type, target); }
+  public TDNode encode(Object obj, Type type, TDNode target) {
+    return BeanCoder.get()._encode(obj, this, type, target);
+  }
 
   public Object decode(TDNode jsonNode, Type type, Object targetObj, String name) {
     return BeanCoder.get().decode(jsonNode, type, targetObj, name, this);

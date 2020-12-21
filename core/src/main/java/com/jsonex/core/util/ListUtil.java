@@ -198,7 +198,7 @@ public class ListUtil {
     return dest;
   }
 
-  public static boolean inLong(long match, long... longs) {
+  public static boolean inLongs(long match, long... longs) {
     if (longs != null)
       for (long l : longs)
         if (match == l)
@@ -206,7 +206,7 @@ public class ListUtil {
     return false;
   }
 
-  public static <T> boolean in(T match, T... values) {
+  public static <T> boolean isIn(T match, T... values) {
     if (values != null)
       for (T l : values) {
         if (match == null) {
@@ -303,7 +303,7 @@ public class ListUtil {
     return list.isEmpty() ? Optional.empty() : Optional.of(list.iterator().next());
   }
 
-  public static <T> boolean containsAny(Collection<T> list, T... elements) {
+  public static <T> boolean containsAny(Collection<? super T> list, T... elements) {
     if (list != null)
       for (T e : elements)
         if (list.contains(e))
@@ -312,6 +312,18 @@ public class ListUtil {
   }
 
   public static void removeLast(List<?> list) { list.remove(list.size() - 1); }
+
+  /** Set at a particular location. It will auto resize the list if necessary */
+  public static <T, L extends List<? super T>> L setAt(L list, int idx, T value) {
+    if (idx < list.size()) {
+      list.set(idx, value);
+      return list;
+    }
+    for (int i = list.size(); i < idx; i++)
+      list.add(null);
+    list.add(value);
+    return list;
+  }
 
   /** build a copy of mutable Set whose content will be independent with original array once created */
   public static <T> Set<T> setOf(T... e) { return new LinkedHashSet<>(Arrays.asList(e)); }

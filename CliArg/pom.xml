@@ -9,8 +9,8 @@
     <version>0.1.10</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
-  <artifactId>csv</artifactId>
-  <name>csv</name>
+  <artifactId>CliArg</artifactId>
+  <name>CliArg</name>
   <dependencies>
     <dependency>
       <groupId>org.projectlombok</groupId>
@@ -27,7 +27,7 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>treedoc</artifactId>
+      <artifactId>JSONCoder</artifactId>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>

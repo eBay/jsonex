@@ -22,17 +22,17 @@ public class TDJSONParser {
   public final static InjectableInstance<TDJSONParser> instance = InjectableInstance.of(TDJSONParser.class);
   public static TDJSONParser get() { return instance.get(); }
 
-  public TDNode parse(String str) { return parse(str, new TDJSONParserOption()); }
-  public TDNode parse(String str, TDJSONParserOption opt) { return parse(new ArrayCharSource(str), opt); }
+  public TDNode parse(String str) { return parse(str, new TDJSONOption()); }
+  public TDNode parse(String str, TDJSONOption opt) { return parse(new ArrayCharSource(str), opt); }
 
-  public TDNode parse(Reader reader) { return parse(reader, new TDJSONParserOption()); }
-  public TDNode parse(Reader reader, TDJSONParserOption opt) { return parse(new ReaderCharSource(reader), opt); }
-  public TDNode parse(CharSource src) { return parse(src, new TDJSONParserOption()); }
-  public TDNode parse(CharSource src, TDJSONParserOption opt) { return parse(src, opt, new TreeDoc(opt.uri).getRoot()); }
+  public TDNode parse(Reader reader) { return parse(reader, new TDJSONOption()); }
+  public TDNode parse(Reader reader, TDJSONOption opt) { return parse(new ReaderCharSource(reader), opt); }
+  public TDNode parse(CharSource src) { return parse(src, new TDJSONOption()); }
+  public TDNode parse(CharSource src, TDJSONOption opt) { return parse(src, opt, new TreeDoc(opt.uri).getRoot()); }
 
-  public TDNode parse(CharSource src, TDJSONParserOption opt, TDNode node) { return parse(src, opt, node, true); }
+  public TDNode parse(CharSource src, TDJSONOption opt, TDNode node) { return parse(src, opt, node, true); }
 
-  public TDNode parse(CharSource src, TDJSONParserOption opt, TDNode node, boolean isRoot) {
+  public TDNode parse(CharSource src, TDJSONOption opt, TDNode node, boolean isRoot) {
     char c = skipSpaceAndComments(src);
     if (c == EOF)
       return node;
@@ -125,7 +125,7 @@ public class TDJSONParser {
     return EOF;
   }
 
-  TDNode parseMap(CharSource src, TDJSONParserOption opt, TDNode node, boolean withStartBracket) {
+  TDNode parseMap(CharSource src, TDJSONOption opt, TDNode node, boolean withStartBracket) {
     node.setType(TDNode.Type.MAP);
     if (withStartBracket)
       src.read();
@@ -177,7 +177,7 @@ public class TDJSONParser {
     return node;
   }
 
-  TDNode parseArray(CharSource src, TDJSONParserOption opt, TDNode node, boolean withStartBracket) {
+  TDNode parseArray(CharSource src, TDJSONOption opt, TDNode node, boolean withStartBracket) {
     node.setType(TDNode.Type.ARRAY);
     if (withStartBracket)
       src.read();

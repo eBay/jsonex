@@ -72,7 +72,7 @@ public class JSONPointer {
       } else if ("..".equals(parts[0])) {
         path.addParts(Part.ofRelative(1));
       } else {
-        path.addParts(Part.ofId(parts[0]));
+        path.addParts(Part.ofChildOrId(parts[0], parts[0]));
       }
     }
 
