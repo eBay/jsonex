@@ -115,7 +115,11 @@ public class ListUtilTest {
     Map<Integer, TestCls> map = ListUtil.toMap(list, F_ID);
 
     assertArrayEquals(list.toArray(), new TreeMap(map).values().toArray());
+
+    TreeMap<Integer, TestCls> treeMap = ListUtil.toMap(list, F_ID, new TreeMap<>());
+    assertArrayEquals(list.toArray(), map.values().toArray());
   }
+
 
   @Test public void testFilter() {
     List<TestCls> list = buildList();

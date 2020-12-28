@@ -1,0 +1,1 @@
+Snapshot(com.jsonex.snapshottest.SnapshotTest_testSnapshot_test) and actual mismatch expected:<Some random junk> but was:<This is actual value>

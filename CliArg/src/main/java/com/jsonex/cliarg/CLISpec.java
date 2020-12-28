@@ -18,6 +18,7 @@ import static com.jsonex.core.util.LangUtil.doIfNotNull;
 import static com.jsonex.core.util.ListUtil.first;
 import static com.jsonex.core.util.ListUtil.setAt;
 import static com.jsonex.core.util.StringUtil.noNull;
+import static java.lang.Math.min;
 
 @Data
 public class CLISpec<T> {
@@ -59,7 +60,7 @@ public class CLISpec<T> {
       if (param.index != null) {
         setAt(indexedParams, param.index, param);
         if (!param.required)
-          firstOptionalIndex = Math.min(firstOptionalIndex, param.index);
+          firstOptionalIndex = min(firstOptionalIndex, param.index);
         else {
           Assert.isTrue(param.index < firstOptionalIndex,
               "Required index argument can't be after Non-Required argument: firstOptionalIndex:"
@@ -86,18 +87,21 @@ public class CLISpec<T> {
     }
 
     sb.append("\nARGUMENTS / OPTIONS");
+    StringBuilder optDesc = new StringBuilder();
     for (Param p : indexedParams) {
-      sb.append("\n  <" + p.name + ">:  " + noNull(p.description));
+      optDesc.append("\n  <" + p.name + ">:\t" + noNull(p.description));
     }
 
     for (Param p : optionParams) {
       if (p.index != null)
         continue;
-      sb.append("\n  ");
-      doIfNotNull(p.shortName, (n) -> sb.append("-" + n + ", "));
-      sb.append("--" + p.name);
-      sb.append(":  " + noNull(p.description));
+      optDesc.append("\n  ");
+      doIfNotNull(p.shortName, (n) -> optDesc.append("-" + n + ", "));
+      optDesc.append("--" + p.name);
+      optDesc.append(":\t" + noNull(p.description));
     }
+
+    sb.append(TextFormatter.alignTabs(optDesc.toString()));
     return sb.toString();
   }
 

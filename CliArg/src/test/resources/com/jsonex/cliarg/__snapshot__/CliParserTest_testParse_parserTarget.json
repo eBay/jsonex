@@ -1,0 +1,11 @@
+{
+  "strParam":"abc",
+  "numParam":10,
+  "point":{
+    "name":"n1",
+    "x":1,
+    "y":2
+  },
+  "opt":"VAL2",
+  "optInt":100
+}

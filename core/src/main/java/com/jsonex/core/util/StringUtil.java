@@ -181,7 +181,6 @@ public class StringUtil {
     return sb.toString();
   }
 
-
   public static StringBuilder appendRepeatedly(StringBuilder result, String str, int times) {
     for (int i=0; i<times; i++)
       result.append(str);
@@ -196,6 +195,6 @@ public class StringUtil {
 
   public static String toTrimmedStr(Object o, int len) { return StringUtil.getLeft(String.valueOf(o), len); }
 
-  public static String noNull(Object o) { return o == null ? "" : o.toString(); };
+  public static String noNull(Object o) { return o == null ? "" : o.toString(); }
 }
 

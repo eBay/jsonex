@@ -42,6 +42,12 @@ public class LangUtil {
     }
   }
 
+  public static <T, R> R getIfInstanceOf(
+      Object obj, Class<T> cls, Function<? super T, ? extends R> func, Function<Object, ? extends R> elseFunc) {
+    return obj != null && cls.isAssignableFrom(obj.getClass()) ? func.apply(cls.cast(obj)) : elseFunc.apply(obj);
+  }
+
+
   public static <T, T1 extends T, T2 extends T> T orElse(T1 value, T2 fullBack) {
     return value == null ? fullBack : value;
   }

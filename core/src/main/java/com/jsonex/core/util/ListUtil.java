@@ -147,14 +147,24 @@ public class ListUtil {
     return toMap(source, keyFunc, Function.identity());
   }
 
+
   public static <S, K, V> Map<K, V> toMap(
       Collection<S> source, Function<? super S, ? extends K> keyFunc, Function<? super S, ? extends V> valFunc) {
+    return toMap(source, keyFunc, valFunc, new LinkedHashMap<>());
+  }
+
+  public static <K, V, D extends Map<? super K, ? super V>> D toMap(
+      Collection<V> source, Function<? super V, ? extends K> keyFunc, D dest) {
+    return toMap(source, keyFunc, i -> i, dest);
+  }
+
+  public static <S, K, V, D extends Map<? super K, ? super V>> D toMap(
+      Collection<S> source, Function<? super S, ? extends K> keyFunc, Function<? super S, ? extends V> valFunc, D dest) {
     if (source == null)
       return null;
-    Map<K, V> map = new LinkedHashMap<>();
     for (S s : source)
-      map.put(keyFunc.apply(s), valFunc.apply(s));
-    return map;
+      dest.put(keyFunc.apply(s), valFunc.apply(s));
+    return dest;
   }
 
   public static <V, S extends Collection<? extends V>, D extends Collection<? super V>> D filter(
@@ -323,6 +333,14 @@ public class ListUtil {
       list.add(null);
     list.add(value);
     return list;
+  }
+
+  public static <T> T getOrDefault(List<T> list, int idx, T value) {
+    return idx < list.size() ? list.get(idx) : value;
+  }
+
+  public static <T, L extends List<T>> L mutateAt(L list, int idx, T defaultVal, Function<? super T, ? extends T> mutator) {
+    return setAt(list, idx, mutator.apply(getOrDefault(list, idx, defaultVal)));
   }
 
   /** build a copy of mutable Set whose content will be independent with original array once created */

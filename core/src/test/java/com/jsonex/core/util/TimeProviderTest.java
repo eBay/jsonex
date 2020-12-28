@@ -19,6 +19,7 @@ import static junit.framework.Assert.assertEquals;
 public class TimeProviderTest {
   @Test public void testTimeProvider() {
     TimeProvider.get().getDate();  // Warm up, so that following test could pass
+    // Flaky testing, but not likely fail.
     assertEquals(new Date(), TimeProvider.get().getDate());
     assertEquals(System.currentTimeMillis(), TimeProvider.get().getTimeMillis());
   }

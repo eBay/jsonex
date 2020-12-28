@@ -9,8 +9,8 @@
     <version>0.1.10</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
-  <artifactId>CliArg</artifactId>
-  <name>CliArg</name>
+  <artifactId>SnapshotTest</artifactId>
+  <name>SnapshotTest</name>
   <dependencies>
     <dependency>
       <groupId>org.projectlombok</groupId>
@@ -24,11 +24,6 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>JSONCoder</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>SnapshotTest</artifactId>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
