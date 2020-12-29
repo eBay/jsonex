@@ -3,7 +3,7 @@ SUMMARY: This is a test arg1
 DESCRIPTION
   Description of test Args
 USAGE
-  TestArg1 [-o <value>] [-i <value>] <strParam> <numParam> [point]
+  TestArg1 -o <value> [-i <value>] <strParam> <numParam> [point]
 EXAMPLES
   arg1 2
   arg1 4

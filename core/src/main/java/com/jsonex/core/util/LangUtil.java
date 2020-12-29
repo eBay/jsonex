@@ -47,6 +47,12 @@ public class LangUtil {
     return obj != null && cls.isAssignableFrom(obj.getClass()) ? func.apply(cls.cast(obj)) : elseFunc.apply(obj);
   }
 
+  public static <T, R> R getIfInstanceOfElseThrow(
+      Object obj, Class<T> cls, Function<? super T, ? extends R> func) {
+    if (obj != null && cls.isAssignableFrom(obj.getClass()))
+      return func.apply(cls.cast(obj));
+    throw new IllegalStateException("Expect class: " + cls + ";got: " + (obj == null ? null : obj.getClass()));
+  }
 
   public static <T, T1 extends T, T2 extends T> T orElse(T1 value, T2 fullBack) {
     return value == null ? fullBack : value;

@@ -1,12 +1,12 @@
 package com.jsonex.cliarg;
 
 import com.jsonex.core.annotation.*;
-import com.jsonex.jsoncoder.JSONCoder;
-import com.jsonex.jsoncoder.JSONCoderOption;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
-import static com.jsonex.snapshottest.Snapshot.assertMatchSnapshot;
+
+import static com.jsonex.snapshottest.Snapshot.assertMatchesSnapshot;
+import static org.junit.Assert.assertTrue;
 
 
 @Slf4j
@@ -35,7 +35,7 @@ public class CliParserTest {
     @Index(2) @Description("number parameter") @Required(false)
     Point point;
 
-    @ShortName("o") @Description( "Opt")
+    @ShortName("o") @Description( "Opt") @Required(true)
     Opt opt = Opt.VAL1;
 
     @ShortName("i")
@@ -45,12 +45,17 @@ public class CliParserTest {
   @Test
   public void testParse() {
     CLISpec spec = new CLISpec(Arg1.class);
-    log.info("usage: " + spec.printUsage());
-    assertMatchSnapshot("usage", spec.printUsage());
+    log.info("spec:\n" + spec.printUsage());
+    assertMatchesSnapshot("usage", spec.printUsage());
 
-    java.lang.String[] args = { "abc", "10", "name:n1,x:1,y:2", "-o", "VAL2", "--optInt", "100"};
+    String[] args = { "abc", "10", "name:n1,x:1,y:2", "-o", "VAL2", "--optInt", "100"};
     CLIParser parser = spec.parse(args, 0);
-    log.info("cli:" + JSONCoder.encode(parser.target, JSONCoderOption.ofIndentFactor(2)));
-    assertMatchSnapshot("parserTarget", parser.target);
+    log.info("parsedValue:\n" + parser.target);
+    assertMatchesSnapshot("parserTarget", parser.target);
+
+    String[] argsWithError = { "-o", "VAL2", "--optInt1"};
+    parser = spec.parse(argsWithError, 0);
+    assertTrue(parser.hasError());
+    assertMatchesSnapshot("parseError", parser.getErrorsAsString());
   }
 }

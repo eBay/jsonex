@@ -1,10 +1,8 @@
 package com.jsonex.snapshottest;
 
 import com.jsonex.core.type.Lazy;
-import com.jsonex.core.util.FileUtil;
 import com.jsonex.core.util.ClassUtil;
-import com.jsonex.jsoncoder.JSONCoder;
-import com.jsonex.jsoncoder.JSONCoderOption;
+import com.jsonex.core.util.FileUtil;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,13 +17,14 @@ import static com.jsonex.core.util.LangUtil.getIfInstanceOf;
  * Snapshot is a simple test utility to record actual output into snapshot file when the test is first time run,
  * and for subsequent runs, it will match the new output against the recorded snapshot value.
  * To approve the expected changes, just rename the newly generated tmp file to the original snapshot file.
- * By default, the snapshot files and the tmp files are stored in the src/test/resources/[package name]/__snapshot__.
+ * By default, the snapshot files and the tmp files are stored in following folder structure:
+ * src/test/resources/<packageName>/__snapshot__/<testClassName>_<testMethodName>_<snapshotName>.[json|txt].[tmp]
  */
 @Data @RequiredArgsConstructor @Slf4j
 public class Snapshot {
   enum Result { MATCHES, MISMATCH, INITIAL }
-  private final static String TEST_RESOURCE_ROOT = "src/test/resources";
 
+  private SnapshotOption option = new SnapshotOption();
   private final String testClass;
   private final String testMethod;
   private final String name;
@@ -39,8 +38,8 @@ public class Snapshot {
   public String getFile() {
     int packagePos = testClass.lastIndexOf(".");
     String baseName = testClass.substring(0, packagePos) + ".__snapshot__" +  testClass.substring(packagePos);
-    String ext = actual instanceof String ? ".txt" : ".json";
-    return TEST_RESOURCE_ROOT + "/" +
+    String ext = actual instanceof String ? ".txt" : option.getSerializer().getFileExtension(actual);
+    return option.getTestResourceRoot() + "/" +
         baseName.replace(".", "/") + "_" + testMethod + "_" + name + ext;
   }
 
@@ -48,10 +47,10 @@ public class Snapshot {
 
   public String getActualString() {
     return actualString.getOrCompute(() ->
-        getIfInstanceOf(actual, String.class, Function.identity(), Snapshot::toJson));
+        getIfInstanceOf(actual, String.class, Function.identity(), this::serialize));
   }
 
-  private static String toJson(Object obj) { return JSONCoder.encode(obj, JSONCoderOption.ofIndentFactor(2)); }
+  private String serialize(Object obj) { return option.getSerializer().serialize(obj); }
 
   /** @return true if snapshot exists and matches*/
   public Snapshot compareOrRecord() {
@@ -85,8 +84,12 @@ public class Snapshot {
 
   public String toString() { return "Snapshot(" + testClass + "_" + testMethod + "_" + name + ")"; }
 
-  public static Snapshot assertMatchSnapshot(String name, Object actual) {
+  public static Snapshot assertMatchesSnapshot(String name, Object actual) {
     return of(name, actual).compareOrRecord();
+  }
+
+  public static Snapshot assertMatchesSnapshot(String name, Object actual, SnapshotOption option) {
+    return of(name, actual).setOption(option).compareOrRecord();
   }
 
   /** For testing only */

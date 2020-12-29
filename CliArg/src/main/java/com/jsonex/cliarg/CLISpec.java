@@ -20,6 +20,19 @@ import static com.jsonex.core.util.ListUtil.setAt;
 import static com.jsonex.core.util.StringUtil.noNull;
 import static java.lang.Math.min;
 
+/**
+ * CLI specification based on annotated java bean of `cls`. Following annotations will be processed:
+ *
+ * Class level:
+ *   {@link Name}: Name of the command. (Optional) Default to the class simple name
+ *   {@link Summary}: Summary of the command (Optional)
+ *   {@link Description}: Description of the command (Optional)
+ *   {@link Examples}: Array of string representation of samples usages (Optional)
+ *
+ * For field level annotations, please refer to class {@link Param}
+ *
+ * @param <T>
+ */
 @Data
 public class CLISpec<T> {
   final Class<T> cls;
@@ -30,8 +43,6 @@ public class CLISpec<T> {
   @Nullable String[] examples;
 
   int firstOptionalIndex = Integer.MAX_VALUE;
-//  Map<String, Param> nameParamMap = new HashMap<>();
-//  Map<String, Param> shortNameParamMap = new HashMap<>();
   List<Param> optionParams = new ArrayList<>();
   List<Param> indexedParams = new ArrayList<>();
   Set<String> requiredParams = new HashSet<>();

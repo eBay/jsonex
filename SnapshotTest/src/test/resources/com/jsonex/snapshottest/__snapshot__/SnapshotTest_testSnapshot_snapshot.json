@@ -1,4 +1,8 @@
 {
+  "option":{
+    "testResourceRoot":"src/test/resources",
+    "serializer":{}
+  },
   "testClass":"com.jsonex.snapshottest.SnapshotTest",
   "testMethod":"testSnapshot",
   "name":"test",
