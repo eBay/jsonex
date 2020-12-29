@@ -5,19 +5,19 @@ import org.junit.Test;
 
 import java.io.File;
 
-import static com.jsonex.snapshottest.Snapshot.assertMatchSnapshot;
+import static com.jsonex.snapshottest.Snapshot.assertMatchesSnapshot;
 import static org.junit.Assert.*;
 
 public class SnapshotTest {
   @Test public void testSnapshot() {
     Snapshot snapshot = Snapshot.of("test", "This is actual value");
-    assertMatchSnapshot("snapshot", snapshot);
+    assertMatchesSnapshot("snapshot", snapshot);
 
     // Test initial
     new File(snapshot.getFile()).delete();
     snapshot.compareOrRecord();
     assertEquals(Snapshot.Result.INITIAL, snapshot.getResult());
-    assertMatchSnapshot("InitialMessage", snapshot.getMessage());
+    assertMatchesSnapshot("InitialMessage", snapshot.getMessage());
 
     // Test matches
     snapshot.compareOrRecord();
@@ -29,10 +29,10 @@ public class SnapshotTest {
     try {
       snapshot.compareOrRecord();
     } catch (AssertionError e) {
-      assertMatchSnapshot("MismatchError", e.getMessage());
+      assertMatchesSnapshot("MismatchError", e.getMessage());
     }
     assertEquals(Snapshot.Result.MISMATCH, snapshot.getResult());
-    assertMatchSnapshot("errorMessage", snapshot.getMessage());
+    assertMatchesSnapshot("errorMessage", snapshot.getMessage());
     assertTrue(new File(snapshot.getFile() + ".tmp").exists());
 
     // Test approved

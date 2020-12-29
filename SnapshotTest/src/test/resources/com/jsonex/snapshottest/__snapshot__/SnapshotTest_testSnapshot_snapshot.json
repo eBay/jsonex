@@ -1,9 +1,0 @@
-{
-  "testClass":"com.jsonex.snapshottest.SnapshotTest",
-  "testMethod":"testSnapshot",
-  "name":"test",
-  "actual":"This is actual value",
-  "actualString":"This is actual value",
-  "file":"src/test/resources/com/jsonex/snapshottest/__snapshot__/SnapshotTest_testSnapshot_test.txt",
-  "tempFile":"src/test/resources/com/jsonex/snapshottest/__snapshot__/SnapshotTest_testSnapshot_test.txt.tmp"
-}

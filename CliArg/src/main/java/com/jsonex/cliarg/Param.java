@@ -19,6 +19,15 @@ import static com.jsonex.core.util.ListUtil.isIn;
  *
  * For Param of complex type, the value can be specified as JSON(ex) string, the top level "{" or "[", can be
  * omitted. The quote for key and value can be omitted.
+ *
+ * Following Annotation will be processed for each parameter:
+ *
+ * {@link Name}  Name of the parameter, optional, default to field name
+ * {@link ShortName}  The optional short name
+ * {@link Description}  The optional description
+ * {@link Index}  Indicate this an indexed parameter
+ * {@link Required}  Indicate if this field is required. all the index fields are required unless explicitly indicated.
+ *     All the non-index fields are not required unless explicitly indicated.
  */
 @Data
 public class Param {

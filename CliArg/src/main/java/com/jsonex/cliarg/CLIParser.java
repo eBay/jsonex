@@ -13,9 +13,14 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
 
+import static com.jsonex.core.util.LangUtil.doIf;
 import static com.jsonex.core.util.ListUtil.isIn;
 
-
+/**
+ * Parse the input command line arguments against the {@link CLISpec}. The parsed result will be stored in the target
+ *
+ * @param <T>
+ */
 @RequiredArgsConstructor @Slf4j @Data
 public class CLIParser<T> {
   final CLISpec<T> spec;
@@ -25,7 +30,7 @@ public class CLIParser<T> {
   final String[] args;
   int argIndex;
   int paramIndex;
-  List<String> unparsedArgs = new ArrayList<>();
+  List<String> extraArgs = new ArrayList<>();
   Map<String, String> errorMessages = new HashMap<>();
 
   @SneakyThrows
@@ -35,7 +40,7 @@ public class CLIParser<T> {
 
   public CLIParser(CLISpec spec, String[] args, int argIndex, T target) {
     this.spec = spec;
-    this.missingParams = spec.requiredParams;
+    this.missingParams = new HashSet<>(spec.requiredParams);
     this.args = args;
     this.argIndex = argIndex;
     this.target = target;
@@ -74,9 +79,11 @@ public class CLIParser<T> {
   private boolean parseNameValue(String name, String value) {
     Param param = spec.getOptionParamByName(name).orElse(null);
     if (param == null) {
-      unparsedArgs.add(name);
+      extraArgs.add(name);
       return false;
     }
+
+    missingParams.remove(name);
 
     Class<?> type = param.property.getType();
     if (param.isBooleanType()) {
@@ -94,10 +101,11 @@ public class CLIParser<T> {
 
   private void parseArg(String arg) {
     if (paramIndex >= spec.indexedParams.size()) {
-      unparsedArgs.add(arg);
+      extraArgs.add(arg);
       return;
     }
     Param param = spec.indexedParams.get(paramIndex++);
+    missingParams.remove(param.name);
     param.property.set(target, parseValue(param, arg));
   }
 
@@ -114,5 +122,17 @@ public class CLIParser<T> {
       log.error("Error parsing parameter:" + param.name, e);
     }
     return null;
+  }
+
+  public boolean hasError() {
+    return !missingParams.isEmpty() || !extraArgs.isEmpty() || !errorMessages.isEmpty();
+  }
+
+  public String getErrorsAsString() {
+    StringBuilder sb = new StringBuilder();
+    doIf(!missingParams.isEmpty(), () -> sb.append("\nMissing requied arguments:" + missingParams));
+    doIf(!extraArgs.isEmpty(), () -> sb.append("\nUnexpected arguments:" + extraArgs));
+    doIf(!errorMessages.isEmpty(), () -> sb.append("\nError parsing following arguments:" + errorMessages));
+    return sb.toString();
   }
 }
