@@ -3,9 +3,10 @@ package com.jsonex.snapshottest;
 import com.jsonex.jsoncoder.JSONCoder;
 import com.jsonex.jsoncoder.JSONCoderOption;
 import lombok.Getter;
+import lombok.Setter;
 
-public class SnapshotSerializerJsonCoder implements SnapshotSerializer<JSONCoderOption> {
-  @Getter private transient JSONCoderOption option = JSONCoderOption.ofIndentFactor(2);
+public class SnapshotSerializerJsonCoder implements SnapshotSerializer<JSONCoderOption, SnapshotSerializerJsonCoder> {
+  @Getter @Setter private transient JSONCoderOption option = JSONCoderOption.ofIndentFactor(2);
 
   @Override
   public String serialize(Object obj) {

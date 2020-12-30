@@ -124,13 +124,11 @@ public class CLIParser<T> {
     return null;
   }
 
-  public boolean hasError() {
-    return !missingParams.isEmpty() || !extraArgs.isEmpty() || !errorMessages.isEmpty();
-  }
+  public boolean hasError() { return !missingParams.isEmpty() || !extraArgs.isEmpty() || !errorMessages.isEmpty(); }
 
   public String getErrorsAsString() {
     StringBuilder sb = new StringBuilder();
-    doIf(!missingParams.isEmpty(), () -> sb.append("\nMissing requied arguments:" + missingParams));
+    doIf(!missingParams.isEmpty(), () -> sb.append("\nMissing required arguments:" + missingParams));
     doIf(!extraArgs.isEmpty(), () -> sb.append("\nUnexpected arguments:" + extraArgs));
     doIf(!errorMessages.isEmpty(), () -> sb.append("\nError parsing following arguments:" + errorMessages));
     return sb.toString();

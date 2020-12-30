@@ -1,3 +1,0 @@
-
-Missing requied arguments:[opt, numParam, strParam]
-Unexpected arguments:[optInt1]

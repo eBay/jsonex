@@ -90,8 +90,9 @@ public class ClassUtil {
   private static final WeakHashMap<Class<?>, Map<String, BeanProperty>> beanPropertyCache = new WeakHashMap<>();
 
   private static Map<String, BeanProperty> _getProperties(Class<?> cls) {
-    //Find all the getter/setter methods
-    Map<String, BeanProperty> attributeMap = new LinkedHashMap<>();//NOPMD
+    // Find all the getter/setter methods
+    // Use TreeMap as method is not in stable order in JVM implementations, so we need to sort them to make stable order
+    Map<String, BeanProperty> attributeMap = new TreeMap<>();
     for (Method m : getAllMethods(cls)) {
       int mod = m.getModifiers();
       if(!Modifier.isPublic(mod) || Modifier.isStatic(mod))
@@ -121,7 +122,7 @@ public class ClassUtil {
         name = "^";
 
       name = StringUtil.lowerFirst(name);
-      if(name.equals("class"))//NOPMD
+      if(name.equals("class"))
         continue;
 
       BeanProperty prop = attributeMap.get(name);

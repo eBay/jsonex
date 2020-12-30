@@ -37,7 +37,7 @@ public class Param {
   @Nullable Integer index;
   @Nullable String description;
   @Nullable Object defVal;
-  boolean required;
+  private Boolean required;
 
   public Param(BeanProperty property, Object defObj) {
     this.property = property;
@@ -48,13 +48,12 @@ public class Param {
     doIfNotNull(property.getAnnotation(Index.class), a -> index = a.value());
 
     defVal = property.get(defObj);
-    required = index != null;
     doIfNotNull(property.getAnnotation(Required.class), a -> required = a.value());
   }
 
-  boolean isBooleanType() {
-    return isIn(property.getType(), Boolean.class, boolean.class);
-  }
+  boolean isBooleanType() { return isIn(property.getType(), Boolean.class, boolean.class); }
+
+  boolean isRequired() { return required != null ? required : index != null; }
 
   String getUsage() {
     if (index != null)

@@ -1,6 +1,9 @@
 package com.jsonex.snapshottest;
 
 import com.jsonex.core.util.FileUtil;
+import com.jsonex.jsoncoder.SimpleFilter;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import org.junit.Test;
 
 import java.io.File;
@@ -41,5 +44,17 @@ public class SnapshotTest {
     assertEquals(Snapshot.Result.MATCHES, snapshot.getResult());
     assertNull(snapshot.getMessage());
     assertFalse(new File(snapshot.getFile() + ".tmp").exists());
+  }
+
+  @Data @AllArgsConstructor
+  static class TestCls {
+    String att1;
+    String att2;
+  }
+
+  @Test public void testWithCustomOptions() {
+    SnapshotOption opt = SnapshotOption.of().mutateJsonCoderOption(o -> o.addFilterFor(TestCls.class, SimpleFilter.exclude("att2")));
+    assertMatchesSnapshot("testCls", new TestCls("val1", "val2"), opt);
+    assertMatchesSnapshot("testCls", new TestCls("val1", "val2_updated"), opt);
   }
 }

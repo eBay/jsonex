@@ -44,7 +44,7 @@ public class ClassUtilTest {
     public String fieldA2;
     public String fieldA3;
     public String fieldA4;
-    public String getA1(String str) { return str; }  // non-get method
+    public String getA1(String str) { return str; }  // non-getter method with additional parameter
     public A() {
       fieldA4 = "4";
       fieldA3 = "3";
@@ -63,6 +63,7 @@ public class ClassUtilTest {
     public String getFieldB1() { return fieldB1; }
     @Nullable @Transient
     public void setWriteOnly(String str) { fieldB5 = str; }
+    public String getReadOnly() { return fieldB1; }
   }
 
   @SuppressWarnings({"CanBeFinal", "SameReturnValue", "WeakerAccess"})
@@ -79,7 +80,7 @@ public class ClassUtilTest {
   @Test public void testGetProperties() {
     Map<String, BeanProperty> properties = ClassUtil.getProperties(B.class);
     log.info("Properties.keySet():" + properties.keySet());
-    String[] exp = {"fieldA1", "fieldA2", "fieldA3", "fieldA4", "fieldB1", "fieldB2", "fieldB3", "fieldB4", "fieldB5", "fieldB6", "writeOnly"};
+    String[] exp = {"fieldA1", "fieldA2", "fieldA3", "fieldA4", "fieldB1", "fieldB2", "fieldB3", "fieldB4", "fieldB5", "fieldB6", "readOnly", "writeOnly"};
     // Java compiler will mass up the order of the getter methods, field order is preserved in most of the java versions
     assertArrayEquals(exp, properties.keySet().toArray());
 

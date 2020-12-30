@@ -70,7 +70,7 @@ public class CLISpec<T> {
 
       if (param.index != null) {
         setAt(indexedParams, param.index, param);
-        if (!param.required)
+        if (!param.isRequired())
           firstOptionalIndex = min(firstOptionalIndex, param.index);
         else {
           Assert.isTrue(param.index < firstOptionalIndex,
