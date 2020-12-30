@@ -35,23 +35,23 @@ There are plenty of options for JSON serialization/deserialization libraries, wh
 * JDK version: 1.7 or above 
 
 
-And many more, please refer the class [JSONCoderOption](JSONCoder/src/main/java/com/jsonex/jsoncoder/JSONCoderOption.java)
+And many more, please refer the class [JSONCoderOption](JSONCoder/src/main/java/org/jsonex/jsoncoder/JSONCoderOption.java)
 for more details. 
 
 Please refer the unit test class for more detailed usage patterns: 
-[JSONCoderTest](JSONCoder/src/test/java/com/jsonex/jsoncoder/JSONCoderTest.java)
+[JSONCoderTest](JSONCoder/src/test/java/org/jsonex/jsoncoder/JSONCoderTest.java)
 
 ## Usage
 
 1. Maven Dependencies
     ```xml
      <dependency>
-       <groupId>com.jsonex</groupId>
+       <groupId>org.jsonex</groupId>
        <artifactId>JSONCoder</artifactId>
        <version>${jsonCoderVersion}</version>
      </dependency>
     ````
-    You can get current version by searching [maven central](https://search.maven.org/search?q=g:com.jsonex)
+    You can get current version by searching [maven central](https://search.maven.org/search?q=g:org.jsonex)
 2. Simple Serialization / Deserialization
     ```java
       // serialization

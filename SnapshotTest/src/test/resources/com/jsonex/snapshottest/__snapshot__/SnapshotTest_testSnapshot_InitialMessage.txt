@@ -1,4 +1,0 @@
-Snapshot(com.jsonex.snapshottest.SnapshotTest_testSnapshot_test) doesn't exist, will record the initial snapshot in
- file:///Users/jianwche/opensource/jsonex/SnapshotTest/src/test/resources/com/jsonex/snapshottest/__snapshot__/SnapshotTest_testSnapshot_test.txt
- snapshot content:
-This is actual value
