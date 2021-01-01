@@ -34,11 +34,11 @@ public class CLIParser<T> {
   Map<String, String> errorMessages = new HashMap<>();
 
   @SneakyThrows
-  public CLIParser(CLISpec descriptor, String[] args, int argIndex) {
-    this(descriptor, args, argIndex, (T) descriptor.createDefaultInstance());
+  public CLIParser(CLISpec<T> spec, String[] args, int argIndex) {
+    this(spec, args, argIndex, (T) spec.createDefaultInstance());
   }
 
-  public CLIParser(CLISpec spec, String[] args, int argIndex, T target) {
+  public CLIParser(CLISpec<T> spec, String[] args, int argIndex, T target) {
     this.spec = spec;
     this.missingParams = new HashSet<>(spec.requiredParams);
     this.args = args;
@@ -46,18 +46,17 @@ public class CLIParser<T> {
     this.target = target;
   }
 
-  public CLIParser<T> parse() {
+  public CLIParser<T> parseOneParam() {
     for (; argIndex < args.length; argIndex++) {
       String arg2 = argIndex < args.length - 1 ? args[argIndex + 1] : null;
-      if (parse(args[argIndex], arg2)) {
+      if (parseOneParam(args[argIndex], arg2))
         argIndex ++;
-      }
     }
     return this;
   }
 
   /** @return true indicates it uses param2 */
-  private boolean parse(String arg1, String arg2) {
+  private boolean parseOneParam(String arg1, String arg2) {
     if (arg1.startsWith("--"))
       return parseOption(arg1.substring(2), arg2);
     else if (arg1.startsWith("-"))
@@ -76,7 +75,7 @@ public class CLIParser<T> {
     return parseNameValue(arg1, arg2);
   }
 
-  private boolean parseNameValue(String name, String value) {
+  private boolean parseNameValue(String name, String val) {
     Param param = spec.getOptionParamByName(name).orElse(null);
     if (param == null) {
       extraArgs.add(name);
@@ -85,17 +84,16 @@ public class CLIParser<T> {
 
     missingParams.remove(name);
 
-    Class<?> type = param.property.getType();
     if (param.isBooleanType()) {
-      if (isIn(value, "true", "false")) {  // Boolean type only accept "true", "false" parameters
-        param.property.set(target, value.equals("true"));
+      if (isIn(val, "true", "false")) {  // Boolean type only accept "true", "false" parameters
+        param.property.set(target, val.equals("true"));
         return true;
       }
       param.property.set(target, true);
       return false;
     }
 
-    param.property.set(target, parseValue(param, value));
+    param.property.set(target, parseValue(param, val));
     return true;
   }
 

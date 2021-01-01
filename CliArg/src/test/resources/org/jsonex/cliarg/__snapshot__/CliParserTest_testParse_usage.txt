@@ -8,8 +8,8 @@ EXAMPLES
   arg1 2
   arg1 4
 ARGUMENTS / OPTIONS
-<strParam>:   Str parameter    
-<numParam>:   number parameter 
-<point>:      number parameter 
--o, --opt:    Opt              
--i, --optInt: 
+  <strParam>:   Str parameter    
+  <numParam>:   number parameter 
+  <point>:      number parameter 
+  -o, --opt:    Opt              
+  -i, --optInt: 

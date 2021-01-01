@@ -1,5 +1,7 @@
 package org.jsonex.cliarg;
 
+import lombok.Data;
+import lombok.SneakyThrows;
 import org.jsonex.core.annotation.Description;
 import org.jsonex.core.annotation.Examples;
 import org.jsonex.core.annotation.Name;
@@ -8,17 +10,14 @@ import org.jsonex.core.type.Nullable;
 import org.jsonex.core.util.Assert;
 import org.jsonex.core.util.BeanProperty;
 import org.jsonex.core.util.ClassUtil;
-import lombok.Data;
-import lombok.SneakyThrows;
 
 import java.util.*;
 
+import static java.lang.Math.min;
 import static org.jsonex.core.util.LangUtil.doIf;
 import static org.jsonex.core.util.LangUtil.doIfNotNull;
 import static org.jsonex.core.util.ListUtil.first;
 import static org.jsonex.core.util.ListUtil.setAt;
-import static org.jsonex.core.util.StringUtil.noNull;
-import static java.lang.Math.min;
 
 /**
  * CLI specification based on annotated java bean of `cls`. Following annotations will be processed:
@@ -50,7 +49,7 @@ public class CLISpec<T> {
   @SneakyThrows
   public CLISpec(Class<T> cliCls) {
     this.cls = cliCls;
-    this.defVal = this.cls.newInstance();
+    this.defVal = createDefaultInstance();
     init();
   }
 
@@ -73,7 +72,7 @@ public class CLISpec<T> {
         if (!param.isRequired())
           firstOptionalIndex = min(firstOptionalIndex, param.index);
         else {
-          Assert.isTrue(param.index < firstOptionalIndex,
+          Assert.isTrue(param.index < firstOptionalIndex, () ->
               "Required index argument can't be after Non-Required argument: firstOptionalIndex:"
                   + firstOptionalIndex + "; param: " + param);
         }
@@ -99,18 +98,11 @@ public class CLISpec<T> {
 
     sb.append("\nARGUMENTS / OPTIONS");
     StringBuilder optDesc = new StringBuilder();
-    for (Param p : indexedParams) {
-      optDesc.append("\n  <" + p.name + ">:\t" + noNull(p.description));
-    }
+    for (Param p : indexedParams)
+      optDesc.append("\n  " + p.getDescriptionLine());
 
-    for (Param p : optionParams) {
-      if (p.index != null)
-        continue;
-      optDesc.append("\n  ");
-      doIfNotNull(p.shortName, (n) -> optDesc.append("-" + n + ", "));
-      optDesc.append("--" + p.name);
-      optDesc.append(":\t" + noNull(p.description));
-    }
+    for (Param p : optionParams)
+      optDesc.append("\n  " + p.getDescriptionLine());
 
     sb.append(TextFormatter.alignTabs(optDesc.toString()));
     return sb.toString();
@@ -118,21 +110,16 @@ public class CLISpec<T> {
 
   public String getUsage() {
     StringBuilder sb = new StringBuilder(name);
-    for (Param param : optionParams)
-      sb.append(param.getUsage());
+    for (Param p : optionParams)
+      sb.append(p.getUsage());
 
-    for (Param param : indexedParams)
-      sb.append(param.getUsage());
+    for (Param p : indexedParams)
+      sb.append(p.getUsage());
 
     return sb.toString();
   }
 
   @SneakyThrows
-  public T createDefaultInstance() {
-    return cls.newInstance();
-  }
-
-  public CLIParser<T> parse(String[] args, int argIndex) {
-    return new CLIParser<T>(this, args, argIndex).parse();
-  }
+  public T createDefaultInstance() { return cls.newInstance(); }
+  public CLIParser<T> parse(String[] args, int argIndex) { return new CLIParser<T>(this, args, argIndex).parseOneParam(); }
 }

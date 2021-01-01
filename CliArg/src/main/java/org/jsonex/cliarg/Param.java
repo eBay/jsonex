@@ -5,8 +5,10 @@ import org.jsonex.core.type.Nullable;
 import org.jsonex.core.util.BeanProperty;
 import lombok.Data;
 
+import static org.jsonex.core.util.LangUtil.doIf;
 import static org.jsonex.core.util.LangUtil.doIfNotNull;
 import static org.jsonex.core.util.ListUtil.isIn;
+import static org.jsonex.core.util.StringUtil.noNull;
 
 /**
  * Represent an command line parameter, it can be either argument or option
@@ -31,7 +33,7 @@ import static org.jsonex.core.util.ListUtil.isIn;
  */
 @Data
 public class Param {
-  final BeanProperty property;
+  transient final BeanProperty property;
   String name;
   @Nullable String shortName;
   @Nullable Integer index;
@@ -42,12 +44,11 @@ public class Param {
   public Param(BeanProperty property, Object defObj) {
     this.property = property;
     name = property.getName();
+    defVal = property.get(defObj);
     doIfNotNull(property.getAnnotation(Name.class), a -> name = a.value());
     doIfNotNull(property.getAnnotation(ShortName.class), a -> shortName = a.value());
     doIfNotNull(property.getAnnotation(Description.class), a -> description = a.value());
     doIfNotNull(property.getAnnotation(Index.class), a -> index = a.value());
-
-    defVal = property.get(defObj);
     doIfNotNull(property.getAnnotation(Required.class), a -> required = a.value());
   }
 
@@ -59,15 +60,19 @@ public class Param {
     if (index != null)
       return isRequired() ? " <" + name + ">" : " [" + name + "]";
 
-    StringBuilder sb = new StringBuilder();
-    if (shortName != null)
-      sb.append("-" + shortName);
-    else
-      sb.append("--" + name);
-
-    if (!isBooleanType()) {
-      sb.append(" <value>");
-    }
+    StringBuilder sb = new StringBuilder(shortName != null ? "-" + shortName : "--" + name);
+    doIf(!isBooleanType(), () -> sb.append(" <value>"));
     return isRequired() ? " " + sb.toString() : " [" + sb + "]";
+  }
+
+  String getDescriptionLine() {
+    StringBuilder sb = new StringBuilder();
+    if (index == null) {
+      doIfNotNull(shortName, n -> sb.append("-" + n + ", "));
+      sb.append("--" + name);
+    } else
+      sb.append("<" + name + ">");
+    sb.append(":\t" + noNull(description));
+    return sb.toString();
   }
 }

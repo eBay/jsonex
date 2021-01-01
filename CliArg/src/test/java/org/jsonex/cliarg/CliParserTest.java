@@ -18,7 +18,7 @@ public class CliParserTest {
     int y;
   }
 
-  public enum Opt{ VAL1, VAL2 }
+  public enum Opt { VAL1, VAL2 }
 
   @Name("TestArg1") @Summary("This is a test arg1") @Description("Description of test Args") @Data
   @Examples({
@@ -45,6 +45,8 @@ public class CliParserTest {
   @Test
   public void testParse() {
     CLISpec spec = new CLISpec(Arg1.class);
+    assertMatchesSnapshot("spec", spec);
+
     log.info("spec:\n" + spec.printUsage());
     assertMatchesSnapshot("usage", spec.printUsage());
 
