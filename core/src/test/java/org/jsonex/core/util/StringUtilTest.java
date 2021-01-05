@@ -83,8 +83,8 @@ public class StringUtilTest {
   }
 
   @Test public void testAppendRepeatedly() {
-    assertEquals("123abab", StringUtil.appendRepeatedly(new StringBuilder("123"), "ab", 2).toString());
-    assertEquals("123  ", StringUtil.appendRepeatedly(new StringBuilder("123"), ' ', 2).toString());
+    assertEquals("123abab", StringUtil.appendRepeatedly(new StringBuilder("123"), 2, "ab").toString());
+    assertEquals("123  ", StringUtil.appendRepeatedly(new StringBuilder("123"), 2, ' ').toString());
   }
 
   @Test public void testToTrimmedStr() {

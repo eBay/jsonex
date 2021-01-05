@@ -181,17 +181,21 @@ public class StringUtil {
     return sb.toString();
   }
 
-  public static StringBuilder appendRepeatedly(StringBuilder result, String str, int times) {
+  public static StringBuilder appendRepeatedly(StringBuilder result, int times, String str) {
     for (int i=0; i<times; i++)
       result.append(str);
     return result;
   }  
 
-  public static StringBuilder appendRepeatedly(StringBuilder result, char c, int times) {
+  public static StringBuilder appendRepeatedly(StringBuilder result, int times, char c) {
     for (int i=0; i<times; i++)
       result.append(c);
     return result;
   }
+
+  public static StringBuilder padEnd(StringBuilder s, int length, char c) { return appendRepeatedly(s, length - s.length(), c); }
+  public static String padEnd(String s, int length, char c) { return padEnd(new StringBuilder(s), length, c).toString(); }
+  public static String padEnd(String s, int length) { return padEnd(s, length, ' '); }
 
   public static String toTrimmedStr(Object o, int len) { return StringUtil.getLeft(String.valueOf(o), len); }
 

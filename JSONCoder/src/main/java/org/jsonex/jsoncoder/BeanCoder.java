@@ -100,7 +100,7 @@ public class BeanCoder {
       try {
         int p = ctx.objectPath.indexOf(eqWrapper);
         if (p >= 0) {
-          return setRef(target, StringUtil.appendRepeatedly(new StringBuilder(), "../", p + 1).toString());
+          return setRef(target, StringUtil.appendRepeatedly(new StringBuilder(), p + 1, "../").toString());
         }
       } catch(ClassCastException e) {
         // Workaround for some class that breaks equals() contract by doing caste before type check

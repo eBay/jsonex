@@ -79,6 +79,10 @@ public class CLISpec<T> {
       } else
         optionParams.add(param);
     };
+    for (int i = 0; i < indexedParams.size(); i++) {
+      Assert.isTrue(indexedParams.get(i) != null,
+          "Indexed argument has to start from 0 and be continuous, missing definition at index: " +i);
+    }
   }
 
   public Optional<Param> getOptionParamByName(String name) {

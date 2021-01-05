@@ -1,12 +1,13 @@
 package org.jsonex.treedoc.json;
 
-import org.jsonex.core.util.StringUtil;
-import org.jsonex.treedoc.TDNode;
 import lombok.Data;
 import lombok.experimental.Accessors;
+import org.jsonex.treedoc.TDNode;
 
 import java.net.URI;
 import java.util.function.Function;
+
+import static org.jsonex.core.util.StringUtil.padEnd;
 
 @Accessors(chain = true) @Data
 public class TDJSONOption {
@@ -41,7 +42,7 @@ public class TDJSONOption {
 
   public TDJSONOption setIndentFactor(int _indentFactor) {
     this.indentFactor = _indentFactor;
-    indentStr = StringUtil.appendRepeatedly(new StringBuilder(), ' ', indentFactor).toString();
+    indentStr = padEnd("", indentFactor);
     return this;
   }
 

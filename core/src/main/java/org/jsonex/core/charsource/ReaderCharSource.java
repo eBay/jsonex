@@ -51,6 +51,9 @@ public class ReaderCharSource extends CharSource {
       }
       toLoad -= len;
       loadPos += len;
+      if (len > 0) {  // Return as soon as new data is read without fully loading the buffer to avoid latency
+        break;
+      }
     }
     return true;
   }

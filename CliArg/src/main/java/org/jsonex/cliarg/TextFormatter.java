@@ -4,9 +4,9 @@ package org.jsonex.cliarg;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.jsonex.core.util.ListUtil.mutateAt;
-import static org.jsonex.core.util.StringUtil.appendRepeatedly;
 import static java.lang.Math.max;
+import static org.jsonex.core.util.ListUtil.mutateAt;
+import static org.jsonex.core.util.StringUtil.padEnd;
 
 public class TextFormatter {
   public static String indent(String text, String indent) {
@@ -33,7 +33,7 @@ public class TextFormatter {
       if (!lines[i].isEmpty()) {
         String[] line = fields[i];
         for (int c = 0; c < line.length; c++)
-          appendRepeatedly(sb.append(line[c]), ' ', columnsSize.get(c) + 1 - line[c].length());
+          sb.append(c == fields.length -1 ? line[c] : padEnd(line[c], columnsSize.get(c) + 1));
       }
       sb.append("\n");
     }

@@ -32,7 +32,7 @@ public class CliParserTest {
     @Index(1) @Description("number parameter")
     int numParam;
 
-    @Index(2) @Description("number parameter") @Required(false)
+    @Index(2) @Description("Object Point") @Required(false)
     Point point;
 
     @ShortName("o") @Description( "Opt") @Required(true)
