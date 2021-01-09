@@ -58,4 +58,8 @@ public class SnapshotTest {
     assertMatchesSnapshot("testCls", new TestCls("val1", "val2"), opt);
     assertMatchesSnapshot("testCls", new TestCls("val1", "val2_updated"), opt);
   }
+
+  @Test public void testWithNoName() {
+    assertMatchesSnapshot("With No name");
+  }
 }

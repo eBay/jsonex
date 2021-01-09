@@ -16,8 +16,6 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import static org.jsonex.core.util.LangUtil.safe;
-
 /**
  * A collection of utilities related to Collection classes. Many methods here are a better alternative
  * to Java8 stream with more concise expression
@@ -147,18 +145,18 @@ public class ListUtil {
     return toMap(source, keyFunc, Function.identity());
   }
 
-
   public static <S, K, V> Map<K, V> toMap(
       Collection<S> source, Function<? super S, ? extends K> keyFunc, Function<? super S, ? extends V> valFunc) {
-    return toMap(source, keyFunc, valFunc, new LinkedHashMap<>());
+    return toMapInto(source, keyFunc, valFunc, new LinkedHashMap<>());
   }
 
-  public static <K, V, D extends Map<? super K, ? super V>> D toMap(
+  // Have to use different name, as Java compile will confuse the overloaded methods with generics.
+  public static <K, V, D extends Map<? super K, ? super V>> D toMapInto(
       Collection<V> source, Function<? super V, ? extends K> keyFunc, D dest) {
-    return toMap(source, keyFunc, i -> i, dest);
+    return toMapInto(source, keyFunc, i -> i, dest);
   }
 
-  public static <S, K, V, D extends Map<? super K, ? super V>> D toMap(
+  public static <S, K, V, D extends Map<? super K, ? super V>> D toMapInto(
       Collection<S> source, Function<? super S, ? extends K> keyFunc, Function<? super S, ? extends V> valFunc, D dest) {
     if (source == null)
       return null;
@@ -311,6 +309,14 @@ public class ListUtil {
     if (list == null)
       return null;
     return list.isEmpty() ? Optional.empty() : Optional.of(list.iterator().next());
+  }
+
+  public static <T> boolean containsAny(Collection<? super T> list, Collection<? extends T> elements) {
+    if (list != null)
+      for (T e : elements)
+        if (list.contains(e))
+          return true;
+    return false;
   }
 
   public static <T> boolean containsAny(Collection<? super T> list, T... elements) {

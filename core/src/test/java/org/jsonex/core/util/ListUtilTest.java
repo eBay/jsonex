@@ -22,6 +22,7 @@ import org.junit.Test;
 import java.util.*;
 
 import static org.jsonex.core.type.Operator.*;
+import static org.jsonex.core.util.ListUtil.listOf;
 import static org.jsonex.core.util.ListUtilTest.TestCls.*;
 import static org.junit.Assert.*;
 
@@ -105,7 +106,7 @@ public class ListUtilTest {
   }
 
   @Test public void testToMapWithKeyAndVal() {
-    Map<Integer, String> map = ListUtil.toMap(buildList(), F_ID, F_NAME);
+    Map<Integer, String> map = ListUtil.toMap(buildList(), F_ID, TestCls::getName);
     assertArrayEquals(new String[]{null, "name1", null, "name3"}, new TreeMap(map).values().toArray());
   }
 
@@ -115,7 +116,7 @@ public class ListUtilTest {
 
     assertArrayEquals(list.toArray(), new TreeMap(map).values().toArray());
 
-    TreeMap<Integer, TestCls> treeMap = ListUtil.toMap(list, F_ID, new TreeMap<>());
+    TreeMap<Integer, TestCls> treeMap = ListUtil.toMapInto(list, F_ID, new TreeMap<>());
     assertArrayEquals(list.toArray(), map.values().toArray());
   }
 
@@ -212,6 +213,10 @@ public class ListUtilTest {
     assertTrue("Should return true: ", ListUtil.containsAny(ListUtil.setOf(1,2,3), 1, 2));
     assertFalse("Should return false: ", ListUtil.containsAny(ListUtil.setOf(1,2,3), 4, 5));
     assertFalse("Should return false for null source: ", ListUtil.containsAny(null, 0));
+
+    assertTrue("Should return true: ", ListUtil.containsAny(ListUtil.setOf(1,2,3), listOf(1, 2)));
+    assertFalse("Should return false: ", ListUtil.containsAny(ListUtil.setOf(1,2,3), listOf(4, 5)));
+    assertFalse("Should return false for null source: ", ListUtil.containsAny(null, listOf(0)));
   }
 
   @Test public void testTakeBetween() {

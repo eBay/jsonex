@@ -1,0 +1,55 @@
+{
+  "cls":"org.jsonex.cliarg.CliParserTest.Arg1",
+  "defVal":{
+    "numParam":0,
+    "opt":"VAL1",
+    "optInt":10
+  },
+  "name":"TestArg1",
+  "summary":"This is a test arg1",
+  "description":"Description of test Args",
+  "examples":[
+    "arg1 2",
+    "arg1 4"
+  ],
+  "firstOptionalIndex":2,
+  "optionParams":[
+    {
+      "name":"opt",
+      "shortName":"o",
+      "description":"Opt",
+      "defVal":"VAL1",
+      "required":true
+    },
+    {
+      "name":"optInt",
+      "shortName":"i",
+      "defVal":10
+    }
+  ],
+  "indexedParams":[
+    {
+      "name":"strParam",
+      "index":0,
+      "description":"Str parameter"
+    },
+    {
+      "name":"numParam",
+      "index":1,
+      "description":"number parameter",
+      "defVal":0
+    },
+    {
+      "name":"point",
+      "index":2,
+      "description":"Object Point",
+      "required":false
+    }
+  ],
+  "requiredParams":[
+    "opt",
+    "numParam",
+    "strParam"
+  ],
+  "usage":"TestArg1 -o <value> [-i <value>] <strParam> <numParam> [point]"
+}

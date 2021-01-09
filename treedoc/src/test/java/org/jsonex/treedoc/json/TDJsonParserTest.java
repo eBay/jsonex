@@ -178,7 +178,7 @@ public class TDJsonParserTest {
   @Test public void testStream() {
     ReaderCharSource reader = new ReaderCharSource(loadResource(this.getClass(), "stream.json"));
     List<TDNode> nodes = new ArrayList<>();
-    while(reader.skipSpacesAndReturns())
+    while(reader.skipSpacesAndReturnsAndCommas())
       nodes.add(TDJSONParser.get().parse(reader));
     TDNode node = TreeDoc.merge(nodes).getRoot();
     log.info("testStream=" + node.toString());
@@ -190,7 +190,7 @@ public class TDJsonParserTest {
   @Test public void testStreamAsSingleDoc() {
     ReaderCharSource reader = new ReaderCharSource(loadResource(this.getClass(), "stream.json"));
     TreeDoc doc = TreeDoc.ofArray();
-    while(reader.skipSpacesAndReturns())
+    while(reader.skipSpacesAndReturnsAndCommas())
       TDJSONParser.get().parse(reader, new TDJSONOption(), doc.getRoot().createChild());
     TDNode node = doc.getRoot();
     log.info("testStream=" + node.toString());

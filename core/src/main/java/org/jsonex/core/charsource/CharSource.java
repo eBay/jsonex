@@ -18,7 +18,8 @@ import java.util.function.Predicate;
 public abstract class CharSource {
   private final static int MAX_STRING_LEN = 20000;
   // HTML &nbsp; will be converted to \u00a0, that's why it need to be supported here
-  private final static String SPACE_RETURN_CHARS =" \n\r\t\u00a0";
+  private final static String SPACE_RETURN_CHARS = " \n\r\t\u00a0";
+  private final static String SPACE_RETURN_COMMA_CHARS = SPACE_RETURN_CHARS + ",";
 
   final Bookmark bookmark = new Bookmark();
 
@@ -70,6 +71,7 @@ public abstract class CharSource {
   public boolean skipUntil(final String terminator) { return skipUntil(terminator, true); }
   /** @return true Indicates more character in the stream  */
   public boolean skipSpacesAndReturns() { return skipUntil(SPACE_RETURN_CHARS, false); }
+  public boolean skipSpacesAndReturnsAndCommas() { return skipUntil(SPACE_RETURN_COMMA_CHARS, false); }
   /** @return true Indicates more character in the stream  */
   public boolean skipChars(String chars) { return skipUntil(chars, false); }
 

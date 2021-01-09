@@ -1,16 +1,18 @@
 package org.jsonex.snapshottest;
 
-import org.jsonex.core.type.Lazy;
-import org.jsonex.core.util.ClassUtil;
-import org.jsonex.core.util.FileUtil;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jsonex.core.type.Lazy;
+import org.jsonex.core.util.ClassUtil;
+import org.jsonex.core.util.FileUtil;
 import org.jsonex.core.util.LangUtil;
 
 import java.io.File;
 import java.util.Objects;
 import java.util.function.Function;
+
+import static org.jsonex.core.util.StringUtil.isEmpty;
 
 /**
  * Snapshot is a simple test utility to record actual output into snapshot file when the test is first time run,
@@ -34,12 +36,14 @@ public class Snapshot {
   private Result result;  // For testing only
   private String message;  // For testing only
 
+  private String getNameSection() { return  isEmpty(name) ? "" : "_" + name; }
+
   public String getFile() {
     int packagePos = testClass.lastIndexOf(".");
     String baseName = testClass.substring(0, packagePos) + ".__snapshot__" +  testClass.substring(packagePos);
     String ext = actual instanceof String ? ".txt" : option.getSerializer().getFileExtension(actual);
     return option.getTestResourceRoot() + "/" +
-        baseName.replace(".", "/") + "_" + testMethod + "_" + name + ext;
+        baseName.replace(".", "/") + "_" + testMethod + getNameSection() + ext;
   }
 
   public String getTempFile() { return getFile() + ".tmp"; }
@@ -81,14 +85,17 @@ public class Snapshot {
     }
   }
 
-  public String toString() { return "Snapshot(" + testClass + "_" + testMethod + "_" + name + ")"; }
+  public String toString() { return "Snapshot(" + testClass + "_" + testMethod + getNameSection() + ")"; }
 
-  public static Snapshot assertMatchesSnapshot(String name, Object actual) {
-    return of(name, actual).compareOrRecord();
-  }
+  public static Snapshot assertMatchesSnapshot(Object actual) { return assertMatchesSnapshot(null, actual); }
+  public static Snapshot assertMatchesSnapshot(String name, Object actual) { return of(name, actual).compareOrRecord(); }
 
   public static Snapshot assertMatchesSnapshot(String name, Object actual, SnapshotOption option) {
     return of(name, actual).setOption(option).compareOrRecord();
+  }
+
+  public static Snapshot assertMatchesSnapshot(Object actual, SnapshotOption option) {
+    return of(null, actual).setOption(option).compareOrRecord();
   }
 
   /** For testing only */

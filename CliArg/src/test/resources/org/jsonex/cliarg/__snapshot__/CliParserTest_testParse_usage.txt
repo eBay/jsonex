@@ -1,0 +1,15 @@
+NAME: TestArg1
+SUMMARY: This is a test arg1
+DESCRIPTION
+  Description of test Args
+USAGE
+  TestArg1 -o <value> [-i <value>] <strParam> <numParam> [point]
+EXAMPLES
+  arg1 2
+  arg1 4
+ARGUMENTS / OPTIONS
+  <strParam>:   Str parameter    
+  <numParam>:   number parameter 
+  <point>:      Object Point     
+  -o, --opt:    Opt              
+  -i, --optInt: 
