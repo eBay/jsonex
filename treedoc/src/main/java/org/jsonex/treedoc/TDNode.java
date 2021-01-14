@@ -9,15 +9,15 @@
 
 package org.jsonex.treedoc;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.jsonex.core.charsource.Bookmark;
 import org.jsonex.core.type.Lazy;
 import org.jsonex.core.util.ListUtil;
 import org.jsonex.core.util.StringUtil;
 import org.jsonex.treedoc.TDPath.Part;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.experimental.Accessors;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,6 +53,8 @@ public class TDNode {
 
   public TDNode(TDNode parent, String key) { this.doc = parent.doc; this.parent = parent; this.key = key; }
   public TDNode(TreeDoc doc, String key) { this.doc = doc; this.key = key; }
+
+  public TDNode cloneOfSimpleType(Object value) { return new TDNode(parent, key).setType(Type.SIMPLE).setValue(value); }
 
   public TDNode setKey(String key) {  this.key = key; return touch(); }
   public TDNode setValue(Object value) { this.value = value; return touch(); }

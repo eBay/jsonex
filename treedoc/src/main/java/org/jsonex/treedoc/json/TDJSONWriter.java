@@ -32,7 +32,7 @@ public class TDJSONWriter {
 
   @SneakyThrows
   public <T extends Appendable> T write(T out, TDNode node, TDJSONOption opt, String indentStr) {
-    node = node == null ? node : opt.nodeMapper.apply(node);
+    node = node == null ? node : opt.applyFilters(node);
     if (node == null) {
       return (T)out.append("null");
     }
@@ -97,7 +97,7 @@ public class TDJSONWriter {
 
   @SneakyThrows
   <T extends Appendable> T writeSimple(T out, TDNode node, TDJSONOption opt) {
-    Object value = opt.valueMapper == null ? node.getValue() : opt.valueMapper.apply(node);
+    Object value = node.getValue();
     if (value instanceof String)
       return writeQuotedString(out, (String)value, opt.quoteChar);
 

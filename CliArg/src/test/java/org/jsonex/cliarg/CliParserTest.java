@@ -40,6 +40,8 @@ public class CliParserTest {
 
     @ShortName("i")
     int optInt = 10;
+
+    int noShortName = 0;
   }
 
   @Test

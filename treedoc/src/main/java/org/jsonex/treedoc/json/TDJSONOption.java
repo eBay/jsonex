@@ -5,7 +5,8 @@ import lombok.experimental.Accessors;
 import org.jsonex.treedoc.TDNode;
 
 import java.net.URI;
-import java.util.function.Function;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.jsonex.core.util.StringUtil.padEnd;
 
@@ -33,9 +34,9 @@ public class TDJSONOption {
   boolean alwaysQuoteName = true;
   char quoteChar = '"';
   String indentStr = "";
+
   /** Node mapper, if it returns null, node will be skipped */
-  Function<TDNode, TDNode> nodeMapper = Function.identity();
-  Function<TDNode, Object> valueMapper = null;
+  List<NodeFilter> nodeFilters = new ArrayList<>();
 
   public static TDJSONOption ofIndentFactor(int factor) { return new TDJSONOption().setIndentFactor(factor); }
   public static TDJSONOption ofDefaultRootType(TDNode.Type type) { return new TDJSONOption().setDefaultRootType(type); }
@@ -47,4 +48,16 @@ public class TDJSONOption {
   }
 
   public boolean hasIndent() { return !indentStr.isEmpty(); }
+
+  public TDNode applyFilters(TDNode n) {
+    for (NodeFilter f : nodeFilters)
+      n = f.apply(n);
+    return n;
+  }
+
+  public TDJSONOption addNodeFilter(NodeFilter... filters) {
+    for (NodeFilter f : filters)
+      this.nodeFilters.add(f);
+    return this;
+  }
 }

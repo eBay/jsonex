@@ -61,14 +61,14 @@ public class Param {
       return isRequired() ? " <" + name + ">" : " [" + name + "]";
 
     StringBuilder sb = new StringBuilder(shortName != null ? "-" + shortName : "--" + name);
-    doIf(!isBooleanType(), () -> sb.append(" <value>"));
+    doIf(!isBooleanType(), () -> sb.append(" {"+ name +"}"));
     return isRequired() ? " " + sb.toString() : " [" + sb + "]";
   }
 
   String getDescriptionLine() {
     StringBuilder sb = new StringBuilder();
     if (index == null) {
-      doIfNotNull(shortName, n -> sb.append("-" + n + ", "));
+      sb.append(shortName != null ? "-" + shortName + ", " : "    ");
       sb.append("--" + name);
     } else
       sb.append("<" + name + ">");

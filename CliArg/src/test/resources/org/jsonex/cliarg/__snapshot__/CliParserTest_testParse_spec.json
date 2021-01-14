@@ -3,7 +3,8 @@
   "defVal":{
     "numParam":0,
     "opt":"VAL1",
-    "optInt":10
+    "optInt":10,
+    "noShortName":0
   },
   "name":"TestArg1",
   "summary":"This is a test arg1",
@@ -25,6 +26,10 @@
       "name":"optInt",
       "shortName":"i",
       "defVal":10
+    },
+    {
+      "name":"noShortName",
+      "defVal":0
     }
   ],
   "indexedParams":[
@@ -51,5 +56,5 @@
     "numParam",
     "strParam"
   ],
-  "usage":"TestArg1 -o <value> [-i <value>] <strParam> <numParam> [point]"
+  "usage":"TestArg1 -o {opt} [-i {optInt}] [--noShortName {noShortName}] <strParam> <numParam> [point]"
 }

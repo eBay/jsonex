@@ -86,12 +86,12 @@ public class CLISpec<T> {
   }
 
   public Optional<Param> getOptionParamByName(String name) {
-    return first(optionParams, p -> p.name.equals(name) || p.shortName.equals(name));
+    return first(optionParams, p -> p.name.equals(name) || name.equals(p.shortName));
   }
 
   public String printUsage() {
     StringBuilder sb = new StringBuilder("NAME: " + name);
-    doIfNotNull(summary, s -> sb.append("\nSUMMARY: " + s));
+    doIfNotNull(summary, s -> sb.append(" - " + s));
     doIfNotNull(description, s -> sb.append("\nDESCRIPTION\n  " + s));
     sb.append("\nUSAGE\n  " + getUsage());
     if (examples != null && examples.length > 0) {

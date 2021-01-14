@@ -70,5 +70,5 @@ public class TestBean extends BaseTestBean {
   private String privateField = "privateFieldValue";
   public static String staticField = "staticFieldValue";
 
-  public String getWithException() { throw new RuntimeException(); }
+  public String getWithException() { throw new RuntimeException("Expected exception"); }
 }

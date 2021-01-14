@@ -9,11 +9,11 @@
 
 package org.jsonex.jsoncoder;
 
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.jsonex.core.util.FileUtil;
 import org.jsonex.core.util.MapBuilder;
 import org.jsonex.treedoc.TDNode;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -28,6 +28,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.jsonex.jsoncoder.fieldTransformer.FieldTransformer.*;
 import static org.junit.Assert.*;
 
 @Slf4j
@@ -328,12 +329,12 @@ public class JSONCoderTest {
 
     JSONCoderOption opt = JSONCoderOption.ofIndentFactor(2);
 
-    opt.addFilterFor(TestBean2.class, SimpleFilter.include("enumField2", "testBean"));
+    opt.addFilterFor(TestBean2.class, include("enumField2", "testBean"));
     opt.getSimpleFilterFor(TestBean2.class).addProperties("ints");
 
-    opt.addFilterFor(TestBean.class, SimpleFilter.exclude("publicStrField"));
+    opt.addFilterFor(TestBean.class, exclude("publicStrField"));
 
-    opt.addFilterFor(Object.class, SimpleFilter.exclude("fieldInAnyClass"));
+    opt.addFilterFor(Object.class, exclude("fieldInAnyClass"));
 
     String result = JSONCoder.encode(bean, opt);
     log("result(filtered)=" + result);
@@ -344,10 +345,15 @@ public class JSONCoderTest {
     assertTrue("should 'str2'", result.contains("str2"));
     assertTrue("shouldn't contain 'publicStrField'", !result.contains("publicStrField"));
 
-    opt.addFilterFor(TestBean2.class, MaskFilterByName.of().add("strField", str -> "hash:" + str.hashCode()));
+    opt.addFilterFor(TestBean2.class, mask(str -> "hash:" + str.hashCode(), "strField"));
     result = JSONCoder.encode(bean, opt);
     log("result(masked) =" + result);
     assertTrue("should include str1 hashCode'", result.contains("\"strField\":\"hash:3541024\""));
+
+    opt.addFilterFor(TestBean2.class, mask("strField"));
+    result = JSONCoder.encode(bean, opt);
+    log("result(masked default) =" + result);
+    assertTrue("should include str1 hashCode and len'", result.contains("\"strField\":\"[masked:hash=3541024,len=4]\""));
 
     opt.addSkippedClasses(TestBean.class);
     result = JSONCoder.encode(bean, opt);

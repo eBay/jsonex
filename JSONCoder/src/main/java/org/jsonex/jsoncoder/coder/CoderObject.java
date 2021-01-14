@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jsonex.core.factory.InjectableInstance;
 import org.jsonex.core.util.*;
 import org.jsonex.jsoncoder.*;
+import org.jsonex.jsoncoder.fieldTransformer.FieldTransformer;
 import org.jsonex.treedoc.TDNode;
 import org.jsonex.treedoc.json.TDJSONWriter;
 
@@ -22,6 +23,8 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.Date;
 import java.util.Map;
+
+import static org.jsonex.core.util.LangUtil.orElse;
 
 @Slf4j
 public class CoderObject implements ICoder<Object> {
@@ -57,7 +60,7 @@ public class CoderObject implements ICoder<Object> {
       // V3DAL will cause Lazy load exception, we have to catch it
       try {
         FieldTransformer.FieldInfo fieldInfo =
-            LangUtil.orElse(opt.transformField(cls, obj, pd, ctx), () -> FieldTransformer.it.get().apply(obj, pd, ctx));
+            orElse(opt.transformField(cls, obj, pd, ctx), () -> FieldTransformer.ofDefault().apply(obj, pd, ctx));
 
         if (fieldInfo.getName() == null)  // Skipped
           continue;

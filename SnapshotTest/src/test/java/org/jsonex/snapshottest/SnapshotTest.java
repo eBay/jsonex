@@ -3,7 +3,7 @@ package org.jsonex.snapshottest;
 import org.jsonex.core.util.FileUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.jsonex.jsoncoder.SimpleFilter;
+import org.jsonex.jsoncoder.fieldTransformer.SimpleFilter;
 import org.junit.Test;
 
 import java.io.File;

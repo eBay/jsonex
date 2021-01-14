@@ -7,13 +7,14 @@
  https://opensource.org/licenses/MIT.
  ************************************************************/
 
-package org.jsonex.jsoncoder;
+package org.jsonex.jsoncoder.fieldTransformer;
 
 import org.jsonex.core.util.BeanProperty;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import org.jsonex.jsoncoder.BeanCoderContext;
 
 import java.util.*;
 

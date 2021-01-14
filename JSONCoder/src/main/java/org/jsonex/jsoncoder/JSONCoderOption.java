@@ -16,6 +16,8 @@ import org.jsonex.core.type.Tuple;
 import org.jsonex.core.type.Tuple.Pair;
 import org.jsonex.core.util.BeanProperty;
 import org.jsonex.jsoncoder.coder.*;
+import org.jsonex.jsoncoder.fieldTransformer.FieldTransformer;
+import org.jsonex.jsoncoder.fieldTransformer.SimpleFilter;
 import org.jsonex.treedoc.json.TDJSONOption;
 import org.slf4j.Logger;
 

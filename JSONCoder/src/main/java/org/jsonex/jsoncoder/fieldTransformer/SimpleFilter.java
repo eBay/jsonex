@@ -7,13 +7,14 @@
  https://opensource.org/licenses/MIT.
  ************************************************************/
 
-package org.jsonex.jsoncoder;
+package org.jsonex.jsoncoder.fieldTransformer;
 
 import org.jsonex.core.util.BeanProperty;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import org.jsonex.jsoncoder.BeanCoderContext;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -25,10 +26,11 @@ public class SimpleFilter implements FieldTransformer {
   private Set<String> properties = new HashSet<>();
 
   public static SimpleFilter of() { return of(false); }
+  @Deprecated // Use FieldTransformer.exclude()
   public static SimpleFilter exclude( String... props) {
     return of().addProperties(props);
   }
-
+  @Deprecated // Use FieldTransformer.include()
   public static SimpleFilter include(String... props) {
     return of(true).addProperties(props);
   }
