@@ -16,7 +16,6 @@
     <module>JSONCoder</module>
     <module>csv</module>
     <module>CliArg</module>
-    <module>SnapshotTestBase</module>
     <module>SnapshotTest</module>
   </modules>
 
