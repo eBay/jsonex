@@ -55,7 +55,7 @@
   'atomicInteger':1001,
   'bigInteger':'123456789012345678901234567890',
   'someClass':'java.util.Date',
-  'xmlCalendar':'2021-01-01T00:00:00.000-08',
+  'xmlCalendar':'2021-01-01T08:00:00.000Z',
   'dateNumberMap':[
     null
   ],

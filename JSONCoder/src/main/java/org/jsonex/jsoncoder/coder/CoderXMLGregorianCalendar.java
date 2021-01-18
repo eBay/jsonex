@@ -26,7 +26,7 @@ public class CoderXMLGregorianCalendar implements ICoder<XMLGregorianCalendar> {
 
   @Override public Class<XMLGregorianCalendar> getType() { return XMLGregorianCalendar.class; }
   @Override public TDNode encode(XMLGregorianCalendar obj, Type type, BeanCoderContext ctx, TDNode target) {
-    String str = ctx.getOption().getCachedParsingDateFormat().format(obj.toGregorianCalendar().getTime());
+    String str = ctx.getOption().getCachedDateFormat().format(obj.toGregorianCalendar().getTime());
     return target.setValue(str);
   }
 
