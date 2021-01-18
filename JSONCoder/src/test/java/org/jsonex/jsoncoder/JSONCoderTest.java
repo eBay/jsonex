@@ -319,8 +319,6 @@ public class JSONCoderTest {
     assertMatchesSnapshot("withMergeArrayOption", toJSONString(bean2));
     assertArrayEquals(new int[]{1, 2, 3, 4}, bean2.getInts());
     assertEquals(listOf("a", "b", "c", "d"), bean2.testBean.getLinkedList1());
-
-
   }
 
   @Test public void testDefaultEnums() {
