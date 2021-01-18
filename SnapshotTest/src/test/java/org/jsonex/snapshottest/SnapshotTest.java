@@ -12,6 +12,11 @@ import static org.jsonex.snapshottest.Snapshot.assertMatchesSnapshot;
 import static org.junit.Assert.*;
 
 public class SnapshotTest {
+  // Remove current path so that it can avoid flaky test when run in different environment
+  static String removeCurrentPth(String message) {
+    return message.replace(new File("").getAbsolutePath(), "");
+  }
+
   @Test public void testSnapshot() {
     Snapshot snapshot = Snapshot.of("test", "This is actual value");
     assertMatchesSnapshot("snapshot", snapshot);
@@ -20,7 +25,7 @@ public class SnapshotTest {
     new File(snapshot.getFile()).delete();
     snapshot.compareOrRecord();
     assertEquals(Snapshot.Result.INITIAL, snapshot.getResult());
-    assertMatchesSnapshot("InitialMessage", snapshot.getMessage());
+    assertMatchesSnapshot("InitialMessage", removeCurrentPth(snapshot.getMessage()));
 
     // Test matches
     snapshot.compareOrRecord();
@@ -35,7 +40,7 @@ public class SnapshotTest {
       assertMatchesSnapshot("MismatchError", e.getMessage());
     }
     assertEquals(Snapshot.Result.MISMATCH, snapshot.getResult());
-    assertMatchesSnapshot("errorMessage", snapshot.getMessage());
+    assertMatchesSnapshot("errorMessage", removeCurrentPth(snapshot.getMessage()));
     assertTrue(new File(snapshot.getFile() + ".tmp").exists());
 
     // Test approved
