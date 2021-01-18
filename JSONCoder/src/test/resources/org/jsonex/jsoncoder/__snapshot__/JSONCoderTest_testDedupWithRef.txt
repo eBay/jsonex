@@ -1,0 +1,34 @@
+{
+  fieldInBaseClass:"Overridden Value",
+  treeMap:{},
+  linkedList1:[],
+  intField:0,
+  floatField:0.0,
+  charField:"\u0000",
+  booleanField:false,
+  bean2:{
+    ints:[
+      1,
+      2,
+      3
+    ],
+    enumSet:[
+      "value1",
+      "value2"
+    ],
+    enumMap:{},
+    $id:1
+  },
+  ints:{
+    $ref:"/bean2/ints"
+  },
+  readonlyField:"This's a readonly field",
+  atomicInteger:100,
+  publicLinkedList:[],
+  publicTreeMap:{},
+  bean2List:[
+    {
+      $ref:"#1"
+    }
+  ]
+}

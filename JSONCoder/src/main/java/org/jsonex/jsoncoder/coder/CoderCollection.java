@@ -70,7 +70,12 @@ public class CoderCollection implements ICoder<Collection> {
           result = new ArrayList<>();
       } else
         result = (Collection<Object>) cls.newInstance();
+    } else {
+      if (!ctx.getOption().isMergeArray())
+        result.clear();
     }
+
+
 
     ctx.getNodeToObjectMap().put(tdNode, result);
 

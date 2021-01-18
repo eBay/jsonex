@@ -28,7 +28,9 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.jsonex.core.util.ListUtil.listOf;
 import static org.jsonex.jsoncoder.fieldTransformer.FieldTransformer.*;
+import static org.jsonex.snapshottest.Snapshot.assertMatchesSnapshot;
 import static org.junit.Assert.*;
 
 @Slf4j
@@ -47,7 +49,7 @@ public class JSONCoderTest {
   @SneakyThrows
   private TestBean buildTestBean() {
     TestBean tb = new TestBean()
-        .setDateField(new Date())
+        .setDateField(new Date(12212121))
         .setStrField("String1: '\"")
         .setIntField(100)
         .setInts(new int[] { 4, 3, 2, 1 })
@@ -57,14 +59,14 @@ public class JSONCoderTest {
         .setAtomicInteger(new AtomicInteger(1001))
         .setBigInteger(new BigInteger("123456789012345678901234567890"))
         .setSomeClass(java.util.Date.class)
-        .setXmlCalendar(DatatypeFactory.newInstance().newXMLGregorianCalendar(new GregorianCalendar()))
-        .setDateNumberMap(new MapBuilder(new Date(), 10_000).getMap());
+        .setXmlCalendar(DatatypeFactory.newInstance().newXMLGregorianCalendar(new GregorianCalendar(2021, 0, 1)))
+        .setDateNumberMap(new MapBuilder(new Date(1111), 10_000).getMap());
 
     tb.publicInts = tb.getInts();
     tb.publicStrField = "PublicString";
     tb.publicMap = new TreeMap<>();
     tb.publicMap.put("key1", new Date(0));
-    tb.publicMap.put("key2", new Date());
+    tb.publicMap.put("key2", new Date(1212121));
 
     tb.publicBigDecimal1 = new BigDecimal("123456789012345678901234567");
     tb.publicBigDecimal2 = new BigDecimal("12");
@@ -94,7 +96,7 @@ public class JSONCoderTest {
   @Test public void testBasicEncoding() {
     TestBean tb = buildTestBean();
     String str = toJSONString(tb);
-    log("JSONStr=" + str);
+    assertMatchesSnapshot(str);
 
     assertTrue("Should contain identifier for Integer IdentifiableEnum", str.contains("\"enumField2\":12345"));
     assertTrue("Double quote should be escaped", str.contains("\"String1: '\\\"\""));
@@ -118,10 +120,10 @@ public class JSONCoderTest {
   @Test public void testCyclicReference() {
     TestBean tb = new TestBean().setBean2(new TestBean2());
     tb.getBean2().testBean = tb;
-    String str = toJSONString(tb, new JSONCoderOption().setJsonOption(false, '`', 0));
-    log("JSONStr=" + str);
+    String str = toJSONString(tb, new JSONCoderOption().setJsonOption(false, '`', 2));
+    assertMatchesSnapshot(str);
 
-    assertTrue("Cyclic reference should be encoded as $ref:str=" + str, str.indexOf("testBean:{$ref:`../../`}") > 0);
+    assertTrue("Cyclic reference should be encoded as $ref:str=" + str, str.indexOf("testBean:{\n      $ref:`../../`\n") > 0);
     TestBean tb1 = JSONCoder.global.decode(str, TestBean.class);
     assertEquals(tb1.getBean2().testBean, tb1);
   }
@@ -133,7 +135,7 @@ public class JSONCoderTest {
     tb2.setInts(tb.getInts());  // Duplicated arrays
 
     String str = toJSONString(tb, JSONCoderOption.of().setDedupWithRef(true).setJsonOption(false, '"', 2));
-    log("JSONStr=" + str);
+    assertMatchesSnapshot(str);
 
     assertTrue("Generate ref if dedupWithRef is set", str.contains("$ref"));
     TestBean tb1 = JSONCoder.global.decode(str, TestBean.class);
@@ -142,31 +144,33 @@ public class JSONCoderTest {
   }
 
   @Test public void testEnumNameOption() {
-    JSONCoderOption codeOption = JSONCoderOption.of().setShowEnumName(true);
+    JSONCoderOption codeOption = JSONCoderOption.ofIndentFactor(2).setShowEnumName(true);
     String str = toJSONString(buildTestBean(), codeOption);
-    log("JSON str=" + str);
+    assertMatchesSnapshot(str);
     assertTrue("Should contain both enum id and name when showEnumName is set", str.indexOf("12345-value1") > 0);
     assertEquals(str, toJSONString(JSONCoder.global.decode(str, TestBean.class), codeOption));
   }
 
   @Test public void testCustomQuote() {
-    JSONCoderOption codeOption = JSONCoderOption.of();
+    JSONCoderOption codeOption = JSONCoderOption.ofIndentFactor(2);
     codeOption.getJsonOption().setQuoteChar('\'');
     String str = toJSONString(buildTestBean(), codeOption);
-    log("testCustomQuote: strWithSingleQuote=" + str);
+    assertMatchesSnapshot("strWithSingleQuote", str);
     assertTrue("Single quote instead of double quote should be quoted when Quote char is set to single quote",
         str.indexOf("'String1: \\'\"'") > 0);
     assertEquals(toJSONString(JSONCoder.global.decode(str, TestBean.class), codeOption), str);
 
     codeOption.getJsonOption().setAlwaysQuoteName(false);  // Make quote optional for attribute names
     str = toJSONString(buildTestBean(), codeOption);
-    log("testCustomQuote: strWithNoKeyQuote=" + str);
+    assertMatchesSnapshot("strWithNoKeyQuote", str);
+
     assertTrue("Key shouldn't be quoted when alwaysQuoteName is set to false", str.contains("treeMap:"));
     assertEquals(toJSONString(JSONCoder.global.decode(str, TestBean.class), codeOption), str);
 
     codeOption.getJsonOption().setQuoteChar('`');
     str = toJSONString(buildTestBean(), codeOption);
-    log("testCustomQuote: strWithBackQuote=" + str);
+    assertMatchesSnapshot("strWithBackQuote", str);
+
     assertTrue("back quote should be quoted when quoteChar set to back quote", str.indexOf("`String1: '\"`") > 0);
   }
 
@@ -184,7 +188,7 @@ public class JSONCoderTest {
     codeOption.getJsonOption().setIndentFactor(4);
 
     TestBean tb = buildTestBean();
-    tb.getBean2().setObjs(new Object[]{"objstr1", new Date() });
+    tb.getBean2().setObjs(new Object[]{"objstr1", new Date(1111) });
     tb.setSomeMethod(Date.class.getMethod("getTime"));
 
     String str = toJSONString(tb, codeOption);
@@ -263,7 +267,7 @@ public class JSONCoderTest {
   @Test public void testPrimitiveTypes() {
     testPrimitiveType("test string {1} [123,234]", String.class);
     testPrimitiveType("", String.class);
-    testPrimitiveType(new Date(), Date.class);
+    testPrimitiveType(new Date(1111), Date.class);
 
     testPrimitiveType(123.456, Double.class);
 
@@ -297,18 +301,26 @@ public class JSONCoderTest {
   }
 
   @Test public void testIncrementDecode() {
-    String jsonStr1 = "{strField: 'strVal1', testBean: {floatField: 1.0, dateField: '2017-10-1'}}";
-    String jsonStr2 = "{enumField: 'value1', testBean: {floatField: 2.0, publicStrField: 'publicStrVal'}}";
+    String jsonStr1 = "{strField: 'strVal1', testBean: {floatField: 1.0, dateField: '2017-10-1', linkedList1: [a,b]}, ints:[1,2]}";
+    String jsonStr2 = "{enumField: 'value1', testBean: {floatField: 2.0, publicStrField: 'publicStrVal', linkedList1: [c,d]}, ints:[3,4]}";
 
     TestBean2 bean2 = JSONCoder.global.decode(jsonStr1, TestBean2.class);
-    log("bean2: " + JSONCoder.global.encode(bean2));
-
     bean2 = JSONCoder.global.decodeTo(jsonStr2, bean2);
-    log("testIncrementDecode: merged: bean2: " + JSONCoder.global.encode(bean2));
+    assertMatchesSnapshot("withoutMergeArrayOption", toJSONString(bean2));
     assertEquals("strVal1", bean2.getStrField());
     Assert.assertEquals(TestBean2.Enum1.value1, bean2.getEnumField());
     assertEquals(2.0, bean2.testBean.getFloatField(), 0.0001);
+    assertArrayEquals(new int[]{3, 4}, bean2.getInts());
+    assertEquals(listOf("c", "d"), bean2.testBean.getLinkedList1());
     assertEquals("publicStrVal", bean2.testBean.publicStrField);
+
+    bean2 = JSONCoder.global.decode(jsonStr1, TestBean2.class);
+    bean2 = JSONCoder.decodeTo(jsonStr2, bean2, new JSONCoderOption().setMergeArray(true));
+    assertMatchesSnapshot("withMergeArrayOption", toJSONString(bean2));
+    assertArrayEquals(new int[]{1, 2, 3, 4}, bean2.getInts());
+    assertEquals(listOf("a", "b", "c", "d"), bean2.testBean.getLinkedList1());
+
+
   }
 
   @Test public void testDefaultEnums() {
@@ -337,7 +349,7 @@ public class JSONCoderTest {
     opt.addFilterFor(Object.class, exclude("fieldInAnyClass"));
 
     String result = JSONCoder.encode(bean, opt);
-    log("result(filtered)=" + result);
+    assertMatchesSnapshot(result);
     assertTrue("shouldn't contain 'str1'", !result.contains("str1"));
     assertTrue("should include 'testBean'", result.contains("testBean"));
     assertTrue("should include 'ints'", result.contains("ints"));

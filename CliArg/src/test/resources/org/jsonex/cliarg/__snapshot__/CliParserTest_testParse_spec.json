@@ -30,6 +30,10 @@
     {
       "name":"noShortName",
       "defVal":0
+    },
+    {
+      "name":"arrayArg",
+      "description":"array of string, you can specify either use ',' separated string (jsonex array, with escape supported), or pass as multiple options"
     }
   ],
   "indexedParams":[
@@ -56,5 +60,5 @@
     "numParam",
     "strParam"
   ],
-  "usage":"TestArg1 -o {opt} [-i {optInt}] [--noShortName {noShortName}] <strParam> <numParam> [point]"
+  "usage":"TestArg1 -o {opt} [-i {optInt}] [--noShortName {noShortName}] [--arrayArg {arrayArg}] <strParam> <numParam> [point]"
 }

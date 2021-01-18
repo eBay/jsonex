@@ -125,5 +125,5 @@ public class CLISpec<T> {
 
   @SneakyThrows
   public T createDefaultInstance() { return cls.newInstance(); }
-  public CLIParser<T> parse(String[] args, int argIndex) { return new CLIParser<T>(this, args, argIndex).parseOneParam(); }
+  public CLIParser<T> parse(String[] args, int argIndex) { return new CLIParser<T>(this, args, argIndex).parse(); }
 }

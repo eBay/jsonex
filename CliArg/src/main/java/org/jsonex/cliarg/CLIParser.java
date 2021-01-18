@@ -32,6 +32,7 @@ public class CLIParser<T> {
   int paramIndex;
   List<String> extraArgs = new ArrayList<>();
   Map<String, String> errorMessages = new HashMap<>();
+  final Set<String> parsedParam = new HashSet<>();
 
   @SneakyThrows
   public CLIParser(CLISpec<T> spec, String[] args, int argIndex) {
@@ -46,7 +47,7 @@ public class CLIParser<T> {
     this.target = target;
   }
 
-  public CLIParser<T> parseOneParam() {
+  public CLIParser<T> parse() {
     for (; argIndex < args.length; argIndex++) {
       String arg2 = argIndex < args.length - 1 ? args[argIndex + 1] : null;
       if (parseOneParam(args[argIndex], arg2))
@@ -82,7 +83,8 @@ public class CLIParser<T> {
       return false;
     }
 
-    missingParams.remove(name);
+    missingParams.remove(param.name);
+    parsedParam.add(param.name);
 
     if (param.isBooleanType()) {
       if (isIn(val, "true", "false")) {  // Boolean type only accept "true", "false" parameters
@@ -115,7 +117,12 @@ public class CLIParser<T> {
         return result;
 
       Type rootType = cls.isArray() || Collection.class.isAssignableFrom(cls) ? Type.ARRAY : Type.MAP;
-      return JSONCoder.decode(value, cls, JSONCoderOption.of().setJsonOption(TDJSONOption.ofDefaultRootType(rootType)));
+      JSONCoderOption opt = JSONCoderOption.of().setJsonOption(TDJSONOption.ofDefaultRootType(rootType));
+      // First time, no need to merge existing result, otherwise do incremental merge with existing parsed value
+      Object existingVal = parsedParam.contains(param.name) ? param.getProperty().get(target) : null;
+      return existingVal == null
+          ? JSONCoder.decode(value, cls, opt)
+          : JSONCoder.decodeTo(value, param.getProperty().get(target), opt.setMergeArray(true));
     } catch (Exception e) {
       log.error("Error parsing parameter:" + param.name, e);
     }

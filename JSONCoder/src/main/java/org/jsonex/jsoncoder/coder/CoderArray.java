@@ -41,12 +41,22 @@ public class CoderArray implements ICoder<Object> {
     if (tdNode.getType() != TDNode.Type.ARRAY)
       throw new BeanCoderException("Incorrect input, the input has to be an array:" + toTrimmedStr(tdNode, 500));
     Class<?> cls = ClassUtil.getGenericClass(type);
-    Object result = Array.newInstance(cls.getComponentType(), tdNode.getChildren().size());
+    int startIdx = 0;
+    int length = tdNode.getChildren().size();
+    if (targetObj != null && ctx.getOption().isMergeArray()) {
+      startIdx = Array.getLength(targetObj);
+      length += startIdx;
+    }
+
+    Object result = Array.newInstance(cls.getComponentType(), length);
+    if (startIdx != 0)
+      System.arraycopy(targetObj, 0, result, 0, startIdx);
 
     ctx.getNodeToObjectMap().put(tdNode, result);
 
-    for (int i=0; i < tdNode.getChildrenSize(); i++)
-      Array.set(result, i, ctx.decode(tdNode.getChild(i), cls.getComponentType(), null, Integer.toString(i)));
+    for (int i = 0; i < tdNode.getChildrenSize(); i++)
+      Array.set(result, startIdx + i,
+          ctx.decode(tdNode.getChild(i), cls.getComponentType(), null, Integer.toString(i)));
     return result;
   }
 }

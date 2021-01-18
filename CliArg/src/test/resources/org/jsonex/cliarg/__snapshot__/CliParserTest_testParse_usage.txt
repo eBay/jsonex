@@ -2,14 +2,15 @@ NAME: TestArg1 - This is a test arg1
 DESCRIPTION
   Description of test Args
 USAGE
-  TestArg1 -o {opt} [-i {optInt}] [--noShortName {noShortName}] <strParam> <numParam> [point]
+  TestArg1 -o {opt} [-i {optInt}] [--noShortName {noShortName}] [--arrayArg {arrayArg}] <strParam> <numParam> [point]
 EXAMPLES
   arg1 2
   arg1 4
 ARGUMENTS / OPTIONS
-  <strParam>:        Str parameter    
-  <numParam>:        number parameter 
-  <point>:           Object Point     
-  -o, --opt:         Opt              
+  <strParam>:        Str parameter                                                                                                                       
+  <numParam>:        number parameter                                                                                                                    
+  <point>:           Object Point                                                                                                                        
+  -o, --opt:         Opt                                                                                                                                 
   -i, --optInt:      
       --noShortName: 
+      --arrayArg:    array of string, you can specify either use ',' separated string (jsonex array, with escape supported), or pass as multiple options 

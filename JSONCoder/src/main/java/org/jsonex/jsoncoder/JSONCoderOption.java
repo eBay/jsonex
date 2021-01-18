@@ -132,6 +132,12 @@ public class JSONCoderOption {
    */
   @Getter @Setter private boolean allowPolymorphicClasses = false;
 
+  /**
+   * Merge array. By default, when decode to exiting object, array or collection will be override instead of merge.
+   * If this set true, it will merge the array (concatenation)
+   */
+  @Getter @Setter private boolean mergeArray = false;
+
   public JSONCoderOption() { this(global); }
   private JSONCoderOption(JSONCoderOption parent) { this.parent = parent; }
   public static JSONCoderOption of() { return new JSONCoderOption(); }

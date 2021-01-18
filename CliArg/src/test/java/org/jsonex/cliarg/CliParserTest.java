@@ -42,6 +42,9 @@ public class CliParserTest {
     int optInt = 10;
 
     int noShortName = 0;
+
+    @Description("array of string, you can specify either use ',' separated string (jsonex array, with escape supported), or pass as multiple options")
+    String[] arrayArg;
   }
 
   @Test
@@ -52,7 +55,8 @@ public class CliParserTest {
     log.info("spec:\n" + spec.printUsage());
     assertMatchesSnapshot("usage", spec.printUsage());
 
-    String[] args = { "abc", "10", "name:n1,x:1,y:2", "-o", "VAL2", "--optInt", "100"};
+    String[] args = { "abc", "10", "name:n1,x:1,y:2", "-o", "VAL2", "--optInt", "100",
+        "--arrayArg", "str1,str2,'It\\'s escapted'", "--arrayArg", "array as separate option"};
     CLIParser parser = spec.parse(args, 0);
     log.info("parsedValue:\n" + parser.target);
     assertMatchesSnapshot("parserTarget", parser.target);

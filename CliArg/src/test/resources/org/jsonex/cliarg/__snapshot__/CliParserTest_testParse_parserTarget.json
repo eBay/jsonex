@@ -8,5 +8,11 @@
   },
   "opt":"VAL2",
   "optInt":100,
-  "noShortName":0
+  "noShortName":0,
+  "arrayArg":[
+    "str1",
+    "str2",
+    "It's escapted",
+    "array as separate option"
+  ]
 }

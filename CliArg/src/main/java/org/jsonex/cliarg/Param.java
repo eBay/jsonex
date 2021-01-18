@@ -19,8 +19,10 @@ import static org.jsonex.core.util.StringUtil.noNull;
  *
  * For option of Boolean type, it will be mapped as flag, that means the value of the option can be omitted.
  *
- * For Param of complex type, the value can be specified as JSON(ex) string, the top level "{" or "[", can be
- * omitted. The quote for key and value can be omitted.
+ * For Param of complex type or array/list, the value can be specified as JSON(ex) string, the top level "{" or "[",
+ * can be, omitted. The quote for key and value can be omitted.
+ *
+ * For array parameters, it also possible to specify the values as separate options. The values will be merged
  *
  * Following Annotation will be processed for each parameter:
  *

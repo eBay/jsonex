@@ -10,6 +10,7 @@
 package org.jsonex.jsoncoder;
 
 import org.jsonex.core.charsource.CharSource;
+import org.jsonex.core.util.Assert;
 import org.jsonex.treedoc.TDNode;
 import org.jsonex.treedoc.TDPath;
 import org.jsonex.treedoc.json.TDJSONParser;
@@ -57,9 +58,12 @@ public class JSONCoder {
   public static <T> T decode(TDNode treeDocNode, Class<T> type, JSONCoderOption opt) { return (T)decode(DecodeReq.of(type).setTdNode(treeDocNode), opt); }
 
   public <T> T decode(DecodeReq<T> req) { return decode(req, option); }
-  public <T> T decodeTo(String str, T target) {
-    return decode(DecodeReq.<T>of(target.getClass()).setJson(str).setTarget(target));
+  public <T> T decodeTo(String str, T target) { return decodeTo(str, target, option); }
+  public static <T> T decodeTo(String str, T target, JSONCoderOption opt) {
+    Assert.isNotNull(target, "Target can't be null for decodeTo()");
+    return decode(DecodeReq.<T>of(target.getClass()).setJson(str).setTarget(target), opt);
   }
+
   public <T> T decode(String str, Class<T> type) { return decode(str, type, option); }
   @SuppressWarnings("unchecked")
   public <T> T decode(Reader reader, Class<T> type) { return (T)decode(DecodeReq.of(type).setReader(reader), option); }
