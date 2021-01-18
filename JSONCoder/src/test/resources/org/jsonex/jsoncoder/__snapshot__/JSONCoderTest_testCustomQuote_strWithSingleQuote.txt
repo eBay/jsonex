@@ -11,7 +11,7 @@
   'charField':'A',
   'booleanField':false,
   'strField':'String1: \'"',
-  'dateField':'1969-12-31T19:23:32.121-08',
+  'dateField':'1970-01-01T03:23:32.121Z',
   'bean2':{
     'enumField':'value2',
     'enumField2':12345,
@@ -67,8 +67,8 @@
   },
   'publicStrField':'PublicString',
   'publicMap':{
-    'key1':'1969-12-31T16:00:00.000-08',
-    'key2':'1969-12-31T16:20:12.121-08'
+    'key1':'1970-01-01T00:00:00.000Z',
+    'key2':'1970-01-01T00:20:12.121Z'
   },
   'publicBigDecimal1':'123456789012345678901234567',
   'publicBigDecimal2':'12',

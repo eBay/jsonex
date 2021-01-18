@@ -27,11 +27,15 @@ public class CoderDate implements ICoder<Date> {
   @Override public Class<Date> getType() { return Date.class; }
   
   @Override public TDNode encode(Date obj, Type type, BeanCoderContext ctx, TDNode target) {
-    String dateFormat = ctx.getOption().getDateFormat();
-    return target.setValue(dateFormat == null ? obj.getTime() : ctx.getCachedDateFormat(dateFormat).format(obj));
+    JSONCoderOption opt = ctx.getOption();
+    return target.setValue(opt.getDateFormat() == null
+        ? obj.getTime()
+        : opt.getCachedDateFormat().format(obj));
   }
 
-  @Override public Date decode(TDNode jsonNode, Type type, Object targetObj, BeanCoderContext ctx) { return _decode(jsonNode.getValue(), ctx); }
+  @Override public Date decode(TDNode jsonNode, Type type, Object targetObj, BeanCoderContext ctx) {
+    return _decode(jsonNode.getValue(), ctx);
+  }
   
   static Date _decode(Object obj, BeanCoderContext ctx) {
     if (obj instanceof Number)
@@ -40,7 +44,7 @@ public class CoderDate implements ICoder<Date> {
     JSONCoderOption opt = ctx.getOption();
     String dateStr = (String) obj;
     try {
-      return ctx.getCachedDateFormat(opt.getDateFormat()).parse(dateStr);
+      return opt.getCachedParsingDateFormat().parse(dateStr);
     } catch(ParseException e) {
       try { 
         return opt.parseDateFullback(dateStr);

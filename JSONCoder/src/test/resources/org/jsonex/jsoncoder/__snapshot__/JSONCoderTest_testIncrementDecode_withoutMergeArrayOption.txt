@@ -21,7 +21,7 @@
     "floatField":2.0,
     "charField":"\u0000",
     "booleanField":false,
-    "dateField":"2017-10-01T00:00:00.000-07",
+    "dateField":"2017-10-01T07:00:00.000Z",
     "readonlyField":"This's a readonly field",
     "atomicInteger":100,
     "publicLinkedList":[],

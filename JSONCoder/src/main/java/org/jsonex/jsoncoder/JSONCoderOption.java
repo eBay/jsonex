@@ -12,6 +12,8 @@ package org.jsonex.jsoncoder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import org.jsonex.core.factory.CacheThreadLocal;
+import org.jsonex.core.factory.InjectableFactory;
 import org.jsonex.core.type.Tuple;
 import org.jsonex.core.type.Tuple.Pair;
 import org.jsonex.core.util.BeanProperty;
@@ -26,7 +28,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static org.jsonex.core.util.LangUtil.doIfElse;
+import static org.jsonex.core.util.LangUtil.*;
 
 @SuppressWarnings("UnusedReturnValue")
 @Accessors(chain=true)
@@ -58,7 +60,7 @@ public class JSONCoderOption {
   /**
    * If true, subclass field won't be encoded
    */
-  @Getter @Setter Boolean ignoreSubClassFields;
+  @Getter @Setter boolean ignoreSubClassFields;
     
   /**
    * If true, enum name will be encoded
@@ -80,10 +82,32 @@ public class JSONCoderOption {
    */
   @Getter @Setter boolean showPrivateField;
   
+  @Getter @Setter String parsingDateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
   /**
-   * Used by BeanCoderDate, If Date format is null, date will be encoded as long with value of Date.getTime()
-   */ 
+   * Used by {@link CoderDate}.encode()}, If Date format is null, date will be encoded as long with value of Date.getTime()
+   */
   @Getter @Setter String dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
+  /** Used by {@link CoderDate}.encode, by default it will use default timezone, a custom timezone can be specified*/
+  @Getter @Setter TimeZone timeZone = null;
+
+  // For performance reason, we need to cache SimpleDateFormat in the same thread as SimpleDateFormat is not threadsafe
+  private static final InjectableFactory._2<String, TimeZone, SimpleDateFormat> dateFormatCache =
+      InjectableFactory._2.of(JSONCoderOption::buildDateFormat, CacheThreadLocal.get());
+
+  public SimpleDateFormat getCachedParsingDateFormat() { return dateFormatCache.get(parsingDateFormat, null); }
+  public SimpleDateFormat getCachedDateFormat() {
+    return dateFormatCache.get(dateFormat, orElse(timeZone, safe(parent, JSONCoderOption::getTimeZone)));
+  }
+
+  private static SimpleDateFormat buildDateFormat(String format, TimeZone timeZone) {
+    SimpleDateFormat result = new SimpleDateFormat(format);
+    if (timeZone != null)
+      result.setTimeZone(timeZone);
+    return result;
+  }
+
+  /** Internal use only */
+
   @Getter private final List<String> fallbackDateFormats = new ArrayList<>();
   
   @Getter @Setter boolean alwaysMapKeyAsString;
@@ -199,7 +223,7 @@ public class JSONCoderOption {
   
   @SuppressWarnings({ "rawtypes", "unchecked" })
   public boolean isIgnoreSubClassFields(Class<?> cls){
-    if(ignoreSubClassFields == Boolean.TRUE)
+    if(ignoreSubClassFields)
       return true;
     for(Class iCls : ignoreSubClassFieldsClasses)
       if(iCls.isAssignableFrom(cls))

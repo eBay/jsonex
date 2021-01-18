@@ -15,6 +15,7 @@ import org.jsonex.core.util.FileUtil;
 import org.jsonex.core.util.MapBuilder;
 import org.jsonex.treedoc.TDNode;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
@@ -38,12 +39,14 @@ public class JSONCoderTest {
   @Rule final public TestName name = new TestName();
   public void log(String msg) { log.info(this.getClass().getSimpleName() + "." + name.getMethodName() + ":" + msg); }
 
-  private static String toJSONString(Object obj, JSONCoderOption option) {
-    return JSONCoder.encode(obj, option);
-  }
+  private static String toJSONString(Object obj, JSONCoderOption option) { return JSONCoder.encode(obj, option); }
 
   private static String toJSONString(Object obj) {
     return JSONCoder.global.encode(obj, JSONCoderOption.ofIndentFactor(2).setWarnLogLevel(JSONCoderOption.LogLevel.DEBUG));
+  }
+
+  @Before public void before() {
+    JSONCoderOption.global.setTimeZone(TimeZone.getTimeZone("UTC"));
   }
 
   @SneakyThrows
