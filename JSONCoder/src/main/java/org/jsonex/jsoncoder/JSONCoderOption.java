@@ -89,15 +89,16 @@ public class JSONCoderOption {
   @Getter @Setter String dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
   /** Used by {@link CoderDate}.encode, by default it will use default timezone, a custom timezone can be specified*/
   @Getter @Setter TimeZone timeZone = null;
+  public TimeZone timeZoneOrParent() { return orElse(timeZone, safe(parent, JSONCoderOption::getTimeZone)); }
 
   // For performance reason, we need to cache SimpleDateFormat in the same thread as SimpleDateFormat is not threadsafe
   private static final InjectableFactory._2<String, TimeZone, SimpleDateFormat> dateFormatCache =
       InjectableFactory._2.of(JSONCoderOption::buildDateFormat, CacheThreadLocal.get());
 
-  public SimpleDateFormat getCachedParsingDateFormat() { return dateFormatCache.get(parsingDateFormat, null); }
-  public SimpleDateFormat getCachedDateFormat() {
-    return dateFormatCache.get(dateFormat, orElse(timeZone, safe(parent, JSONCoderOption::getTimeZone)));
-  }
+  public SimpleDateFormat getCachedParsingDateFormat() { return getCachedDateFormat(parsingDateFormat); }
+  public SimpleDateFormat getCachedDateFormat() { return getCachedDateFormat(dateFormat); }
+  public SimpleDateFormat getCachedDateFormat(String format) { return dateFormatCache.get(format, timeZoneOrParent()); }
+
 
   private static SimpleDateFormat buildDateFormat(String format, TimeZone timeZone) {
     SimpleDateFormat result = new SimpleDateFormat(format);
@@ -211,7 +212,7 @@ public class JSONCoderOption {
     ParseException exp = null;
     for(String fmt : fallbackDateFormats){
       try {
-        return new SimpleDateFormat(fmt).parse(dateStr);
+        return getCachedDateFormat(fmt).parse(dateStr);
       } catch(ParseException e1) {
         exp = e1;
       }

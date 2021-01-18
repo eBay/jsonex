@@ -279,13 +279,18 @@ public class JSONCoderTest {
     testPrimitiveType(true, Boolean.class);
   }
 
+  private SimpleDateFormat buildDateFormat(String format) {
+    SimpleDateFormat result = new SimpleDateFormat(format);
+    result.setTimeZone(JSONCoderOption.global.getTimeZone());
+    return result;
+  }
+
   @Test public void testDecodePrimitiveTypeWithoutQuote() {
     assertEquals("1234", JSONCoder.global.decode("1234", String.class));
     assertEquals("12:34", JSONCoder.global.decode("12:34", String.class));
 
     String strDate = "2018-10-1 12:30:10";
-    SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-d HH:mm:ss");
-    assertEquals(strDate, df.format(JSONCoder.global.decode(strDate, Date.class)));
+    assertEquals(strDate, buildDateFormat("yyyy-MM-d HH:mm:ss").format(JSONCoder.global.decode(strDate, Date.class)));
 
     strDate = "1970-01-01T00:00:00.000Z";  // ISO 8601 date format
     assertEquals(0, JSONCoder.global.decode(strDate, Date.class).getTime());
@@ -390,11 +395,11 @@ public class JSONCoderTest {
 
     str = "{dateField: '1900-1-1'}";
     bean = JSONCoder.getGlobal().decode(str, TestBean.class);
-    assertEquals("1900-01-01", new SimpleDateFormat("yyyy-MM-dd").format(bean.getDateField()));
+    assertEquals("1900-01-01", buildDateFormat("yyyy-MM-dd").format(bean.getDateField()));
 
     str = "{dateField: '1900-1-1 11:11:11'}";
     bean = JSONCoder.getGlobal().decode(str, TestBean.class);
-    assertEquals("1900-01-01 11:11:11", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(bean.getDateField()));
+    assertEquals("1900-01-01 11:11:11", buildDateFormat("yyyy-MM-dd HH:mm:ss").format(bean.getDateField()));
 
     str = "{dateField: 'invalidDateFormat'}";
     expectDecodeWithException(str, TestBean.class,
