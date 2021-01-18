@@ -51,6 +51,8 @@ public class JSONCoderTest {
 
   @SneakyThrows
   private TestBean buildTestBean() {
+    GregorianCalendar cal = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+    cal.setTime(new Date(0));
     TestBean tb = new TestBean()
         .setDateField(new Date(12212121))
         .setStrField("String1: '\"")
@@ -62,7 +64,7 @@ public class JSONCoderTest {
         .setAtomicInteger(new AtomicInteger(1001))
         .setBigInteger(new BigInteger("123456789012345678901234567890"))
         .setSomeClass(java.util.Date.class)
-        .setXmlCalendar(DatatypeFactory.newInstance().newXMLGregorianCalendar(new GregorianCalendar(2021, 0, 1)))
+        .setXmlCalendar(DatatypeFactory.newInstance().newXMLGregorianCalendar(cal))
         .setDateNumberMap(new MapBuilder(new Date(1111), 10_000).getMap());
 
     tb.publicInts = tb.getInts();
