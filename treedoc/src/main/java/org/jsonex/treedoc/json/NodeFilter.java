@@ -17,20 +17,18 @@ public interface NodeFilter extends Function<TDNode, TDNode> {
     abstract TDNode transform(TDNode n);
     public RegexFilter(String... strPatterns) { addPatterns(strPatterns); }
     public TDNode apply(TDNode n) {
-      if (pathPatterns.size() == 0 || !matches(n.getPathAsString(), pathPatterns))
+      if (!matches(n.getPathAsString()))
         return n;
       return transform(n);
     }
     void addPatterns(String... patterns) {
-      if (patterns != null) {
-        for (String ptn : patterns) {
+      if (patterns != null)
+        for (String ptn : patterns)
           pathPatterns.add(Pattern.compile(ptn));
-        }
-      }
     }
 
-    static boolean matches(String path, List<Pattern> patterns) {
-      return exists(patterns, p -> p.matcher(path).matches());
+    boolean matches(String path) {
+      return exists(pathPatterns, p -> p.matcher(path).matches());
     }
   }
 
@@ -56,11 +54,7 @@ public interface NodeFilter extends Function<TDNode, TDNode> {
     }
   }
 
-  static ExcludeFilter exclude(String... patterns) {
-    return new ExcludeFilter(patterns);
-  }
+  static ExcludeFilter exclude(String... patterns) { return new ExcludeFilter(patterns); }
 
-  static MaskFilter mask(String... patterns) {
-    return new MaskFilter(patterns);
-  }
+  static MaskFilter mask(String... patterns) { return new MaskFilter(patterns); }
 }

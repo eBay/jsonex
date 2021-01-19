@@ -35,7 +35,7 @@ public class TDJSONOption {
   char quoteChar = '"';
   String indentStr = "";
 
-  /** Node mapper, if it returns null, node will be skipped */
+  /** Node filters, if it returns null, node will be skipped */
   List<NodeFilter> nodeFilters = new ArrayList<>();
 
   public static TDJSONOption ofIndentFactor(int factor) { return new TDJSONOption().setIndentFactor(factor); }
@@ -50,8 +50,11 @@ public class TDJSONOption {
   public boolean hasIndent() { return !indentStr.isEmpty(); }
 
   public TDNode applyFilters(TDNode n) {
-    for (NodeFilter f : nodeFilters)
+    for (NodeFilter f : nodeFilters) {
+      if (n == null)
+        break;
       n = f.apply(n);
+    }
     return n;
   }
 

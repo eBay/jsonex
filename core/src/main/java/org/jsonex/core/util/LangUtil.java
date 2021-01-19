@@ -37,10 +37,17 @@ public class LangUtil {
   public static void throwIf(boolean condition, Supplier<Exception> exp) { if (condition) throw exp.get(); }
 
   public static <T> void doIfInstanceOf(Object obj, Class<T> cls, Consumer<? super T> action) {
-    if (obj != null && cls.isAssignableFrom(obj.getClass())) {
+    if (obj != null && cls.isAssignableFrom(obj.getClass()))
       action.accept(cls.cast(obj));
-    }
   }
+
+  public static <T> void doIfInstanceOfOrElseThrow(Object obj, Class<T> cls, Consumer<? super T> action) {
+    if (obj != null && cls.isAssignableFrom(obj.getClass()))
+      action.accept(cls.cast(obj));
+    else
+      throw new IllegalStateException("Expect class: " + cls + ";got: " + safe(obj, Object::getClass));
+  }
+
 
   public static <T, R> R getIfInstanceOf(
       Object obj, Class<T> cls, Function<? super T, ? extends R> func, Function<Object, ? extends R> elseFunc) {
@@ -51,7 +58,7 @@ public class LangUtil {
       Object obj, Class<T> cls, Function<? super T, ? extends R> func) {
     if (obj != null && cls.isAssignableFrom(obj.getClass()))
       return func.apply(cls.cast(obj));
-    throw new IllegalStateException("Expect class: " + cls + ";got: " + (obj == null ? null : obj.getClass()));
+    throw new IllegalStateException("Expect class: " + cls + ";got: " + safe(obj, Object::getClass));
   }
 
   public static <T, T1 extends T, T2 extends T> T orElse(T1 value, T2 fullBack) {

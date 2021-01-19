@@ -26,16 +26,12 @@ public class TDJSONWriter {
     return write(new StringBuilder(), node, opt).toString();
   }
 
-  public <T extends Appendable> T write(T out, TDNode node, TDJSONOption opt) {
-    return write(out, node, opt, "");
-  }
+  public <T extends Appendable> T write(T out, TDNode node, TDJSONOption opt) { return write(out, node, opt, ""); }
 
   @SneakyThrows
   public <T extends Appendable> T write(T out, TDNode node, TDJSONOption opt, String indentStr) {
-    node = node == null ? node : opt.applyFilters(node);
-    if (node == null) {
-      return (T)out.append("null");
-    }
+    if (node == null)
+      return (T) out.append("null");
 
     String childIndentStr = "";
     if (opt.hasIndent())
@@ -51,27 +47,28 @@ public class TDJSONWriter {
   @SneakyThrows
   <T extends Appendable> T writeMap(T out, TDNode node, TDJSONOption opt, String indentStr, String childIndentStr) {
     out.append('{');
-    if (node.getChildren() != null) {
-      for (int i = 0; i < node.getChildrenSize(); i++){
-        TDNode cn = node.getChild(i);
-        if (opt.hasIndent())
-          out.append('\n').append(childIndentStr);
+    for (int i = 0; i < node.getChildrenSize(); i++) {
+      TDNode cn = opt.applyFilters(node.getChild(i));
+      if (cn == null)
+        continue;
 
-        if (!StringUtil.isJavaIdentifier(cn.getKey()) || opt.alwaysQuoteName)  // Quote the key in case  it's not valid java identifier
-          writeQuotedString(out, cn.getKey(), opt.quoteChar);
-        else
-          out.append(cn.getKey());
-        out.append(":");
-        write(out, cn, opt, childIndentStr);
-        if (i < node.getChildrenSize() - 1) // No need "," for last entry
-          out.append(",");
-      }
+      if (opt.hasIndent())
+        out.append('\n').append(childIndentStr);
 
-      if (opt.hasIndent() && node.hasChildren())
-        out.append('\n').append(indentStr);
+      if (!StringUtil.isJavaIdentifier(cn.getKey()) || opt.alwaysQuoteName)  // Quote the key in case  it's not valid java identifier
+        writeQuotedString(out, cn.getKey(), opt.quoteChar);
+      else
+        out.append(cn.getKey());
+      out.append(":");
+      write(out, cn, opt, childIndentStr);
+      if (i < node.getChildrenSize() - 1) // No need "," for last entry
+        out.append(",");
     }
 
-    return (T)out.append('}');
+    if (opt.hasIndent() && node.hasChildren())
+      out.append('\n').append(indentStr);
+
+    return (T) out.append('}');
   }
 
   @SneakyThrows
