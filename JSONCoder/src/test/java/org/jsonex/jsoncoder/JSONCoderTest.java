@@ -28,6 +28,7 @@ import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.jsonex.core.util.ListUtil.listOf;
 import static org.jsonex.jsoncoder.fieldTransformer.FieldTransformer.*;
@@ -349,8 +350,7 @@ public class JSONCoderTest {
 
     JSONCoderOption opt = JSONCoderOption.ofIndentFactor(2);
 
-    opt.addFilterFor(TestBean2.class, include("enumField2", "testBean"));
-    opt.getSimpleFilterFor(TestBean2.class).addProperties("ints");
+    opt.addFilterFor(TestBean2.class, include("ints", "enumField2", "testBean", "strField"));
 
     opt.addFilterFor(TestBean.class, exclude("publicStrField"));
 
@@ -358,7 +358,7 @@ public class JSONCoderTest {
 
     String result = JSONCoder.encode(bean, opt);
     assertMatchesSnapshot(result);
-    assertTrue("shouldn't contain 'str1'", !result.contains("str1"));
+    assertTrue("should contain 'str1'", result.contains("str1"));
     assertTrue("should include 'testBean'", result.contains("testBean"));
     assertTrue("should include 'ints'", result.contains("ints"));
     assertTrue("should contain 'enumField2'", result.contains("enumField2"));
@@ -373,7 +373,7 @@ public class JSONCoderTest {
     opt.addFilterFor(TestBean2.class, mask("strField"));
     result = JSONCoder.encode(bean, opt);
     log("result(masked default) =" + result);
-    assertTrue("should include str1 hashCode and len'", result.contains("\"strField\":\"[masked:hash=3541024,len=4]\""));
+    assertTrue("should include str1 hashCode and len'", result.contains("\"strField\":\"hash:1682212197\""));
 
     opt.addSkippedClasses(TestBean.class);
     result = JSONCoder.encode(bean, opt);
@@ -477,6 +477,22 @@ public class JSONCoderTest {
     TestBean testBean = JSONCoder.global.decode(DecodeReq.of(TestBean.class).setJson(jsonStr).setNodePath("response/data"));
     assertEquals(2.0, testBean.getFloatField(), 0.0001);
     assertEquals("publicStrVal", testBean.publicStrField);
+  }
+
+  static class ClsWithTypeVar {
+    public List<Map<String, Number>> listOfMap = new ArrayList<>();
+    public AtomicReference<Map<String, Number>> refOfMap = new AtomicReference<>();
+    public <V> V getValue() { return (V)"abc"; }
+  }
+  @Test public void testFieldWithTypeVariable() {
+    ClsWithTypeVar bean = new ClsWithTypeVar();
+    bean.listOfMap.add(new MapBuilder("str1", 1).getMap());
+    bean.refOfMap.set(new MapBuilder("str1", 1).getMap());
+    String json = JSONCoder.global.encode(bean);
+    assertMatchesSnapshot(json);
+    ClsWithTypeVar bean1 = JSONCoder.global.decode(json, ClsWithTypeVar.class);
+    String json1 = JSONCoder.global.encode(bean1);
+    assertEquals(json, json1);
   }
 
   private void expectDecodeWithException(String str, Class<?> cls, String expectedError) {

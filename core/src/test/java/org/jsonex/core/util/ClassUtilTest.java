@@ -139,7 +139,7 @@ public class ClassUtilTest {
     try {
       prop.set(c, "str");
     } catch(InvokeRuntimeException e) {
-      assertEquals("field is not mutable: methodReadOnly,class:class org.jsonex.core.util.ClassUtilTest$C",
+      assertEquals("field is not mutable: methodReadOnly, class:class org.jsonex.core.util.ClassUtilTest$C",
           e.getMessage());
     }
 
@@ -151,14 +151,14 @@ public class ClassUtilTest {
     try {
       prop.get(c);
     } catch(InvokeRuntimeException e) {
-      assertEquals("field is not readable: methodSetOnly,class:class org.jsonex.core.util.ClassUtilTest$C",
+      assertEquals("field is not readable: methodSetOnly, class:class org.jsonex.core.util.ClassUtilTest$C",
           e.getMessage());
     }
 
     try {
       prop.set(c, null);
     } catch(InvokeRuntimeException e) {
-      assertEquals("error set value:methodSetOnly,class=class org.jsonex.core.util.ClassUtilTest$C,value=null",
+      assertEquals("error set value:methodSetOnly, class=class org.jsonex.core.util.ClassUtilTest$C,value=null",
           e.getMessage());
     }
   }

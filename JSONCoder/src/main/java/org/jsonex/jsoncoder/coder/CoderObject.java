@@ -12,19 +12,28 @@ package org.jsonex.jsoncoder.coder;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.jsonex.core.factory.InjectableInstance;
-import org.jsonex.core.util.*;
-import org.jsonex.jsoncoder.*;
-import org.jsonex.jsoncoder.fieldTransformer.FieldTransformer;
+import org.jsonex.core.util.BeanProperty;
+import org.jsonex.core.util.ClassUtil;
+import org.jsonex.core.util.StringUtil;
+import org.jsonex.jsoncoder.BeanCoderContext;
+import org.jsonex.jsoncoder.BeanCoderException;
+import org.jsonex.jsoncoder.ICoder;
+import org.jsonex.jsoncoder.JSONCoderOption;
+import org.jsonex.jsoncoder.fieldTransformer.FieldTransformer.FieldInfo;
 import org.jsonex.treedoc.TDNode;
 import org.jsonex.treedoc.json.TDJSONWriter;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.util.Date;
 import java.util.Map;
+import java.util.Objects;
+import java.util.function.Function;
 
-import static org.jsonex.core.util.LangUtil.orElse;
+import static org.jsonex.core.util.LangUtil.getIfInstanceOf;
+import static org.jsonex.core.util.ListUtil.removeLast;
 
 @Slf4j
 public class CoderObject implements ICoder<Object> {
@@ -59,16 +68,18 @@ public class CoderObject implements ICoder<Object> {
 
       // V3DAL will cause Lazy load exception, we have to catch it
       try {
-        FieldTransformer.FieldInfo fieldInfo =
-            orElse(opt.transformField(cls, obj, pd, ctx), () -> FieldTransformer.ofDefault().apply(obj, pd, ctx));
+        FieldInfo fieldInfo = new FieldInfo(pd.getName(), pd.getActualGenericType(type), pd.get(obj));
+        fieldInfo = opt.transformField(cls, fieldInfo, ctx);
 
         if (fieldInfo.getName() == null)  // Skipped
           continue;
 
         if (fieldInfo.getObj() != null) {
-          TDNode cn = ctx.encode(fieldInfo.getObj(), fieldInfo.getType(), target.createChild(pd.getName()));
+          Type fieldType =  getIfInstanceOf(fieldInfo.getType(), TypeVariable.class,
+              t -> ClassUtil.getActualTypeOfTypeVariable(t, type), Function.identity());
+          TDNode cn = ctx.encode(fieldInfo.getObj(), fieldType, target.createChild(pd.getName()));
           if (cn.getType() == TDNode.Type.SIMPLE && cn.getValue() == null)
-            ListUtil.removeLast(target.getChildren());
+            removeLast(target.getChildren());
         }
       } catch(Exception e) {
         opt.getWarnLogLevel().log(log, "warning during encoding", e);
@@ -129,7 +140,7 @@ public class CoderObject implements ICoder<Object> {
 
     for (TDNode nc : tdNode.getChildren()) {
       BeanProperty prop = pds.get(nc.getKey());
-      if (prop == null)  // Certain serializer does't follow java bean naming convention, the attribute name is capitalized
+      if (prop == null)  // Certain serializer does not follow java bean naming convention, the attribute name is capitalized
         prop = pds.get(StringUtil.lowerFirst(nc.getKey()));
 
       if (prop == null) {
@@ -165,9 +176,9 @@ public class CoderObject implements ICoder<Object> {
         continue;
       }
 
-      Type childType = prop.getGenericType();
+      Type childType = prop.getActualGenericType(type);
       Object child = ctx.decode(nc, childType, childTargetObj, nc.getKey());
-      if (childTargetObj != child)
+      if (!Objects.equals(childTargetObj, child))
         prop.set(result, child);
     }
     return result;

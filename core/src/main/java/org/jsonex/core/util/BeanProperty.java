@@ -14,10 +14,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
+import java.util.function.Function;
+
+import static org.jsonex.core.util.LangUtil.getIfInstanceOf;
 
 /**
  * Wrapper around class getter, setter and field to provide convenient access of a bean property so that clients don't
@@ -58,9 +58,9 @@ public class BeanProperty {
         return;
       }
     } catch(Exception e){
-      throw new InvokeRuntimeException("error set value:" + name + ",class=" + obj.getClass() + ",value=" + value, e);
+      throw new InvokeRuntimeException("error set value:" + name + ", class=" + obj.getClass() + ",value=" + value, e);
     }
-    throw new InvokeRuntimeException("field is not mutable: " + name + ",class:" + obj.getClass());
+    throw new InvokeRuntimeException("field is not mutable: " + name + ", class:" + obj.getClass());
   }
   
   public Object get(Object obj){
@@ -73,9 +73,9 @@ public class BeanProperty {
         return field.get(obj);
       }
     } catch(Exception e) {
-      throw new InvokeRuntimeException("error get value:" + name + ",class:" + obj.getClass(), e);
+      throw new InvokeRuntimeException("error get value:" + name + ", class:" + obj.getClass(), e);
     }
-    throw new InvokeRuntimeException("field is not readable: " + name + ",class:" + obj.getClass());
+    throw new InvokeRuntimeException("field is not readable: " + name + ", class:" + obj.getClass());
   }
   
   public <T extends Annotation> T getAnnotation(Class<T> cls) {
@@ -105,6 +105,12 @@ public class BeanProperty {
       return field.getGenericType();
     else
       return setter.getGenericParameterTypes()[0];
+  }
+
+  /** If the genericType is TypeVariable, it will resolve it with actual type. otherwise it's the same as getGenericType */
+  public Type getActualGenericType(Type clsType) {
+    return  getIfInstanceOf(getGenericType(), TypeVariable.class,
+        t -> ClassUtil.getActualTypeOfTypeVariable(t, clsType), Function.identity());
   }
   
   public Class<?> getType(){

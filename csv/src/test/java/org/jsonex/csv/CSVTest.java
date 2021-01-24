@@ -1,12 +1,14 @@
 package org.jsonex.csv;
 
+import lombok.extern.slf4j.Slf4j;
 import org.jsonex.core.charsource.ArrayCharSource;
 import org.jsonex.core.util.FileUtil;
 import org.jsonex.treedoc.TDNode;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 
+import static org.jsonex.snapshottest.Snapshot.assertMatchesSnapshot;
 import static org.junit.Assert.assertEquals;
+
 
 @Slf4j
 public class CSVTest {
@@ -17,7 +19,7 @@ public class CSVTest {
 
     CSVOption opt = new CSVOption().setFieldSep('|');
     String str = CSVWriter.get().writeAsString(node, opt);
-    log.info("str:" + str);
+    assertMatchesSnapshot(str);
     TDNode node1 = CSVParser.get().parse(str, opt);
     assertEquals(node, node1);
   }

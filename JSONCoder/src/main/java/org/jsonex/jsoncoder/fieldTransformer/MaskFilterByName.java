@@ -9,14 +9,14 @@
 
 package org.jsonex.jsoncoder.fieldTransformer;
 
-import org.jsonex.core.util.BeanProperty;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.jsonex.jsoncoder.BeanCoderContext;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 @SuppressWarnings("UnusedReturnValue")
 @Setter @Getter @Accessors(chain=true) @RequiredArgsConstructor(staticName = "of")
@@ -29,11 +29,11 @@ public class MaskFilterByName implements FieldTransformer {
   }
 
   @Override
-  public FieldInfo apply(Object obj, BeanProperty property, BeanCoderContext beanCoderContext) {
-    MaskStrategy strategy = fieldToStrategyMap.get(property.getName());
+  public FieldInfo apply(FieldInfo fieldInfo, BeanCoderContext beanCoderContext) {
+    MaskStrategy strategy = fieldToStrategyMap.get(fieldInfo.getName());
     if (strategy == null)
-      return null;
+      return fieldInfo;
 
-    return new FieldInfo(property.getName(), String.class, strategy.apply(property.get(obj)));
+    return fieldInfo.setObj(strategy.apply(fieldInfo.obj)).setType(String.class);
   }
 }

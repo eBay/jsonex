@@ -9,7 +9,6 @@
 
 package org.jsonex.jsoncoder.fieldTransformer;
 
-import org.jsonex.core.util.BeanProperty;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -26,14 +25,6 @@ public class SimpleFilter implements FieldTransformer {
   private Set<String> properties = new HashSet<>();
 
   public static SimpleFilter of() { return of(false); }
-  @Deprecated // Use FieldTransformer.exclude()
-  public static SimpleFilter exclude( String... props) {
-    return of().addProperties(props);
-  }
-  @Deprecated // Use FieldTransformer.include()
-  public static SimpleFilter include(String... props) {
-    return of(true).addProperties(props);
-  }
 
   private boolean isFieldSkipped(String field) {
     return isInclude() ? !properties.contains(field) : properties.contains(field);
@@ -50,9 +41,9 @@ public class SimpleFilter implements FieldTransformer {
   }
 
   @Override
-  public FieldInfo apply(Object o, BeanProperty property, BeanCoderContext beanCoderContext) {
-    if(isFieldSkipped(property.getName()))
+  public FieldInfo apply(FieldInfo fieldInfo, BeanCoderContext beanCoderContext) {
+    if(isFieldSkipped(fieldInfo.getName()))
       return new FieldInfo(null, null, null);
-    return null;
+    return fieldInfo;
   }
 }

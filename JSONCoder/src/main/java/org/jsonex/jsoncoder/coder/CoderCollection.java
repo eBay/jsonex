@@ -75,8 +75,6 @@ public class CoderCollection implements ICoder<Collection> {
         result.clear();
     }
 
-
-
     ctx.getNodeToObjectMap().put(tdNode, result);
 
     for (int i = 0; i < tdNode.getChildrenSize(); i++)

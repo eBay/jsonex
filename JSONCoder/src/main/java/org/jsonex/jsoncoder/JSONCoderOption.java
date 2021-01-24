@@ -16,10 +16,11 @@ import org.jsonex.core.factory.CacheThreadLocal;
 import org.jsonex.core.factory.InjectableFactory;
 import org.jsonex.core.type.Tuple;
 import org.jsonex.core.type.Tuple.Pair;
-import org.jsonex.core.util.BeanProperty;
+import org.jsonex.core.util.ClassUtil;
+import org.jsonex.core.util.ListUtil;
 import org.jsonex.jsoncoder.coder.*;
 import org.jsonex.jsoncoder.fieldTransformer.FieldTransformer;
-import org.jsonex.jsoncoder.fieldTransformer.SimpleFilter;
+import org.jsonex.jsoncoder.fieldTransformer.FieldTransformer.FieldInfo;
 import org.jsonex.treedoc.json.TDJSONOption;
 import org.slf4j.Logger;
 
@@ -27,8 +28,11 @@ import java.text.Format;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.jsonex.core.util.LangUtil.*;
+import static org.jsonex.core.util.ListUtil.listOf;
+import static org.jsonex.jsoncoder.fieldTransformer.FieldTransformer.exclude;
 
 @SuppressWarnings("UnusedReturnValue")
 @Accessors(chain=true)
@@ -38,8 +42,7 @@ public class JSONCoderOption {
     global.addCoder(CoderDate.get(), CoderEnum.get(), CoderXMLGregorianCalendar.get(), CoderAtomicInteger.get(),
         CoderBigInteger.get(), CoderClass.get(), CoderURI.get(), CoderURL.get());
 
-    global.skippedClasses.add(Format.class);
-
+    global.addSkippedClasses(Format.class);
     global.fallbackDateFormats.add("yyyy-MM-dd HH:mm:ss.SSS.Z");  //Just for backward compatibility.
     global.fallbackDateFormats.add("yyyy/MM/dd HH:mm:ss.SSS.Z");
     global.fallbackDateFormats.add("yyyy-MM-dd HH:mm:ss.SSS");
@@ -48,7 +51,9 @@ public class JSONCoderOption {
     global.fallbackDateFormats.add("yyyy-MM-dd");
     global.fallbackDateFormats.add("HH:mm:ss");
     
-    global.getDefaultFilter().addProperties("copy");  // DAO class has a getCopy() method
+    global
+        .addDefaultFilter(exclude("copy"))  // DAO class has a getCopy() method
+        .addFilterFor(AtomicReference.class, exclude("acquire", "opaque", "plain"));
   }
   private final JSONCoderOption parent;
   
@@ -187,17 +192,14 @@ public class JSONCoderOption {
     return parent != null && parent.isClassSkipped(cls);
   }
   
-  public FieldTransformer.FieldInfo transformField(
-      Class<?> cls, Object o, BeanProperty property, BeanCoderContext beanCoderContext) {
+  public FieldInfo transformField(Class<?> cls, FieldInfo fieldInfo, BeanCoderContext beanCoderContext) {
     for (Pair<Class<?>, FieldTransformer> filter : filters) {
       if (!filter._1.isAssignableFrom(cls))
         continue;
-      FieldTransformer.FieldInfo fieldInfo = filter._2.apply(o, property, beanCoderContext);
-      if (fieldInfo != null)
-        return fieldInfo;
+      fieldInfo = filter._2.apply(fieldInfo, beanCoderContext);
     }
     
-    return parent == null ? null : parent.transformField(cls, o, property, beanCoderContext);
+    return parent == null ? fieldInfo : parent.transformField(cls, fieldInfo, beanCoderContext);
   }
   
   @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -231,17 +233,9 @@ public class JSONCoderOption {
         return true;
     return parent != null && parent.isIgnoreSubClassFields(cls);
   }
-  
-  public SimpleFilter getDefaultFilter() { return getSimpleFilterFor(Object.class); }
-  public SimpleFilter getSimpleFilterFor(Class<?> cls) {
-    for (Pair<Class<?>, FieldTransformer> filter : filters) {
-      if (!(filter._2 instanceof SimpleFilter) || filter._1 != cls)
-        continue;
-      return (SimpleFilter) filter._2;
-    }
-    SimpleFilter result = SimpleFilter.of();
-    filters.add(0, Tuple.of(cls, result));
-    return result;
+
+  public JSONCoderOption addDefaultFilter(FieldTransformer filter) {
+    return addFilterFor(Object.class, filter, false);
   }
 
   public JSONCoderOption addFilterFor(Class<?> cls, FieldTransformer filter) {
@@ -256,6 +250,11 @@ public class JSONCoderOption {
 
   public JSONCoderOption addSkippedClasses(Class<?>... cls) {
     skippedClasses.addAll(Arrays.asList(cls));
+    return this;
+  }
+
+  public JSONCoderOption addSkippedClasses(String... cls) {
+    skippedClasses.addAll(ListUtil.map(listOf(cls), ClassUtil::forName));
     return this;
   }
 

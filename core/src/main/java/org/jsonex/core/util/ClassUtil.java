@@ -9,8 +9,8 @@
 
 package org.jsonex.core.util;
 
-import org.jsonex.core.type.Nullable;
 import lombok.SneakyThrows;
+import org.jsonex.core.type.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,12 +20,17 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static org.jsonex.core.util.ArrayUtil.indexOf;
+import static org.jsonex.core.util.ListUtil.listOf;
+
 @SuppressWarnings("ALL")
 public class ClassUtil {
   private static final Logger logger = LoggerFactory.getLogger(ClassUtil.class);
 
   public static final Type[] EMPTY_TYPE_ARRAY = new Type[0];
 
+  @SneakyThrows
+  public static Class<?> forName(String name) { return Class.forName(name); }
 
   @Deprecated  //Used only for testing, don't use in production code
   @SneakyThrows
@@ -334,11 +339,11 @@ public class ClassUtil {
   }
 
   public static @Nullable Type[] getGenericTypeActualParams(@Nullable Type type) {
-    if(type == null || type instanceof Class)
+    if (type == null || type instanceof Class)
       return null;
-    if(type instanceof ParameterizedType)
-      return ((ParameterizedType)type).getActualTypeArguments();
-    throw new RuntimeException("Unexpected type:" + type);
+    if (type instanceof ParameterizedType)
+      return ((ParameterizedType) type).getActualTypeArguments();
+    throw new RuntimeException("Unexpected type:" + type + "; class:" + type.getClass());
   }
 
   public static Type[] getGenericTypeActualParamsForInterface(Type type, Class<?> intf) {
@@ -347,6 +352,26 @@ public class ClassUtil {
       if (getGenericClass(t) == intf)
         return getGenericTypeActualParams(t);
     return EMPTY_TYPE_ARRAY;
+  }
+
+  /**
+   *  Resolve actual type of TypeVariable.
+   *  If typeVar.genericDeclaration is Class, expect clsType to be
+   *  ParameterizedType, and it will match the variable name with the index of ParameterizedType.
+   *  If typeVar.genericDeclaration is Executable, there's no way to get the actual type, the best guess
+   *  is to return the bound for the Executable generic type declaration
+   */
+  public static Type getActualTypeOfTypeVariable(TypeVariable typeVar, Type clsType) {
+    if (typeVar.getGenericDeclaration() instanceof Class && clsType instanceof ParameterizedType)
+          return getActualTypeOfTypeVariable(typeVar, (Class) typeVar.getGenericDeclaration(), (ParameterizedType) clsType);
+    return typeVar.getBounds()[0];
+  }
+
+  private static Type getActualTypeOfTypeVariable(TypeVariable typeVar, Class cls, ParameterizedType clsType) {
+    int idx = indexOf(cls.getTypeParameters(), typeVar);
+    Assert.isTrue(idx >= 0, "Can't find the index of the typeVar" + typeVar + "; in class:" + cls +
+        "; with declared parameters: " + listOf(cls.getTypeParameters()));
+    return getGenericTypeActualParams(clsType)[idx];
   }
 
   public static List<Class<?>> getAllInterface(Class<?> cls) {

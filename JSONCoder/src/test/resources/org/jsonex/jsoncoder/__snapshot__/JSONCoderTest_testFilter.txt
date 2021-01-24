@@ -1,4 +1,5 @@
 {
+  "strField":"str1",
   "ints":[
     1,
     2
