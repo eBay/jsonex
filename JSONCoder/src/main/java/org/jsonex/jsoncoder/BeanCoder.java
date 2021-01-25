@@ -43,11 +43,6 @@ public class BeanCoder {
   public final static InjectableInstance<BeanCoder> it = InjectableInstance.of(BeanCoder.class);
   public static BeanCoder get() { return it.get(); }
 
-  private final static int MAX_OBJECTS = 10_000;
-  private final static int MAX_DEPTH = 50;
-  public final static String ID_KEY = "$id";
-  private final static String REF_KEY = "$ref";
-
   // Convenient utility method
   public TDNode encode(Object obj) { return encode(obj, new BeanCoderContext(JSONCoderOption.global), null); }
   public TDNode encode(Object obj, BeanCoderContext context, Type type) { return _encode(obj, context.reset(), type, new TreeDoc().getRoot()); }
@@ -102,21 +97,21 @@ public class BeanCoder {
         if (p >= 0) {
           return setRef(target, StringUtil.appendRepeatedly(new StringBuilder(), p + 1, "../").toString());
         }
-      } catch(ClassCastException e) {
-        // Workaround for some class that breaks equals() contract by doing caste before type check
+      } catch(ClassCastException | IllegalArgumentException e) {
+        // Workaround for some class that breaks equals() contract by doing caste before type check, or asset the type
         // We will ignore this error
       }
 
-      if (ctx.objToNodeMap.size() > MAX_OBJECTS || ctx.objectPath.size() > MAX_DEPTH)
+      if (ctx.objectCount++ > opt.maxObjects || ctx.objectPath.size() > opt.maxDepth)
         return target.setValue("[TRIMMED_DUE_TO_TOO_MANY_OBJECT]");
 
       TDNode orgResult = ctx.objToNodeMap.get(eqWrapper);
       if(opt.dedupWithRef && orgResult != null) {
         if (orgResult.getType() == TDNode.Type.MAP) {
-          Integer id = (Integer) orgResult.getChildValue(ID_KEY);
+          Integer id = (Integer) orgResult.getChildValue(TDNode.ID_KEY);
           if (id == null) {  // This is the first reference. Only if there's a reference, the original map will display the hash value
             id = ctx.getNextId();
-            orgResult.createChild(ID_KEY).setValue(id);
+            orgResult.createChild(TDNode.ID_KEY).setValue(id);
           }
           return setRef(target, "#" + id);
         } else  // It's Array
@@ -152,7 +147,7 @@ public class BeanCoder {
   }
 
   private static TDNode setRef(TDNode node, String ref) {
-    node.setType(TDNode.Type.MAP).createChild(REF_KEY).setValue(ref);
+    node.setType(TDNode.Type.MAP).createChild(TDNode.REF_KEY).setValue(ref);
     return node;
   }
 
@@ -170,7 +165,7 @@ public class BeanCoder {
     Class<?> cls = ClassUtil.getGenericClass(type);
 
     try{
-      Object refVal = tdNode.getChildValue(REF_KEY);
+      Object refVal = tdNode.getChildValue(TDNode.REF_KEY);
       if (refVal instanceof String) {
         String ref = (String)refVal;
         TDNode target = tdNode.getByPath(ref);

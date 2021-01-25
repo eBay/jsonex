@@ -32,6 +32,9 @@ import static org.jsonex.core.util.ListUtil.last;
 // @Getter @Setter
 @Accessors(chain = true)
 public class TDNode {
+  public final static String ID_KEY = "$id";
+  public final static String REF_KEY = "$ref";
+
   public enum Type { MAP, ARRAY, SIMPLE }
   @Getter TreeDoc doc;
   @Getter @Setter TDNode parent;

@@ -170,8 +170,17 @@ public class TDJSONParser {
         node.createChild(i + "").setValue(key);
       else {
         TDNode childNode = parse(src, opt, node.createChild(key), false);
-        if (opt.KEY_ID.equals(key) && childNode.getType() == TDNode.Type.SIMPLE)
-          node.getDoc().getIdMap().put(childNode.getValue().toString(), node);
+        if (opt.KEY_ID.equals(key) && childNode.getType() == TDNode.Type.SIMPLE) {
+          String id = childNode.getValue().toString();
+          if (opt.getDocId() != null) {
+            id += "_" + opt.getDocId();
+            childNode.setValue(id);
+          }
+          node.getDoc().getIdMap().put(id, node);
+        } else if (TDNode.REF_KEY.equals(key) && childNode.getType() == TDNode.Type.SIMPLE) {
+          if (opt.getDocId() != null)
+            childNode.setValue(childNode.getValue() + "_" + opt.getDocId());
+        }
       }
       i++;
     }

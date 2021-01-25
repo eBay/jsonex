@@ -37,8 +37,16 @@ public class CoderCollection implements ICoder<Collection> {
     if (actualTypeParameters != null)
       childType = actualTypeParameters[0];
 
-    for (Object o1 : (Collection<?>)obj)
-      ctx.encode(o1, childType, target.createChild(null));
+    try {
+      int i = 0;
+      for (Object o1 : (Collection<?>) obj) {
+        ctx.encode(o1, childType, target.createChild(null));
+        if (i++ > ctx.getOption().getMaxElementsPerNode())
+          break;
+      }
+    } catch(ConcurrentModificationException e) {
+      // Ignore, some collection will be changed during serialization, such as class loader
+    }
 
     return target;
   }

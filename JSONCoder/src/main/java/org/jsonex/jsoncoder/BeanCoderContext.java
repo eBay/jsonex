@@ -26,6 +26,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class BeanCoderContext {
   private int nextId = 1;   // The next id for $ref
+  int objectCount = 0;
   @Getter final JSONCoderOption option;
 
   /**

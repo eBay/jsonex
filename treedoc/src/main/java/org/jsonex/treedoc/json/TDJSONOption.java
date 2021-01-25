@@ -35,6 +35,13 @@ public class TDJSONOption {
   char quoteChar = '"';
   String indentStr = "";
 
+  /**
+   * if this is set, all the id in $id and $ref will be suffixed with "_" + docId, this is to avoid collision when merge
+   * multiple docs as stream
+   */
+  String docId = null;
+  public TDJSONOption setDocId(int docId) { this.docId = "" + docId; return this; }
+
   /** Node filters, if it returns null, node will be skipped */
   List<NodeFilter> nodeFilters = new ArrayList<>();
 

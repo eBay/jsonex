@@ -175,6 +175,8 @@ public class TDJsonParserTest {
     assertEquals(str1, node.toString());
   }
 
+  private final static String EXPECTED_STREAM_MERGE_RESULT =
+      "[{a: 1, obj: {$id: '1_0'}, ref: {$ref: '#1_0'}}, {b: 2, obj: {$id: '1_1'}, ref: {$ref: '#1_1'}}, 'a:1', 'b:2']";
   @Test public void testStream() {
     ReaderCharSource reader = new ReaderCharSource(loadResource(this.getClass(), "stream.json"));
     List<TDNode> nodes = new ArrayList<>();
@@ -184,22 +186,23 @@ public class TDJsonParserTest {
     log.info("testStream=" + node.toString());
     assertEquals("1", node.getChild(1).getKey());
     assertEquals(node.getDoc(), node.getChild(1).getChild(0).getDoc());
-    assertEquals("[{a: 1}, {b: 2}, 'a:1', 'b:2']", node.toString());
+    assertEquals(EXPECTED_STREAM_MERGE_RESULT, node.toString());
   }
 
   @Test public void testStreamAsSingleDoc() {
     ReaderCharSource reader = new ReaderCharSource(loadResource(this.getClass(), "stream.json"));
     TreeDoc doc = TreeDoc.ofArray();
+    int docId = 0;
     while(reader.skipSpacesAndReturnsAndCommas())
-      TDJSONParser.get().parse(reader, new TDJSONOption(), doc.getRoot().createChild());
+      TDJSONParser.get().parse(reader, new TDJSONOption().setDocId(docId++), doc.getRoot().createChild());
     TDNode node = doc.getRoot();
     log.info("testStream=" + node.toString());
-    assertEquals("[{a: 1}, {b: 2}, 'a:1', 'b:2']", node.toString());
+    assertEquals(EXPECTED_STREAM_MERGE_RESULT, node.toString());
 
     TreeDoc docFirstElement = node.getDoc().retain(node.getChild(0));
     node = docFirstElement.getRoot();
     log.info("testStream=" + node.toString());
     assertEquals("root", node.getKey());
-    assertEquals("{a: 1}", node.toString());
+    assertEquals("{a: 1, obj: {$id: '1_0'}, ref: {$ref: '#1_0'}}", node.toString());
   }
 }

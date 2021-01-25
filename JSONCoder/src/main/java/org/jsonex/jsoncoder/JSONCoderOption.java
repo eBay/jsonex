@@ -17,7 +17,6 @@ import org.jsonex.core.factory.InjectableFactory;
 import org.jsonex.core.type.Tuple;
 import org.jsonex.core.type.Tuple.Pair;
 import org.jsonex.core.util.ClassUtil;
-import org.jsonex.core.util.ListUtil;
 import org.jsonex.jsoncoder.coder.*;
 import org.jsonex.jsoncoder.fieldTransformer.FieldTransformer;
 import org.jsonex.jsoncoder.fieldTransformer.FieldTransformer.FieldInfo;
@@ -32,6 +31,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.jsonex.core.util.LangUtil.*;
 import static org.jsonex.core.util.ListUtil.listOf;
+import static org.jsonex.core.util.ListUtil.map;
 import static org.jsonex.jsoncoder.fieldTransformer.FieldTransformer.exclude;
 
 @SuppressWarnings("UnusedReturnValue")
@@ -56,7 +56,11 @@ public class JSONCoderOption {
         .addFilterFor(AtomicReference.class, exclude("acquire", "opaque", "plain"));
   }
   private final JSONCoderOption parent;
-  
+
+  @Getter @Setter int maxObjects = 10_000;
+  @Getter @Setter int maxDepth = 30;
+  @Getter @Setter int maxElementsPerNode = 2000;
+
   /**
    * If true, when convert from an java bean, the readonly field will be ignored
    */
@@ -124,6 +128,7 @@ public class JSONCoderOption {
   @Getter @Setter boolean errorOnUnknownProperty;
   
   @Getter private final Set<Class<?>> skippedClasses = new HashSet<>();
+  @Getter private final Set<String> skippedPackages = new HashSet<>();
   
   //The class in this list, subclass field will be ignored.
   @Getter private final Set<Class<?>> ignoreSubClassFieldsClasses = new HashSet<>();
@@ -186,6 +191,11 @@ public class JSONCoderOption {
   public boolean isClassSkipped(Class<?> cls) {
     for (Class<?> skip : skippedClasses) {
       if (skip.isAssignableFrom(cls))
+        return true;
+    }
+
+    for (String pkg : skippedPackages) {
+      if (cls.getPackage() != null && cls.getPackage().getName().startsWith(pkg))
         return true;
     }
     
@@ -254,7 +264,12 @@ public class JSONCoderOption {
   }
 
   public JSONCoderOption addSkippedClasses(String... cls) {
-    skippedClasses.addAll(ListUtil.map(listOf(cls), ClassUtil::forName));
+    skippedClasses.addAll(map(listOf(cls), ClassUtil::forName));
+    return this;
+  }
+
+  public JSONCoderOption addSkippedPackages(String... pkgs) {
+    skippedPackages.addAll(listOf(pkgs));
     return this;
   }
 

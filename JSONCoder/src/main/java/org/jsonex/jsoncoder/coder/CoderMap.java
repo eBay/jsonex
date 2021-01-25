@@ -57,9 +57,12 @@ public class CoderMap implements ICoder<Map> {
         || opt.isAlwaysMapKeyAsString()) {
       target.setType(TDNode.Type.MAP);
       // Handle it as Map and put the key as String key
+      int i = 0;
       for (Map.Entry<?, ?> entry : map.entrySet()) {
         String key = String.valueOf(entry.getKey());
         ctx.encode(entry.getValue(), childValueType, target.createChild(key));
+        if (i++ > ctx.getOption().getMaxElementsPerNode())
+          break;
       }
       return target;
     }
@@ -70,10 +73,13 @@ public class CoderMap implements ICoder<Map> {
     if (map.entrySet() != null) {
       target.setType(TDNode.Type.ARRAY);
       TDNode child = target.createChild(null);
+      int i = 0;
       for (Map.Entry<?, ?> entry : map.entrySet()) {
         Map<String, Object> entryMap = new LinkedHashMap<>(2);//NOPMD
         ctx.encode(entry.getKey(), childKeyType, child.createChild("key"));
         ctx.encode(entry.getValue(), childValueType, child.createChild("value"));
+        if (i++ > ctx.getOption().getMaxElementsPerNode())
+          break;
       }
     }
 

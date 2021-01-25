@@ -10,6 +10,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.jsonex.core.util.LangUtil.doIfNotNull;
+import static org.jsonex.core.util.ListUtil.mapKeys;
+
 @Accessors(chain = true) @Setter @Getter @RequiredArgsConstructor
 public class TreeDoc {
   final Map<String, TDNode> idMap = new HashMap<>();
@@ -40,17 +43,25 @@ public class TreeDoc {
   /**
    * Create a TreeDoc with array root node contains the input nodes. This method will mutate the input nodes without
    * copying them. So the original Treedoc and parent associated with nodes will be obsoleted.
-   * For idMap merge, if there's duplicated keys, later one will override previous one.
+   * For idMap merge, all the id will be reassigned as id + "_" + docId to avoid collision.
    */
   public static TreeDoc merge(Collection<TDNode> nodes) {
     TreeDoc result = new TreeDoc();
     result.root.type = TDNode.Type.ARRAY;
+    int docId = 0;
     for (TDNode node : nodes) {
       node.setKey(null);
-      result.idMap.putAll(node.doc.idMap);
+      final int lId = docId;
+      result.idMap.putAll(mapKeys(node.doc.idMap, k -> k + "_" + lId));
+      node.foreach(n -> {
+        n.doc = result;
+        doIfNotNull(n.getChild(TDNode.REF_KEY), nRef -> nRef.value += "_" + lId);
+        doIfNotNull(n.getChild(TDNode.ID_KEY), nRef -> nRef.value += "_" + lId);
+      });
       result.root.addChild(node);
+      docId ++;
     }
-    result.root.foreach(n -> n.doc = result);
+
     return result;
   }
 }
