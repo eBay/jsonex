@@ -16,6 +16,8 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import static org.jsonex.core.util.LangUtil.safe;
+
 /**
  * A collection of utilities related to Collection classes. Many methods here are a better alternative
  * to Java8 stream with more concise expression
@@ -103,7 +105,7 @@ public class ListUtil {
       return null;
     Map<TK, TV> result = new HashMap<>();
     for (Map.Entry<? extends K, ? extends V> entry : source.entrySet())
-      result.put(LangUtil.safe(entry.getKey(), keyFunc), LangUtil.safe(entry.getValue(), valFunc));
+      result.put(safe(entry.getKey(), keyFunc), safe(entry.getValue(), valFunc));
     return result;
   }
 
@@ -350,10 +352,10 @@ public class ListUtil {
   }
 
   /** build a copy of mutable Set whose content will be independent with original array once created */
-  public static <T> Set<T> setOf(T... e) { return new LinkedHashSet<>(Arrays.asList(e)); }
+  public static <T> Set<T> setOf(T... e) { return e == null ? null : new LinkedHashSet<>(Arrays.asList(e)); }
 
   /** build a copy of mutable list whose content will be independent with original array once created */
-  public static <T> List<T> listOf(T... e) { return new ArrayList<>(Arrays.asList(e)); }
+  public static <T> List<T> listOf(T... e) { return e == null ? null : new ArrayList<>(Arrays.asList(e)); }
 
   public static <K, V, M extends Map<K, V>> M mergeWith(M target, Map<? extends K, ? extends V> source,
       BiFunction<? super V, ? super V, ? extends V> mergeFunc) {
