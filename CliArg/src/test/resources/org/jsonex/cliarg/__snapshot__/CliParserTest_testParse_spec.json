@@ -56,9 +56,9 @@
     }
   ],
   "requiredParams":[
-    "opt",
+    "strParam",
     "numParam",
-    "strParam"
+    "opt"
   ],
   "usage":"TestArg1 -o {opt} [-i {optInt}] [--noShortName {noShortName}] [--arrayArg {arrayArg}] <strParam> <numParam> [point]"
 }

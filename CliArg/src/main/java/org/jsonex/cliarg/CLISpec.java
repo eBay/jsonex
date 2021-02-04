@@ -44,7 +44,7 @@ public class CLISpec<T> {
   int firstOptionalIndex = Integer.MAX_VALUE;
   List<Param> optionParams = new ArrayList<>();
   List<Param> indexedParams = new ArrayList<>();
-  Set<String> requiredParams = new HashSet<>();
+  Set<String> requiredParams = new LinkedHashSet<>();
 
   @SneakyThrows
   public CLISpec(Class<T> cliCls) {

@@ -31,8 +31,8 @@ public class CLIParser<T> {
   int argIndex;
   int paramIndex;
   List<String> extraArgs = new ArrayList<>();
-  Map<String, String> errorMessages = new HashMap<>();
-  final Set<String> parsedParam = new HashSet<>();
+  Map<String, String> errorMessages = new LinkedHashMap<>();
+  final Set<String> parsedParam = new LinkedHashSet<>();
 
   @SneakyThrows
   public CLIParser(CLISpec<T> spec, String[] args, int argIndex) {
@@ -41,7 +41,7 @@ public class CLIParser<T> {
 
   public CLIParser(CLISpec<T> spec, String[] args, int argIndex, T target) {
     this.spec = spec;
-    this.missingParams = new HashSet<>(spec.requiredParams);
+    this.missingParams = new LinkedHashSet<>(spec.requiredParams);
     this.args = args;
     this.argIndex = argIndex;
     this.target = target;
