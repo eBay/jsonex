@@ -119,7 +119,6 @@ public class ListUtil {
     return map(source, keyFunc, Function.identity());
   }
 
-
   /**
    * The list should contain Long values. Otherwise ClassCastException will be thrown.
    */

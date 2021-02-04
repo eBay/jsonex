@@ -23,8 +23,7 @@ import lombok.SneakyThrows;
 
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 import static org.jsonex.core.util.ClassUtil.isSimpleType;
 import static org.jsonex.core.util.StringUtil.toTrimmedStr;
@@ -41,6 +40,10 @@ public class CoderMap implements ICoder<Map> {
     JSONCoderOption opt = ctx.getOption();
 
     Map<?,?> map = (Map<?,?>)obj;
+    if (!(map instanceof SortedMap) && ! (map instanceof LinkedHashMap) && ! (map instanceof EnumMap)) {
+      map = new TreeMap<>(map);  // Due to instability of map iterator, we copy it to TreeMap to make it in stable order.
+    }
+
     Type[] actualTypeParameters = ClassUtil.getGenericTypeActualParams(type);
 
     Type childKeyType = null;
