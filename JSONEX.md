@@ -1,14 +1,14 @@
-# JSONEX Proposal
+# JSONex Specification
 
 ## Overview
-JSON has become a popular format for data serialization and configuration, but due to the constrains from the original standard, it becomes painful to be used for configuration. Thus people create different kinds of similar alternative such as YAML. We still feel JSON is the right fit for configuration with some minor extensions, thus we propose an extended JSON format **JSONEX**, which is supported by this JSONCoder library. 
+JSON is a popular format for data serialization and configuration, but due to the constraints from the original standard, it becomes painful to be used for configuration. Thus, different kinds of similar alternative we created, such as YAML and TOML. With many advantages of JSON format such as simplicity, self-explanatory and compatibility of Javascript syntax, We still feel JSON is the right fit for configuration with some minor extensions, thus we propose an extended JSON format **JSONex**, which is supported by Jsonex libraries in both [Java](https://github.com/eBay/jsonex) and [TypeScript](https://github.com/treedoc/treedoc_ts).
 
 ## Issues with JSON
-* **Mandatory quote for keys:** This is un-necessary redundant data just to waste spaces and bandwidth
+* **Mandatory quote for keys:** This is un-necessary redundant data just to waste spaces and bandwidth and make it harder to write and read
 * **Only double quote (") can be used:** Not like javascript can use single quote (') or (`) as quote, with this flexibility, lots of escapes can be eliminated
-* **No comments Support:** That's the most complained issue as configuration
+* **No comments Support:** That's the most complained issue as a configuration format
 * **Does not support multi-line String literal**: As configuration, we often need to embedded structured text
-* **No comma allowed at end of last element:**: This causes many of merge issues and make comment out a line difficult. In javascript, this is allowed
+* **No comma allowed at end of last element**: This causes many of merge issues and make comment out a single line difficult. In javascript, this is allowed
 
 ## Proposal
 To solve the above limitations, we propose **JSONEX** with following extensions
@@ -57,4 +57,10 @@ line2`,
 }
 ```
 
+## Other similar effort
+- [Json5](https://json5.org/)
+- [Hjson](https://hjson.github.io/)
+
+## See JSONex in a live viewer
+- [TreeDocViewer](http://treedoc.org)
 

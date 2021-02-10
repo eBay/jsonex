@@ -2,9 +2,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.jsonex</groupId>
+  <groupId>org.jsonex</groupId>
   <artifactId>jcParent</artifactId>
-  <version>0.1.10</version>
+  <version>0.1.17</version>
   <packaging>pom</packaging>
   <name>JSONCoder Parent</name>
   <description>JSONCoder Parent</description>
@@ -15,6 +15,8 @@
     <module>treedoc</module>
     <module>JSONCoder</module>
     <module>csv</module>
+    <module>CliArg</module>
+    <module>SnapshotTest</module>
   </modules>
 
   <properties>
@@ -62,6 +64,16 @@
       <dependency>
         <groupId>${project.groupId}</groupId>
         <artifactId>treedoc</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>JSONCoder</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>SnapshotTest</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>

@@ -1,0 +1,3 @@
+Snapshot(org.jsonex.snapshottest.SnapshotTest_testSnapshot_test) and actual mismatch. The actual is record in file:
+file:///src/test/resources/org/jsonex/snapshottest/__snapshot__/SnapshotTest_testSnapshot_test.txt.tmp
+Please review the difference. If the change is expected, please override the snapshot file with the tmp file.

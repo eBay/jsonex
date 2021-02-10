@@ -1,0 +1,22 @@
+{
+  "strField":"str1",
+  "ints":[
+    1,
+    2
+  ],
+  "enumField2":12345,
+  "testBean":{
+    "fieldInBaseClass":"Overridden Value",
+    "treeMap":{},
+    "linkedList1":[],
+    "intField":0,
+    "floatField":0.0,
+    "charField":"\u0000",
+    "booleanField":false,
+    "strField":"str2",
+    "readonlyField":"This's a readonly field",
+    "atomicInteger":100,
+    "publicLinkedList":[],
+    "publicTreeMap":{}
+  }
+}
