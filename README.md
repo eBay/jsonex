@@ -44,7 +44,7 @@ Please refer the unit test class for more detailed usage patterns:
 
 ## Usage
 
-1. Maven Dependencies
+- Maven Dependencies
     ```xml
      <dependency>
        <groupId>org.jsonex</groupId>
@@ -53,14 +53,15 @@ Please refer the unit test class for more detailed usage patterns:
      </dependency>
     ````
     You can get current version by searching [maven central](https://search.maven.org/search?q=g:org.jsonex)
-2. Simple Serialization / Deserialization
+
+- Simple Serialization / Deserialization
     ```java
       // serialization
       JSONCoder.global.encode(o)
       // de-serialization
       SomeClass obj = JSONCoder.global.decode(str, SomeClass.class);
     ```
-3. Filter out fields and classes
+- Filter out fields and classes
     ```java
    JSONCoderOption opt = new JSONCoderOption();
     // For TestBean2 and it's sub-classes, only include field: "enumField2", "testBean"
@@ -72,25 +73,29 @@ Please refer the unit test class for more detailed usage patterns:
     // Exclude certain classes
     opt.addSkippedClasses(SomeExcludedClass.class);
     String result = JSONCoder.encode(bean, opt);
-
     ```
-4. Deserialize with generic types
+- Mask out certain fields: for privacy reason, quite often when we serialize an object, we need to maskout certain fields such as emailAddress, here's example to do that:
+  ```java
+  String result = JSONCoder.encode(bean, JSONCoderOption.ofIndentFactor(2).addFilterFor(SomeBean.class, mask("field1", "field2")));
+  ```
+   
+- Deserialize with generic types
     ```java
     String str = "['str1', 'str2', 'str3']";
     List<String> result = JSONCoder.global.decode(new DecodeReq<List<String>>(){}.setSource(str));
     ```
-5. Deserialize and merge to existing object (Incremental decode)
+- Deserialize and merge to existing object (Incremental decode)
     ```java
     TestBean bean = JSONCoder.global.decodeTo(jsonStr, bean);
     ```
-6. Set custom Quote and custom indentations
+- Set custom Quote and custom indentations
     ```java
     JSONCoderOption opt = new JSONCoderOption();
     opt.getJsonOption().setQuoteChar('`');
     opt.getJsonOption().setIndentFactor(2);
     String jsonStr = JSONCoder.global.encode(someObj, opt);
     ```
-7. Register custom coder for certain classes
+- Register custom coder for certain classes
     ```java
     public class CoderBigInteger implements ICoder<BigInteger>{
       public Class<BigInteger> getType() {return BigInteger.class;}

@@ -206,6 +206,7 @@ public class JSONCoderOption {
     for (Pair<Class<?>, FieldTransformer> filter : filters) {
       if (!filter._1.isAssignableFrom(cls))
         continue;
+      // TODO: Fix when to stop the filter chain strategy
       fieldInfo = filter._2.apply(fieldInfo, beanCoderContext);
     }
     

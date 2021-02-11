@@ -370,10 +370,9 @@ public class JSONCoderTest {
     log("result(masked) =" + result);
     assertTrue("should include str1 hashCode'", result.contains("\"strField\":\"hash:3541024\""));
 
-    opt.addFilterFor(TestBean2.class, mask("strField"));
-    result = JSONCoder.encode(bean, opt);
+    result = JSONCoder.encode(bean, JSONCoderOption.ofIndentFactor(2).addFilterFor(TestBean2.class, mask("strField")));
     log("result(masked default) =" + result);
-    assertTrue("should include str1 hashCode and len'", result.contains("\"strField\":\"hash:1682212197\""));
+    assertTrue("should include str1 hashCode and len'", result.contains("\"strField\":\"[Masked:len=4,360820]\""));
 
     opt.addSkippedClasses(TestBean.class);
     result = JSONCoder.encode(bean, opt);

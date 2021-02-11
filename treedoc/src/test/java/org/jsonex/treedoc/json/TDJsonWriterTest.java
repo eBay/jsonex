@@ -19,7 +19,7 @@ public class TDJsonWriterTest {
     log.info("testWriterWithValueMapper: str=\n" + str);
     node = TDJSONParser.get().parse(str);
     assertNull(node.getValueByPath("/data/0/$id"));
-    assertEquals("<Masked:len=10>", node.getValueByPath("/data/0/ip"));
-    assertEquals("{Masked:size=2}", node.getValueByPath("/data/0/address"));
+    assertEquals("[Masked:len=10,aac1cfe2]", node.getValueByPath("/data/0/ip"));
+    assertEquals("{Masked:len=2}", node.getValueByPath("/data/0/address"));
   }
 }
