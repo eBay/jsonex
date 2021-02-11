@@ -8,6 +8,7 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
+import static java.lang.String.format;
 import static org.jsonex.core.util.ListUtil.exists;
 
 /** if it returns null, node will be skipped */
@@ -46,9 +47,11 @@ public interface NodeFilter extends Function<TDNode, TDNode> {
     }
     private String getMaskStr(TDNode n) {
       switch (n.getType()) {
-        case SIMPLE: return "<Masked:len=" + Objects.toString(n.getValue()).length()+ ">";
-        case MAP: return "{Masked:size=" + n.getChildrenSize() + "}";
-        case ARRAY: return "[Masked:length=" + n.getChildrenSize() + "]";
+        case SIMPLE:
+          String str = Objects.toString(n.getValue());
+          return str.isEmpty() ? str : format("[Masked:len=%d,%x]", str.length(), str.hashCode());
+        case MAP: return "{Masked:len=" + n.getChildrenSize() + "}";
+        case ARRAY: return "[Masked:len=" + n.getChildrenSize() + "]";
       }
       return "[Masked]";  // Shouldn't happen
     }
