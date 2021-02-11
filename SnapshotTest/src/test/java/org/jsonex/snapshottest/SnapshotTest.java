@@ -3,11 +3,11 @@ package org.jsonex.snapshottest;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.jsonex.core.util.FileUtil;
-import org.jsonex.jsoncoder.fieldTransformer.FieldTransformer;
 import org.junit.Test;
 
 import java.io.File;
 
+import static org.jsonex.jsoncoder.fieldTransformer.FieldTransformer.exclude;
 import static org.jsonex.snapshottest.Snapshot.assertMatchesSnapshot;
 import static org.junit.Assert.*;
 
@@ -59,7 +59,7 @@ public class SnapshotTest {
 
   @Test public void testWithCustomOptions() {
     SnapshotOption opt = SnapshotOption.of().mutateJsonCoderOption(o ->
-        o.addFilterFor(TestCls.class, FieldTransformer.exclude("att2")));
+        o.addFilterFor(TestCls.class, exclude("att2")));
     assertMatchesSnapshot("testCls", new TestCls("val1", "val2"), opt);
     assertMatchesSnapshot("testCls", new TestCls("val1", "val2_updated"), opt);
   }
