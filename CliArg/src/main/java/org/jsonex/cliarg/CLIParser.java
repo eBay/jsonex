@@ -112,7 +112,7 @@ public class CLIParser<T> {
   private Object parseValue(Param param, String value)  {
     Class<?> cls = param.property.getType();
     try {
-      Object result = ClassUtil.stringToSimpleObject(value, cls, new BeanConvertContext());
+      Object result = ClassUtil.toSimpleObject(value, cls, new BeanConvertContext());
       if (result != null)
         return result;
 

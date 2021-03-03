@@ -13,6 +13,7 @@ import org.jsonex.core.charsource.ArrayCharSource;
 import org.jsonex.core.charsource.CharSource;
 import org.jsonex.core.charsource.ReaderCharSource;
 import org.jsonex.core.factory.InjectableInstance;
+import org.jsonex.core.util.ClassUtil;
 import org.jsonex.treedoc.TDNode;
 import org.jsonex.treedoc.TreeDoc;
 
@@ -69,17 +70,7 @@ public class TDJSONParser {
         term = node.getParent().getType() == TDNode.Type.ARRAY ? ",\n\r]" : ",\n\r}";
 
       String str = src.readUntil(term, 0, Integer.MAX_VALUE).trim();
-      if ("null".equals(str))
-        return node.setValue(null);
-      if ("true".equals(str))
-        return node.setValue(true);
-      if ("false".equals(str))
-        return node.setValue(false);
-      if (str.startsWith("0x") || str.startsWith(("0X")))
-        return node.setValue(parseNumber(str.substring(2), true));
-      if (c == '-' || c == '+' || c == '.' || (c >= '0' && c <= '9'))
-        return node.setValue(parseNumber(str, false));
-      return node.setValue(str);
+      return node.setValue(ClassUtil.toSimpleObject(str));
     } finally {
       node.setEnd(src.getBookmark());
     }
@@ -211,24 +202,5 @@ public class TDJSONParser {
       }
     }
     return node;
-  }
-
-  Object parseNumber(String str, boolean isHex) {
-    if (!isHex && str.indexOf('.') >= 0) {
-      try {
-        return Double.parseDouble(str);
-      } catch(NumberFormatException e) {
-        return str;
-      }
-    }
-
-    try {
-      long value = Long.parseLong(str, isHex ? 16 : 10);
-      if (value < Integer.MAX_VALUE)   // Can't use Ternary here, as the type will be automatically upper casted to long
-        return (int) value;
-      return value;
-    } catch (NumberFormatException e) {
-      return str;
-    }
   }
 }

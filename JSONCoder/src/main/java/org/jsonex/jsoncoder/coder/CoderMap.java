@@ -118,7 +118,7 @@ public class CoderMap implements ICoder<Map> {
       case MAP:
         for (int i = 0; i < tdNode.getChildrenSize(); i++) {
           TDNode cn = tdNode.getChild(i);
-          Object key = ClassUtil.stringToSimpleObject(cn.getKey(), ClassUtil.getGenericClass(childKeyType), new BeanConvertContext());
+          Object key = ClassUtil.toSimpleObject(cn.getKey(), ClassUtil.getGenericClass(childKeyType), new BeanConvertContext());
           Object value = ctx.decode(cn, childValueType, result.get(key), i + ".value");
           result.put(key, value);
         }

@@ -43,8 +43,9 @@ SnapsbotTest is a simple unit test library to allow tests to assert if new outpu
   }
   ```
   **How it works**:
-    - __Recording mode__: when this test is first run, as there's no existing snapshot, it will record the output by serializing `result` with [JSONCoder](JSONCoder/src/main/java/org/jsonex/jsoncoder/JSONCoder.java), and store this JSON file under `resource/__snapshot__` folder.
-    - __Verifying Mode__: for subsequent runs, as there's already snapshot recorded, it will serialize the new output and compare it with the recorded snapshot. Test passes if it matches. Otherwise test fails, and a tmp file be generated with the new snapshot under the same folder. Developers can compare the tmp file with exsting snapshot file to determine if the delta is expected or not. If it's expected, just delete the previously recorded snapshot file. Rerun the test, a new version of the snapshot will be generated.
+    - __Recording Mode__: when this test is first run, as there's no existing snapshot, it will record the output by serializing `result` with [JSONCoder](JSONCoder/src/main/java/org/jsonex/jsoncoder/JSONCoder.java), and store this JSON file under `resource/__snapshot__` folder.
+    - __Verifying Mode__: for subsequent runs, as there's already snapshot recorded, it will serialize the new output and compare it with the recorded snapshot. Test passes if it matches. Otherwise test fails, and a tmp file will be generated with the new snapshot under the same folder. Developers can compare the tmp file with exsting snapshot file to determine if the delta is expected or not.
+    - __Approve New Snapshot__: If the delta it's expected, just delete the previously recorded snapshot file. Rerun the test, a new version of the snapshot will be generated.
     
 - Advanced usage
   - **Customize JSONCoder**: sometimes, we want to ignore certain fields in the snapshot or want to use some customized JSON encoder for certain class, we can pass an additional [SnapshotOption](src/main/java/org/jsonex/snapshottest/SnapshotOption.java) parameter to the `assertMatchesSnapshot()` method to customize the JSONCoder
