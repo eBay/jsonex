@@ -18,7 +18,7 @@ public class CSVTest {
 
     CSVOption opt = new CSVOption().setFieldSep('|');
     String str = CSVWriter.get().writeAsString(node, opt);
-    assertMatchesSnapshot("asstring", str);
+    assertMatchesSnapshot("asString", str);
     TDNode node1 = CSVParser.get().parse(str, opt);
     assertEquals(node, node1);
   }

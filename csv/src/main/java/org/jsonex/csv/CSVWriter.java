@@ -44,9 +44,9 @@ public class CSVWriter {
     if (!(field.getValue() instanceof String))
       return false;
     String str = (String)field.getValue();
-    return (str.contains(opt.getQuoteCharStr())
+    return str.contains(opt.getQuoteCharStr())
         || str.contains(opt.getFieldSepStr())
-        || str.contains(opt.getRecordSepStr()))
+        || str.contains(opt.getRecordSepStr())
         || ClassUtil.toSimpleObject(str) != str;
   }
 }

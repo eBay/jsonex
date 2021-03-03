@@ -177,7 +177,7 @@ public class JSONCoderOption {
    * As Java Map and Set implementation, the order may not be strictly consistent cross JVM implementation
    * set this to true, it will sort the keys in a predicate order
    */
-  @Getter @Setter private boolean strictConsistentOrder = false;
+  @Getter @Setter private boolean strictOrder = false;
 
   public JSONCoderOption() { this(global); }
   private JSONCoderOption(JSONCoderOption parent) { this.parent = parent; }

@@ -483,7 +483,7 @@ public class ClassUtil {
     return tryToNumber(str);
   }
 
-  public static Object tryToNumber(String str) {
+  private static Object tryToNumber(String str) {
     if (!str.isEmpty()) {
       if (str.startsWith("0x") || str.startsWith(("0X")))
         return parseNumber(str.substring(2), true);
@@ -494,7 +494,7 @@ public class ClassUtil {
     return str;
   }
 
-  public static Object parseNumber(String str, boolean isHex) {
+  private static Object parseNumber(String str, boolean isHex) {
     if (!isHex && str.indexOf('.') >= 0) {
       try {
         return Double.parseDouble(str);
