@@ -12,6 +12,7 @@ package org.jsonex.jsoncoder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import lombok.extern.slf4j.Slf4j;
 import org.jsonex.core.factory.CacheThreadLocal;
 import org.jsonex.core.factory.InjectableFactory;
 import org.jsonex.core.type.Tuple;
@@ -31,11 +32,10 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.jsonex.core.util.LangUtil.*;
 import static org.jsonex.core.util.ListUtil.listOf;
-import static org.jsonex.core.util.ListUtil.map;
 import static org.jsonex.jsoncoder.fieldTransformer.FieldTransformer.exclude;
 
 @SuppressWarnings("UnusedReturnValue")
-@Accessors(chain=true)
+@Accessors(chain=true) @Slf4j
 public class JSONCoderOption {
   @Getter final static JSONCoderOption global = new JSONCoderOption(null);
   static {
@@ -271,7 +271,13 @@ public class JSONCoderOption {
   }
 
   public JSONCoderOption addSkippedClasses(String... cls) {
-    skippedClasses.addAll(map(listOf(cls), ClassUtil::forName));
+    for (String c : cls) {
+      try {
+        skippedClasses.add(ClassUtil.forName(c));
+      } catch (Exception e) {
+        log.error("addSkippedClasses: Error load class: " + c);
+      }
+    }
     return this;
   }
 

@@ -16,8 +16,6 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import static org.jsonex.core.util.LangUtil.safe;
-
 /**
  * A collection of utilities related to Collection classes. Many methods here are a better alternative
  * to Java8 stream with more concise expression
@@ -27,7 +25,8 @@ import static org.jsonex.core.util.LangUtil.safe;
  * but won't complain it's already bad, I'm just a transformer but not a validator.
  */
 public class ListUtil {
-  public static <C extends Collection<? super TDest>, TSrc, TDest> C map(
+  /** Map with index. Have to use a different name as Java type inference has difficult to distinguish BiFuncion and Function */
+  public static <C extends Collection<? super TDest>, TSrc, TDest> C mapWithIndex(
       Collection<? extends TSrc> source, BiFunction<? super TSrc, Integer, ? extends TDest> func, C dest) {
     if (source != null) {
       int idx = 0;
@@ -39,12 +38,12 @@ public class ListUtil {
 
   public static <C extends Collection<? super TDest>, TSrc, TDest> C map(
       Collection<? extends TSrc> source, Function<? super TSrc, ? extends TDest> func, C dest) {
-    return map(source, (e, i) ->  func.apply(e), dest);
+    return mapWithIndex(source, (e, i) ->  func.apply(e), dest);
   }
 
-  public static <TSrc, TDest> List<TDest> map(
+  public static <TSrc, TDest> List<TDest> mapWithIndex(
       Collection<? extends TSrc> source, BiFunction<? super TSrc, Integer, ? extends TDest> func) {
-    return source == null ? null : map(source, func, new ArrayList<>());
+    return source == null ? null : mapWithIndex(source, func, new ArrayList<>());
   }
 
   public static <TSrc, TDest> List<TDest> map(
@@ -52,7 +51,7 @@ public class ListUtil {
     return source == null ? null : map(source, func, new ArrayList<>());
   }
 
-  public static <C extends Collection<? super TDest>, TSrc, TDest> C flatMap(Collection<? extends TSrc> source,
+  public static <C extends Collection<? super TDest>, TSrc, TDest> C flatMapWithIndex(Collection<? extends TSrc> source,
       BiFunction<? super TSrc, Integer, ? extends Collection< ? extends TDest>> func, C dest) {
     if (source != null) {
       int idx = 0;
@@ -67,12 +66,12 @@ public class ListUtil {
 
   public static <C extends Collection<? super TDest>, TSrc, TDest> C flatMap(
       Collection<? extends TSrc> source, Function<? super TSrc, ? extends Collection< ? extends TDest>> func, C dest) {
-    return flatMap(source, (e, i) ->  func.apply(e), dest);
+    return flatMapWithIndex(source, (e, i) ->  func.apply(e), dest);
   }
 
-  public static <TSrc, TDest> List<TDest> flatMap(Collection<? extends TSrc> source,
+  public static <TSrc, TDest> List<TDest> flatMapWithIndex(Collection<? extends TSrc> source,
       BiFunction<? super TSrc, Integer, ? extends Collection< ? extends TDest>> func) {
-    return source == null ? null : flatMap(source, func, new ArrayList<>());
+    return source == null ? null : flatMapWithIndex(source, func, new ArrayList<>());
   }
 
   public static <TSrc, TDest> List<TDest> flatMap(
