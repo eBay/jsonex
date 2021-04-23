@@ -16,6 +16,8 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import static org.jsonex.core.util.LangUtil.safe;
+
 /**
  * A collection of utilities related to Collection classes. Many methods here are a better alternative
  * to Java8 stream with more concise expression

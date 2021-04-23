@@ -31,7 +31,7 @@ public class CoderClass implements ICoder<Class> {
   @Override public Class decode(TDNode jsonNode, Type type, Object targetObj, BeanCoderContext context) {
     try {
       return Class.forName((String) jsonNode.getValue());
-    } catch (Exception e) {
+    } catch (Throwable e) {
       throw new BeanCoderException("Can't load class: " + jsonNode.getValue(), e);
     }
   }

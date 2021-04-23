@@ -152,13 +152,13 @@ public class JSONCoderOption {
   @Getter @Setter private TDJSONOption jsonOption = new TDJSONOption();
 
   public enum LogLevel {
-    OFF { public void log(Logger log, String msg, Exception e) { /* Noop */ }},
-    DEBUG { public void log(Logger log, String msg, Exception e) { log.debug(msg, e); }},
-    INFO { public void log(Logger log, String msg, Exception e) { log.info(msg, e); }},
-    WARN { public void log(Logger log, String msg, Exception e) { log.warn(msg, e); }},
-    ERROR { public void log(Logger log, String msg, Exception e) { log.error(msg, e); }},
+    OFF { public void log(Logger log, String msg, Throwable e) { /* Noop */ }},
+    DEBUG { public void log(Logger log, String msg, Throwable e) { log.debug(msg, e); }},
+    INFO { public void log(Logger log, String msg, Throwable e) { log.info(msg, e); }},
+    WARN { public void log(Logger log, String msg, Throwable e) { log.warn(msg, e); }},
+    ERROR { public void log(Logger log, String msg, Throwable e) { log.error(msg, e); }},
     ;
-    public abstract void log(Logger logger, String message, Exception e);
+    public abstract void log(Logger logger, String message, Throwable e);
   }
   @Getter @Setter private LogLevel warnLogLevel = LogLevel.INFO;
 

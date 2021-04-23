@@ -81,7 +81,7 @@ public class CoderObject implements ICoder<Object> {
           if (cn.getType() == TDNode.Type.SIMPLE && cn.getValue() == null)
             removeLast(target.getChildren());
         }
-      } catch(Exception e) {
+      } catch(Throwable e) {
         opt.getWarnLogLevel().log(log, "warning during encoding", e);
         // ignore this exception
       }
