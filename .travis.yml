@@ -1,6 +1,6 @@
 language: java
 
-script: "env && mvn clean install"
+script: "mvn clean install"
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
