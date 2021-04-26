@@ -250,15 +250,26 @@ public class ClassUtilTest {
     assertEquals(Double.TYPE, ClassUtil.getType("java.lang.Double/TYPE"));
   }
 
-  @Test public void testStringToSimpleObject() {
+  @Test public void testToSimpleObjectWithType() {
     BeanConvertContext ctx = new BeanConvertContext();
-    assertEquals((Byte)(byte)1, ClassUtil.stringToSimpleObject("1", Byte.class, ctx));
-    assertEquals((Integer)1, ClassUtil.stringToSimpleObject("1", Integer.class, ctx));
-    assertEquals((Long)1L, ClassUtil.stringToSimpleObject("1", Long.class, ctx));
-    assertEquals((Double) 1.1d, ClassUtil.stringToSimpleObject("1.1", Double.class, ctx));
-    assertEquals(Boolean.TRUE, ClassUtil.stringToSimpleObject("true", Boolean.class, ctx));
-    assertEquals((Character)'a', ClassUtil.stringToSimpleObject("a", Character.class, ctx));
-    assertEquals(TimeUnit.SECONDS, ClassUtil.stringToSimpleObject("SECONDS", TimeUnit.class, ctx));
+    assertEquals((Byte)(byte)1, ClassUtil.toSimpleObject("1", Byte.class, ctx));
+    assertEquals((Integer)1, ClassUtil.toSimpleObject("1", Integer.class, ctx));
+    assertEquals((Long)1L, ClassUtil.toSimpleObject("1", Long.class, ctx));
+    assertEquals((Double) 1.1d, ClassUtil.toSimpleObject("1.1", Double.class, ctx));
+    assertEquals(Boolean.TRUE, ClassUtil.toSimpleObject("true", Boolean.class, ctx));
+    assertEquals((Character)'a', ClassUtil.toSimpleObject("a", Character.class, ctx));
+    assertEquals(TimeUnit.SECONDS, ClassUtil.toSimpleObject("SECONDS", TimeUnit.class, ctx));
+  }
+
+  @Test public void testToSimpleObjectWithoutType() {
+    assertEquals(1, ClassUtil.toSimpleObject("1"));
+    assertEquals(1000000000000L, ClassUtil.toSimpleObject("1000000000000"));
+    assertEquals(1.0, ClassUtil.toSimpleObject("1.0"));
+    assertEquals(Boolean.TRUE, ClassUtil.toSimpleObject("true"));
+    assertEquals(Boolean.FALSE, ClassUtil.toSimpleObject("false"));
+    assertEquals(0x11, ClassUtil.toSimpleObject("0x11"));
+    assertEquals(0X11, ClassUtil.toSimpleObject("0X11"));
+    assertEquals("1.1.1.1", ClassUtil.toSimpleObject("1.1.1.1"));
   }
 
   @Test public void testIsSimpleType() {

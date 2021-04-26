@@ -26,7 +26,10 @@ public class JSONCoder {
 
   @Getter final JSONCoderOption option;
   public JSONCoder(JSONCoderOption option) { this.option = option; }
-  
+
+  public static JSONCoder get() { return getGlobal(); }
+
+
   @SuppressWarnings("unchecked")
   public static <T> T decode(DecodeReq<T> req, JSONCoderOption opt) {
     try {

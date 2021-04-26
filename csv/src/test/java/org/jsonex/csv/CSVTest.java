@@ -14,12 +14,11 @@ import static org.junit.Assert.assertEquals;
 public class CSVTest {
   @Test public void testParseAndWriter() {
     TDNode node = CSVParser.get().parse(FileUtil.loadResource(CSVTest.class, "test.csv"));
-    assertEquals("[['field1', 'field2', 'field3'], ['v11', 'v12', 'v13'], ['v21', 'v2l1\\nV2l2', 'v23'], ['v31\"v31', 'v32\"\"v32', 'v33']]",
-        node.toString());
+    assertMatchesSnapshot("parsed", node.toString());
 
     CSVOption opt = new CSVOption().setFieldSep('|');
     String str = CSVWriter.get().writeAsString(node, opt);
-    assertMatchesSnapshot(str);
+    assertMatchesSnapshot("asString", str);
     TDNode node1 = CSVParser.get().parse(str, opt);
     assertEquals(node, node1);
   }

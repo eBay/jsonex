@@ -5,6 +5,7 @@ import org.jsonex.core.charsource.Bookmark;
 import org.jsonex.core.charsource.CharSource;
 import org.jsonex.core.charsource.ReaderCharSource;
 import org.jsonex.core.factory.InjectableInstance;
+import org.jsonex.core.util.ClassUtil;
 import org.jsonex.treedoc.TDNode;
 import org.jsonex.treedoc.TreeDoc;
 
@@ -49,11 +50,13 @@ public class CSVParser {
 
   }
 
-  String readField(CharSource src, CSVOption opt) {
+  Object readField(CharSource src, CSVOption opt) {
     StringBuilder sb = new StringBuilder();
     boolean previousQuoted = false;
+    boolean isString = false;
     while (!src.isEof() && src.peek() != opt.fieldSep && src.peek() != opt.recordSep) {
       if (src.peek() == opt.quoteChar) {
+        isString = true;
         if (previousQuoted)
           sb.append(opt.quoteChar);
         src.skip();  // for "", we will keep one quote
@@ -69,6 +72,7 @@ public class CSVParser {
     if (!src.isEof() && src.peek() == opt.fieldSep)
       src.skip();  // Skip fieldSep
 
-    return sb.toString();
+    String str = sb.toString();
+    return isString ? str : ClassUtil.toSimpleObject(str);
   }
 }

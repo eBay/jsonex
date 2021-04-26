@@ -137,7 +137,7 @@ public class BeanCoder {
         ctx.objToNodeMap.put(eqWrapper, target);
 
       return target;
-    } catch (Exception ex) {
+    } catch (Throwable ex) {
       throw new BeanCoderException(ex);
     } finally{
       if(ctx.objectPath.size() > pathSize) {
@@ -198,7 +198,7 @@ public class BeanCoder {
 
       //Handle bean type
       return CoderObject.get().decode(tdNode, type, targetObj, ctx);
-    } catch(Exception e) {
+    } catch(Throwable e) {
       throw new BeanCoderException("failed to decode:"+type + "; name=" + name, e);
     }
   }

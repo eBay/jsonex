@@ -12,6 +12,7 @@ package org.jsonex.jsoncoder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import lombok.extern.slf4j.Slf4j;
 import org.jsonex.core.factory.CacheThreadLocal;
 import org.jsonex.core.factory.InjectableFactory;
 import org.jsonex.core.type.Tuple;
@@ -31,11 +32,10 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.jsonex.core.util.LangUtil.*;
 import static org.jsonex.core.util.ListUtil.listOf;
-import static org.jsonex.core.util.ListUtil.map;
 import static org.jsonex.jsoncoder.fieldTransformer.FieldTransformer.exclude;
 
 @SuppressWarnings("UnusedReturnValue")
-@Accessors(chain=true)
+@Accessors(chain=true) @Slf4j
 public class JSONCoderOption {
   @Getter final static JSONCoderOption global = new JSONCoderOption(null);
   static {
@@ -152,13 +152,13 @@ public class JSONCoderOption {
   @Getter @Setter private TDJSONOption jsonOption = new TDJSONOption();
 
   public enum LogLevel {
-    OFF { public void log(Logger log, String msg, Exception e) { /* Noop */ }},
-    DEBUG { public void log(Logger log, String msg, Exception e) { log.debug(msg, e); }},
-    INFO { public void log(Logger log, String msg, Exception e) { log.info(msg, e); }},
-    WARN { public void log(Logger log, String msg, Exception e) { log.warn(msg, e); }},
-    ERROR { public void log(Logger log, String msg, Exception e) { log.error(msg, e); }},
+    OFF { public void log(Logger log, String msg, Throwable e) { /* Noop */ }},
+    DEBUG { public void log(Logger log, String msg, Throwable e) { log.debug(msg, e); }},
+    INFO { public void log(Logger log, String msg, Throwable e) { log.info(msg, e); }},
+    WARN { public void log(Logger log, String msg, Throwable e) { log.warn(msg, e); }},
+    ERROR { public void log(Logger log, String msg, Throwable e) { log.error(msg, e); }},
     ;
-    public abstract void log(Logger logger, String message, Exception e);
+    public abstract void log(Logger logger, String message, Throwable e);
   }
   @Getter @Setter private LogLevel warnLogLevel = LogLevel.INFO;
 
@@ -172,6 +172,12 @@ public class JSONCoderOption {
    * If this set true, it will merge the array (concatenation)
    */
   @Getter @Setter private boolean mergeArray = false;
+
+  /**
+   * As Java Map and Set implementation, the order may not be strictly consistent cross JVM implementation
+   * set this to true, it will sort the keys in a predicate order
+   */
+  @Getter @Setter private boolean strictOrder = false;
 
   public JSONCoderOption() { this(global); }
   private JSONCoderOption(JSONCoderOption parent) { this.parent = parent; }
@@ -202,17 +208,27 @@ public class JSONCoderOption {
     return parent != null && parent.isClassSkipped(cls);
   }
   
-  public FieldInfo transformField(Class<?> cls, FieldInfo fieldInfo, BeanCoderContext beanCoderContext) {
+  public FieldInfo transformField(Class<?> cls, FieldInfo fieldInfo, BeanCoderContext ctx) {
     for (Pair<Class<?>, FieldTransformer> filter : filters) {
       if (!filter._1.isAssignableFrom(cls))
         continue;
       // TODO: Fix when to stop the filter chain strategy
-      fieldInfo = filter._2.apply(fieldInfo, beanCoderContext);
+      fieldInfo = filter._2.apply(fieldInfo, ctx);
     }
     
-    return parent == null ? fieldInfo : parent.transformField(cls, fieldInfo, beanCoderContext);
+    return parent == null ? fieldInfo : parent.transformField(cls, fieldInfo, ctx);
   }
-  
+
+  public boolean isExcluded(Class<?> cls, String name, BeanCoderContext ctx) {
+    for (Pair<Class<?>, FieldTransformer> filter : filters) {
+      if (!filter._1.isAssignableFrom(cls))
+        continue;
+      if (!filter._2.shouldInclude(name, ctx))
+        return true;
+    }
+    return parent == null ? false : parent.isExcluded(cls, name, ctx);
+  }
+
   @SuppressWarnings({ "rawtypes", "unchecked" })
   Object getEqualsWrapper(Object obj) {
     for(EqualsWrapper ew : equalsWrapper)
@@ -265,7 +281,13 @@ public class JSONCoderOption {
   }
 
   public JSONCoderOption addSkippedClasses(String... cls) {
-    skippedClasses.addAll(map(listOf(cls), ClassUtil::forName));
+    for (String c : cls) {
+      try {
+        skippedClasses.add(ClassUtil.forName(c));
+      } catch (Exception e) {
+        log.error("addSkippedClasses: Error load class: " + c);
+      }
+    }
     return this;
   }
 

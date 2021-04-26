@@ -40,7 +40,8 @@ public class CoderMap implements ICoder<Map> {
     JSONCoderOption opt = ctx.getOption();
 
     Map<?,?> map = (Map<?,?>)obj;
-    if (!(map instanceof SortedMap) && ! (map instanceof LinkedHashMap) && ! (map instanceof EnumMap)) {
+    if (opt.isStrictOrder()
+        && !(map instanceof SortedMap) && ! (map instanceof LinkedHashMap) && ! (map instanceof EnumMap)) {
       map = new TreeMap<>(map);  // Due to instability of map iterator, we copy it to TreeMap to make it in stable order.
     }
 
@@ -118,7 +119,7 @@ public class CoderMap implements ICoder<Map> {
       case MAP:
         for (int i = 0; i < tdNode.getChildrenSize(); i++) {
           TDNode cn = tdNode.getChild(i);
-          Object key = ClassUtil.stringToSimpleObject(cn.getKey(), ClassUtil.getGenericClass(childKeyType), new BeanConvertContext());
+          Object key = ClassUtil.toSimpleObject(cn.getKey(), ClassUtil.getGenericClass(childKeyType), new BeanConvertContext());
           Object value = ctx.decode(cn, childValueType, result.get(key), i + ".value");
           result.put(key, value);
         }

@@ -26,7 +26,8 @@ public interface FieldTransformer extends BiFunction<FieldInfo, BeanCoderContext
     Object obj;
   }
 
-  @Override FieldInfo apply(FieldInfo fieldInfo, BeanCoderContext beanCoderContext);
+  default boolean shouldInclude(String name, BeanCoderContext ctx) { return true; }
+  default FieldInfo apply(FieldInfo fieldInfo, BeanCoderContext beanCoderContext) { return fieldInfo; }
 
   // Factory methods
   static SimpleFilter exclude(String... props) { return SimpleFilter.of().addProperties(props); }

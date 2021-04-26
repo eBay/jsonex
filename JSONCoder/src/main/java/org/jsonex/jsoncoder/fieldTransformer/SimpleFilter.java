@@ -26,10 +26,6 @@ public class SimpleFilter implements FieldTransformer {
 
   public static SimpleFilter of() { return of(false); }
 
-  private boolean isFieldSkipped(String field) {
-    return isInclude() ? !properties.contains(field) : properties.contains(field);
-  }
-  
   public SimpleFilter addProperties(String... props) {
     properties.addAll(Arrays.asList(props));
     return this;
@@ -41,9 +37,7 @@ public class SimpleFilter implements FieldTransformer {
   }
 
   @Override
-  public FieldInfo apply(FieldInfo fieldInfo, BeanCoderContext beanCoderContext) {
-    if(isFieldSkipped(fieldInfo.getName()))
-      return new FieldInfo(null, null, null);
-    return fieldInfo;
+  public boolean shouldInclude(String name, BeanCoderContext beanCoderContext) {
+    return isInclude() ? properties.contains(name) : !properties.contains(name);
   }
 }

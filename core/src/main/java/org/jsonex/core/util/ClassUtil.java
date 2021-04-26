@@ -403,7 +403,7 @@ public class ClassUtil {
     return result.toArray(new Method[0]);
   }
 
-  public static <T extends Enum<T>> T stringToEnum(Class<T> cls, String str) {
+  public static <T extends Enum<T>> T toEnum(Class<T> cls, String str) {
     try{
       int i = Integer.parseInt(str);
       return cls.getEnumConstants()[i];
@@ -423,7 +423,7 @@ public class ClassUtil {
    * @return null means the type is not supported.
    */
   @SuppressWarnings({ "unchecked", "rawtypes" })
-  public static <T> T stringToSimpleObject(String str, Class<T> cls, BeanConvertContext ctx)
+  public static <T> T toSimpleObject(String str, Class<T> cls, BeanConvertContext ctx)
   {
     if(str == null)
       throw new NullPointerException();//NOPMD
@@ -456,7 +456,7 @@ public class ClassUtil {
       return (T)Character.valueOf(str.charAt(0));
 
     if(Enum.class.isAssignableFrom(cls)){
-      return (T)stringToEnum((Class)cls, str);
+      return (T) toEnum((Class)cls, str);
     }
 
     if(Date.class.isAssignableFrom(cls))
@@ -467,6 +467,50 @@ public class ClassUtil {
       }
 
     return null;
+  }
+
+  /**
+   * To Simple Object without type. It will to convert str into null, boolean, double, long or Integer.
+   * For number, it supports Hex number with prefix of "0x". If conversion fails. It will return the original str.
+   */
+  public static Object toSimpleObject(String str) {
+    if ("null".equals(str))
+      return null;
+    if ("true".equals(str))
+      return true;
+    if ("false".equals(str))
+      return false;
+    return tryToNumber(str);
+  }
+
+  private static Object tryToNumber(String str) {
+    if (!str.isEmpty()) {
+      if (str.startsWith("0x") || str.startsWith(("0X")))
+        return parseNumber(str.substring(2), true);
+      char c = str.charAt(0);
+      if (c == '-' || c == '+' || c == '.' || (c >= '0' && c <= '9'))
+        return parseNumber(str, false);
+    }
+    return str;
+  }
+
+  private static Object parseNumber(String str, boolean isHex) {
+    if (!isHex && str.indexOf('.') >= 0) {
+      try {
+        return Double.parseDouble(str);
+      } catch(NumberFormatException e) {
+        return str;
+      }
+    }
+
+    try {
+      long value = Long.parseLong(str, isHex ? 16 : 10);
+      if (value < Integer.MAX_VALUE)   // Can't use Ternary here, as the type will be automatically upper casted to long
+        return (int) value;
+      return value;
+    } catch (NumberFormatException e) {
+      return str;
+    }
   }
 
   /**
