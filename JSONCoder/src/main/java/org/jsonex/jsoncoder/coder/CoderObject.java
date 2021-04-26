@@ -66,6 +66,9 @@ public class CoderObject implements ICoder<Object> {
       if (pd.isTransient())
         continue;
 
+      if (opt.isExcluded(cls, pd.getName(), ctx))
+        continue;
+
       // V3DAL will cause Lazy load exception, we have to catch it
       try {
         FieldInfo fieldInfo = new FieldInfo(pd.getName(), pd.getActualGenericType(type), pd.get(obj));

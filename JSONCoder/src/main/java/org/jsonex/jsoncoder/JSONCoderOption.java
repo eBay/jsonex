@@ -208,17 +208,27 @@ public class JSONCoderOption {
     return parent != null && parent.isClassSkipped(cls);
   }
   
-  public FieldInfo transformField(Class<?> cls, FieldInfo fieldInfo, BeanCoderContext beanCoderContext) {
+  public FieldInfo transformField(Class<?> cls, FieldInfo fieldInfo, BeanCoderContext ctx) {
     for (Pair<Class<?>, FieldTransformer> filter : filters) {
       if (!filter._1.isAssignableFrom(cls))
         continue;
       // TODO: Fix when to stop the filter chain strategy
-      fieldInfo = filter._2.apply(fieldInfo, beanCoderContext);
+      fieldInfo = filter._2.apply(fieldInfo, ctx);
     }
     
-    return parent == null ? fieldInfo : parent.transformField(cls, fieldInfo, beanCoderContext);
+    return parent == null ? fieldInfo : parent.transformField(cls, fieldInfo, ctx);
   }
-  
+
+  public boolean isExcluded(Class<?> cls, String name, BeanCoderContext ctx) {
+    for (Pair<Class<?>, FieldTransformer> filter : filters) {
+      if (!filter._1.isAssignableFrom(cls))
+        continue;
+      if (!filter._2.shouldInclude(name, ctx))
+        return true;
+    }
+    return parent == null ? false : parent.isExcluded(cls, name, ctx);
+  }
+
   @SuppressWarnings({ "rawtypes", "unchecked" })
   Object getEqualsWrapper(Object obj) {
     for(EqualsWrapper ew : equalsWrapper)
