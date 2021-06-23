@@ -12,8 +12,8 @@ public class LangUtil {
    * Method extension utility to call getter avoid NPE if the obj is null. It simulates optional chain (?.)
    * in other languages
    */
-  public static <T,R> R safeOrElse(T obj, Function<T,R> getter, @Nullable R def) { return obj == null ? def : getter.apply(obj); }
-  public static <T,R> R safeOrElse(T obj, Function<T,R> getter, Supplier<R> def) { return obj == null ? def.get() : getter.apply(obj); }
+  public static <T,R> R safeOrElse(T obj, Function<T,R> getter, @Nullable R def) { return orElse(obj == null ? null : getter.apply(obj), def); }
+  public static <T,R> R safeOrElse(T obj, Function<T,R> getter, Supplier<R> def) { return orElse(obj == null ? null : getter.apply(obj), def); }
   public static <T,R> R safe(T obj, Function<T,R> getter) { return safeOrElse(obj, getter, (R) null); }
   public static <T,R1, R2> R2 safeOrElse(T obj, Function<T,R1> getter1, Function<R1,R2> getter2, @Nullable R2 def) { return safeOrElse(safe(obj, getter1), getter2, def); }
   public static <T,R1, R2> R2 safeOrElse(T obj, Function<T,R1> getter1, Function<R1,R2> getter2, Supplier<R2> def) { return safeOrElse(safe(obj, getter1), getter2, def); }
