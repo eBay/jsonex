@@ -189,13 +189,8 @@ public class TDJsonParserTest {
     assertEquals(EXPECTED_STREAM_MERGE_RESULT, node.toString());
   }
 
-  @Test public void testStreamAsSingleDoc() {
-    ReaderCharSource reader = new ReaderCharSource(loadResource(this.getClass(), "stream.json"));
-    TreeDoc doc = TreeDoc.ofArray();
-    int docId = 0;
-    while(reader.skipSpacesAndReturnsAndCommas())
-      TDJSONParser.get().parse(reader, new TDJSONOption().setDocId(docId++), doc.getRoot().createChild());
-    TDNode node = doc.getRoot();
+  @Test public void testParseAll() {
+    TDNode node = TDJSONParser.get().parseAll(loadResource(this.getClass(), "stream.json"));
     log.info("testStream=" + node.toString());
     assertEquals(EXPECTED_STREAM_MERGE_RESULT, node.toString());
 

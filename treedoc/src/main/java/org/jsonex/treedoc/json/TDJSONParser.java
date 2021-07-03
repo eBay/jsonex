@@ -32,6 +32,19 @@ public class TDJSONParser {
   public TDNode parse(CharSource src) { return parse(src, new TDJSONOption()); }
   public TDNode parse(CharSource src, TDJSONOption opt) { return parse(src, opt, new TreeDoc(opt.uri).getRoot()); }
 
+  public TDNode parseAll(Reader reader) { return parseAll(reader, new TDJSONOption()); }
+  public TDNode parseAll(Reader reader, TDJSONOption opt) { return parseAll(new ReaderCharSource(reader), opt); }
+  public TDNode parseAll(CharSource src) { return parseAll(src, new TDJSONOption()); }
+  public TDNode parseAll(String str, TDJSONOption opt) { return parseAll(new ArrayCharSource(str), opt); }
+  /** Parse all the JSON objects in the input stream until EOF and store them inside an root node with array type */
+  public TDNode parseAll(CharSource src, TDJSONOption opt) {
+    TreeDoc doc = TreeDoc.ofArray();
+    int docId = 0;
+    while(src.skipSpacesAndReturnsAndCommas())
+      TDJSONParser.get().parse(src, new TDJSONOption().setDocId(docId++), doc.getRoot().createChild());
+    return doc.getRoot();
+  }
+
   public TDNode parse(CharSource src, TDJSONOption opt, TDNode node) { return parse(src, opt, node, true); }
 
   public TDNode parse(CharSource src, TDJSONOption opt, TDNode node, boolean isRoot) {
