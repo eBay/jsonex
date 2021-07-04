@@ -131,7 +131,8 @@ public class TDJsonParserTest {
     log.info("testTDPath: node1: " + TestUtil.toJSON(node1));
 
     assertEquals("Some Name 1", node1.getChildValue("name"));
-    assertEquals(10, jp.query(node1, "2/limit").getValue());
+    // Relative with number support removed
+    // assertEquals(10, jp.query(node1, "2/limit").getValue());
   }
 
   @Test public void testToString() {

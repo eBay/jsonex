@@ -10,9 +10,8 @@ public class JSONPointerTest {
   @Test public void testParse() {
     verify("//ab.c/p1#/p1", new TDPath().setDocPath("//ab.c/p1").addParts(Part.ofRoot(), Part.ofChild("p1")));
     verify("//ab.c/p1#p1/p2", new TDPath().setDocPath("//ab.c/p1").addParts(Part.ofChildOrId("p1", "p1"), Part.ofChild("p2")));
-    verify("1/p1", new TDPath().addParts(Part.ofRelative(1), Part.ofChild("p1")));
+    assertEquals(new TDPath().addParts(Part.ofRelative(1), Part.ofChild("p1")), JSONPointer.get().parse("1/p1", true));
     verify("#../p1", new TDPath().addParts(Part.ofRelative(1), Part.ofChild("p1")));
-    verify("1/p1", new TDPath().addParts(Part.ofRelative(1), Part.ofChild("p1")));
     verify("#./p1", new TDPath().addParts(Part.ofRelative(0), Part.ofChild("p1")));
   }
 
