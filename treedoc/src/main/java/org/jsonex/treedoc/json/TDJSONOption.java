@@ -7,11 +7,13 @@ import org.jsonex.treedoc.TDNode;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiFunction;
 
 import static org.jsonex.core.util.StringUtil.padEnd;
 
 @Accessors(chain = true) @Data
 public class TDJSONOption {
+  public enum TextType {OPERATOR, KEY, STRING, NON_STRING}
   String KEY_ID = "$id";
 //  String KEY_REF = "$ref";
 //  String ObJ_START = "{";
@@ -34,6 +36,7 @@ public class TDJSONOption {
   boolean alwaysQuoteName = true;
   char quoteChar = '"';
   String indentStr = "";
+  BiFunction<String, TextType, String> textDecorator;
 
   /**
    * if this is set, all the id in $id and $ref will be suffixed with "_" + docId, this is to avoid collision when merge
@@ -70,4 +73,10 @@ public class TDJSONOption {
       this.nodeFilters.add(f);
     return this;
   }
+
+  // Helper methods for deco text
+  public String deco(String text, TextType type) {
+    return textDecorator == null ? text : textDecorator.apply(text, type);
+  }
+  public String deco(char c, TextType type) { return deco(String.valueOf(c), type); }
 }
