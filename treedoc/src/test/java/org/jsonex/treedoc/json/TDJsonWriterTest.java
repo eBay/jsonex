@@ -29,10 +29,10 @@ public class TDJsonWriterTest {
           switch (type) {
             case KEY: return "<b>" + str + "</b>";
             case OPERATOR: return "<font color=red>" + str + "</font>";
-            case NON_STRING:
-              return "<font color=green>" + str + "</font>";
+            case NON_STRING: return "<font color=green>" + str + "</font>";
             case STRING:
-            default: return str;
+            default:
+              return str;
           }
         });
     String str = TDJSONWriter.get().writeAsString(node, opt);

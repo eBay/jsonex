@@ -13,6 +13,7 @@ import org.jsonex.core.factory.InjectableInstance;
 import org.jsonex.core.util.StringUtil;
 import org.jsonex.treedoc.TDNode;
 import lombok.SneakyThrows;
+import org.jsonex.treedoc.json.TDJSONOption.TextType;
 
 import java.io.IOException;
 
@@ -58,9 +59,9 @@ public class TDJSONWriter {
         out.append('\n').append(childIndentStr);
 
       if (!StringUtil.isJavaIdentifier(cn.getKey()) || opt.alwaysQuoteName)  // Quote the key in case  it's not valid java identifier
-        writeQuotedString(out, opt.deco(cn.getKey(), KEY), opt.quoteChar);
+        writeQuotedString(out, opt.deco(cn.getKey(), KEY), opt, KEY);
       else
-        out.append(cn.getKey());
+        out.append(opt.deco(cn.getKey(), KEY));
       out.append(opt.deco(":", OPERATOR));
       write(out, cn, opt, childIndentStr);
       if (i < node.getChildrenSize() - 1) // No need "," for last entry
@@ -84,7 +85,7 @@ public class TDJSONWriter {
 
         write(out, cn, opt, childIndentStr);
         if (i < node.getChildrenSize() - 1) // No need "," for last entry
-          out.append(",");
+          out.append(opt.deco(",", OPERATOR));
       }
 
       if (opt.hasIndent() && node.hasChildren())
@@ -98,17 +99,17 @@ public class TDJSONWriter {
   <T extends Appendable> T writeSimple(T out, TDNode node, TDJSONOption opt) {
     Object value = node.getValue();
     if (value instanceof String)
-      return writeQuotedString(out, opt.deco((String)value, STRING), opt.quoteChar);
+      return writeQuotedString(out, opt.deco((String)value, STRING), opt, STRING);
 
     if (value instanceof Character)
-      return writeQuotedString(out, opt.deco((Character)value, STRING), opt.quoteChar);
+      return writeQuotedString(out, opt.deco((Character)value, STRING), opt, STRING);
 
     return (T)out.append(opt.deco(String.valueOf(value), NON_STRING));
   }
 
-  <T extends Appendable> T writeQuotedString(T out, String str, char quoteChar) throws IOException {
-    return (T) out.append(quoteChar)
-        .append(StringUtil.cEscape(str, quoteChar, true))
-        .append(quoteChar);
+  <T extends Appendable> T writeQuotedString(T out, String str, TDJSONOption opt, TextType type) throws IOException {
+    return (T) out.append(opt.quoteChar)
+        .append(opt.deco(StringUtil.cEscape(str, opt.quoteChar, true), type))
+        .append(opt.quoteChar);
   }
 }
