@@ -59,7 +59,7 @@ public class TDJSONWriter {
         out.append('\n').append(childIndentStr);
 
       if (!StringUtil.isJavaIdentifier(cn.getKey()) || opt.alwaysQuoteName)  // Quote the key in case  it's not valid java identifier
-        writeQuotedString(out, opt.deco(cn.getKey(), KEY), opt, KEY);
+        writeQuotedString(out, cn.getKey(), opt, KEY);
       else
         out.append(opt.deco(cn.getKey(), KEY));
       out.append(opt.deco(":", OPERATOR));
@@ -99,10 +99,10 @@ public class TDJSONWriter {
   <T extends Appendable> T writeSimple(T out, TDNode node, TDJSONOption opt) {
     Object value = node.getValue();
     if (value instanceof String)
-      return writeQuotedString(out, opt.deco((String)value, STRING), opt, STRING);
+      return writeQuotedString(out, (String)value, opt, STRING);
 
     if (value instanceof Character)
-      return writeQuotedString(out, opt.deco((Character)value, STRING), opt, STRING);
+      return writeQuotedString(out, String.valueOf(value), opt, STRING);
 
     return (T)out.append(opt.deco(String.valueOf(value), NON_STRING));
   }

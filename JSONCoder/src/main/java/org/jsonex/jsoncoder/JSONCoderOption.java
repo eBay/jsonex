@@ -175,7 +175,7 @@ public class JSONCoderOption {
 
   /**
    * As Java Map and Set implementation, the order may not be strictly consistent cross JVM implementation
-   * set this to true, it will sort the keys in a predicate order
+   * set this to true, it will sort the keys in a predicated order
    */
   @Getter @Setter private boolean strictOrder = false;
 
