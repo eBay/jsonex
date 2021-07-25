@@ -4,7 +4,6 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsonex.core.type.Lazy;
-import org.jsonex.core.util.ClassUtil;
 import org.jsonex.core.util.FileUtil;
 import org.jsonex.core.util.LangUtil;
 
@@ -103,7 +102,7 @@ public class Snapshot {
 
   /** For testing only */
   public static Snapshot of(String name, Object actual) {
-    StackTraceElement si = ClassUtil.findCallerStackTrace(Snapshot.class);
+    StackTraceElement si = SnapshotUtil.findCallerTestMethod();
     return new Snapshot(si.getClassName(), si.getMethodName(), name, actual);
   }
 }

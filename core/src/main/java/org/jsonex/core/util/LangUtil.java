@@ -52,10 +52,16 @@ public class LangUtil {
   }
 
   public static <T> void doIfInstanceOfOrElseThrow(Object obj, Class<T> cls, Consumer<? super T> action) {
+    doIfInstanceOfOrElseThrow(obj, cls, action, () ->
+        new IllegalStateException("Expect class: " + cls + ";got: " + safe(obj, Object::getClass)));
+  }
+
+  @SneakyThrows
+  public static <T> void doIfInstanceOfOrElseThrow(Object obj, Class<T> cls, Consumer<? super T> action, Supplier<Exception> exp) {
     if (obj != null && cls.isAssignableFrom(obj.getClass()))
       action.accept(cls.cast(obj));
     else
-      throw new IllegalStateException("Expect class: " + cls + ";got: " + safe(obj, Object::getClass));
+      throw exp.get();
   }
 
   public static <TO, TC, R> R getIfInstanceOf(
@@ -65,9 +71,16 @@ public class LangUtil {
 
   public static <T, R> R getIfInstanceOfElseThrow(
       Object obj, Class<T> cls, Function<? super T, ? extends R> func) {
+    return getIfInstanceOfElseThrow(obj, cls, func, () ->
+        new IllegalStateException("Expect class: " + cls + ";got: " + safe(obj, Object::getClass)));
+  }
+
+  @SneakyThrows
+  public static <T, R> R getIfInstanceOfElseThrow(
+      Object obj, Class<T> cls, Function<? super T, ? extends R> func, Supplier<Exception> exp) {
     if (obj != null && cls.isAssignableFrom(obj.getClass()))
       return func.apply(cls.cast(obj));
-    throw new IllegalStateException("Expect class: " + cls + ";got: " + safe(obj, Object::getClass));
+    throw exp.get();
   }
 
   public static <T, T1 extends T, T2 extends T> T orElse(T1 value, T2 fullBack) {

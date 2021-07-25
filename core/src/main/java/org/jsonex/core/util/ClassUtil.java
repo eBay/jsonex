@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.function.Predicate;
 
 import static org.jsonex.core.util.ArrayUtil.indexOf;
 import static org.jsonex.core.util.ListUtil.listOf;
@@ -28,6 +29,8 @@ public class ClassUtil {
   private static final Logger logger = LoggerFactory.getLogger(ClassUtil.class);
 
   public static final Type[] EMPTY_TYPE_ARRAY = new Type[0];
+  public final static StackTraceElement UNKNOWN_STACK_TRACE_ELEMENT = new StackTraceElement("unknown", "unknown","unknown", 0);
+
 
   @SneakyThrows
   public static Class<?> forName(String name) { return Class.forName(name); }
@@ -588,20 +591,27 @@ public class ClassUtil {
       return Class.forName(typeName); // TODO: interpret generate type syntax
   }
 
-  /**
-   * This method will return the nearest caller stack above thisClass
-   */
+  /** {@link ClassUtil#findCallerStackTrace(Class, Predicate)} findCallerStackTrace} */
   public static StackTraceElement findCallerStackTrace(Class<?> calleeClass) {
+    return findCallerStackTrace(calleeClass, s -> true);
+  }
+
+  /**
+   * This method will return the closest caller stack above method in thisClass and matches the predicate. Default predicate
+   * will return true.
+   * @return UNKNOWN_STACK_TRACE_ELEMENT if it's not found
+   */
+  public static StackTraceElement findCallerStackTrace(Class<?> calleeClass, Predicate<StackTraceElement> predicate) {
     boolean findSelf = false;
     for (StackTraceElement s : Thread.currentThread().getStackTrace()) {
       boolean isSelf = s.getClassName().equals(calleeClass.getName());
       if (!findSelf) {
         if (isSelf)
           findSelf = true;
-      } else if (!isSelf)
+      } else if (!isSelf && predicate.test(s))
         return s;
     }
     logger.error("Can't find the caller stack, return a dummy Stacktrace");  // Shouldn't happen
-    return new StackTraceElement("unknown", "unknown","unknown", 0);  // Should teach here, return the top just to avoid NPE for caller
+    return UNKNOWN_STACK_TRACE_ELEMENT;  // Shouldn't reach here, return the DUMMY value just to avoid NPE for caller
   }
 }

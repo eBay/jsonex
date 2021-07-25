@@ -10,6 +10,7 @@ import java.io.File;
 import static org.jsonex.jsoncoder.fieldTransformer.FieldTransformer.exclude;
 import static org.jsonex.snapshottest.Snapshot.assertMatchesSnapshot;
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class SnapshotTest {
   // Remove current path so that it can avoid flaky test when run in different environment
@@ -66,5 +67,13 @@ public class SnapshotTest {
 
   @Test public void testWithNoName() {
     assertMatchesSnapshot("With No name");
+  }
+
+  @Test public void testWithNestedCall() {
+    inNestedCall();
+  }
+  private void inNestedCall() {
+    Snapshot snapshot = Snapshot.of(null, "In nested call").compareOrRecord();
+    assertEquals("testWithNestedCall", snapshot.getTestMethod());
   }
 }
