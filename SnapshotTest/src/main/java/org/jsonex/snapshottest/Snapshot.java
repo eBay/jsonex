@@ -11,6 +11,7 @@ import java.io.File;
 import java.util.Objects;
 import java.util.function.Function;
 
+import static org.jsonex.core.util.LangUtil.throwIf;
 import static org.jsonex.core.util.StringUtil.isEmpty;
 
 /**
@@ -42,6 +43,7 @@ public class Snapshot {
 
   public String getFile() {
     int packagePos = testClass.lastIndexOf(".");
+    throwIf(packagePos < 0, () -> new IllegalArgumentException("Class has not package:" + testClass));
     String baseName = testClass.substring(0, packagePos) + ".__snapshot__" +  testClass.substring(packagePos);
     String ext = actual instanceof String ? ".txt" : option.getSerializer().getFileExtension(actual);
     return option.getTestResourceRoot() + "/" +
