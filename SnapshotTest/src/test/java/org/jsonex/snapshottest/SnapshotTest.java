@@ -72,6 +72,7 @@ public class SnapshotTest {
   @Test public void testWithNestedCall() {
     inNestedCall();
   }
+
   private void inNestedCall() {
     Snapshot snapshot = Snapshot.of(null, "In nested call").compareOrRecord();
     assertEquals("testWithNestedCall", snapshot.getTestMethod());

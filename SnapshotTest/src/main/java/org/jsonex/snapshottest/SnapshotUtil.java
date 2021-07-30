@@ -16,8 +16,12 @@ public class SnapshotUtil {
 
   @SneakyThrows
   static boolean isTestMethod(StackTraceElement s) {
-    Class<?> cls = Class.forName(s.getClassName());
-    return exists(listOf(cls.getMethods()), m -> m.getName().equals(s.getMethodName()) && isTestMethod(m));
+    try {
+      Class<?> cls = Class.forName(s.getClassName());
+      return exists(listOf(cls.getMethods()), m -> m.getName().equals(s.getMethodName()) && isTestMethod(m));
+    } catch (ClassNotFoundException e) {
+      return  false;
+    }
   }
 
   static boolean isTestMethod(Method method) {
