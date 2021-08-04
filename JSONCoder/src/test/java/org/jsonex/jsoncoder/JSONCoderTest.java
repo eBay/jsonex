@@ -494,6 +494,16 @@ public class JSONCoderTest {
     assertEquals(json, json1);
   }
 
+  @Test public void testStrictOrder() {
+    Set<NoneComparable> set = new HashSet<>(listOf(new NoneComparable("a"), new NoneComparable("b"), new NoneComparable("c"), new NoneComparable("d")));
+    assertMatchesSnapshot("set", JSONCoder.encode(set, JSONCoderOption.of().setStrictOrder(true)));
+
+    Map<NoneComparable, String> map = new HashMap<>();
+    map.put(new NoneComparable("a"), "value 1");
+    map.put(new NoneComparable("b"), "value 2");
+    assertMatchesSnapshot("map", JSONCoder.encode(map, JSONCoderOption.of().setStrictOrder(true)));
+  }
+
   private void expectDecodeWithException(String str, Class<?> cls, String expectedError) {
     expectDecodeWithException(str, cls, JSONCoderOption.global, expectedError);
   }

@@ -42,7 +42,9 @@ public class CoderMap implements ICoder<Map> {
     Map<?,?> map = (Map<?,?>)obj;
     if (opt.isStrictOrder()
         && !(map instanceof SortedMap) && ! (map instanceof LinkedHashMap) && ! (map instanceof EnumMap)) {
-      map = new TreeMap<>(map);  // Due to instability of map iterator, we copy it to TreeMap to make it in stable order.
+      TreeMap treeMap = new TreeMap<>(FullbackComparator.it);  // Due to instability of map iterator, we copy it to TreeMap to make it in stable order.
+      treeMap.putAll(map);
+      map = treeMap;
     }
 
     Type[] actualTypeParameters = ClassUtil.getGenericTypeActualParams(type);

@@ -46,6 +46,8 @@ public class LangUtil {
   @SneakyThrows
   public static void throwIf(boolean condition, Supplier<Exception> exp) { if (condition) throw exp.get(); }
 
+  public static <T> T throwIfNull(T obj, Supplier<Exception> exp) { throwIf(obj == null, exp); return obj; }
+
   public static <T> void doIfInstanceOf(Object obj, Class<T> cls, Consumer<? super T> action) {
     if (obj != null && cls.isAssignableFrom(obj.getClass()))
       action.accept(cls.cast(obj));
