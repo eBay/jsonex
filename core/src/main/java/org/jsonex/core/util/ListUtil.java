@@ -303,13 +303,13 @@ public class ListUtil {
 
   public static <T> Optional<T> last(List<T> list) {
     if (list == null)
-      return null;
+      return Optional.empty();
     return list.isEmpty() ? Optional.empty() : Optional.of(list.get(list.size() - 1));
   }
 
   public static <T> Optional<T> first(Collection<T> list) {
     if (list == null)
-      return null;
+      return Optional.empty();
     return list.isEmpty() ? Optional.empty() : Optional.of(list.iterator().next());
   }
 
