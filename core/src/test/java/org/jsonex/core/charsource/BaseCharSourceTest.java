@@ -73,7 +73,7 @@ public abstract class BaseCharSourceTest {
       cs.readQuotedString(c);
       fail("Should throw error");
     } catch(EOFRuntimeException e) {
-      assertEquals("Can't find matching quote at position:1", e.getMessage());
+      assertEquals("Can't find matching quote at position:1;line:0;col:1", e.getMessage());
       // e.printStackTrace();
     }
   }

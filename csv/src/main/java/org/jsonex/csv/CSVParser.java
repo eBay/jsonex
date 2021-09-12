@@ -1,9 +1,6 @@
 package org.jsonex.csv;
 
-import org.jsonex.core.charsource.ArrayCharSource;
-import org.jsonex.core.charsource.Bookmark;
-import org.jsonex.core.charsource.CharSource;
-import org.jsonex.core.charsource.ReaderCharSource;
+import org.jsonex.core.charsource.*;
 import org.jsonex.core.factory.InjectableInstance;
 import org.jsonex.core.util.ClassUtil;
 import org.jsonex.treedoc.TDNode;
@@ -59,8 +56,17 @@ public class CSVParser {
         isString = true;
         if (previousQuoted)
           sb.append(opt.quoteChar);
+
+        // Not calling getBookmark() to avoid clone an object
+        int pos = src.bookmark.getPos();
+        int line = src.bookmark.getLine();
+        int col = src.bookmark.getCol();
+
         src.skip();  // for "", we will keep one quote
         src.readUntil(opt.getQuoteCharStr(), sb);
+
+        if (src.isEof())
+          throw new EOFRuntimeException("Can't find matching quote at position:" + pos + ";line:" + line + ";col:" + col);
         if (src.peek() == opt.quoteChar)
           src.skip();
         previousQuoted = true;

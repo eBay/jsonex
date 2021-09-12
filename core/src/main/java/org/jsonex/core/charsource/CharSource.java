@@ -21,7 +21,7 @@ public abstract class CharSource {
   private final static String SPACE_RETURN_CHARS = " \n\r\t\u00a0";
   private final static String SPACE_RETURN_COMMA_CHARS = SPACE_RETURN_CHARS + ",";
 
-  final Bookmark bookmark = new Bookmark();
+  public final Bookmark bookmark = new Bookmark();
 
   public abstract char read();
   public abstract char peek(int i);
@@ -137,10 +137,13 @@ public abstract class CharSource {
 
   public StringBuilder readQuotedString(char quote, StringBuilder sb) {
     String terminator = getTermStrWithQuoteAndEscape(quote);
+    // Not calling getBookmark() to avoid clone an object
     int pos = getPos();
+    int line = bookmark.getLine();
+    int col = bookmark.getCol();
     while (true) {
       if (!readUntil(terminator, sb))
-        throw new EOFRuntimeException("Can't find matching quote at position:" + pos);
+        throw new EOFRuntimeException("Can't find matching quote at position:" + pos + ";line:" + line + ";col:" + col);
       char c = read();
       if (c == quote) {
         break;
