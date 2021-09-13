@@ -1,15 +1,18 @@
 package org.jsonex.treedoc.json;
 
+import lombok.extern.slf4j.Slf4j;
 import org.jsonex.core.charsource.ArrayCharSource;
 import org.jsonex.core.charsource.ReaderCharSource;
+import org.jsonex.core.util.ListUtil;
+import org.jsonex.core.util.MapBuilder;
 import org.jsonex.treedoc.TDNode;
 import org.jsonex.treedoc.TreeDoc;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static org.jsonex.core.util.FileUtil.loadResource;
 import static org.jsonex.core.util.FileUtil.readResource;
@@ -217,5 +220,20 @@ public class TDJsonParserTest {
     parseWithException("{a:[abc,def}", "EOF while expecting matching ']' with '[' at Bookmark(line=0, col=3, pos=3), Bookmark(line=0, col=12, pos=12), digest:");
     parseWithException("{a", "No ':' after key:a, Bookmark(line=0, col=2, pos=2), digest:");
     parseWithException("{'a'", "No ':' after key:a, Bookmark(line=0, col=4, pos=4), digest:");
+  }
+
+  @Test public void testParseMapToString() {
+    Map<String, Object> map = new MapBuilder<String, Object>()
+        .put("K1", "v1")
+        .put("k2", 123)
+        .put("k3", new MapBuilder<String, Object>()
+            .put("c", "Test with ,in")
+            .getMap())
+        .put("k4", ListUtil.listOf("ab,c", "def"))
+        .getMap();
+    String str = map.toString();
+    log.info("testParseMapToString: str=" + str);
+    TDNode node = TDJSONParser.get().parse(str, TDJSONOption.ofMapToString());
+    assertEquals("{K1: 'v1', k2: 123, k3: {c: 'Test with ,in'}, k4: ['ab,c', 'def']}", node.toString());
   }
 }

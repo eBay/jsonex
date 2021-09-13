@@ -62,10 +62,10 @@ public class TDJSONWriter {
         writeQuotedString(out, cn.getKey(), opt, KEY);
       else
         out.append(opt.deco(cn.getKey(), KEY));
-      out.append(opt.deco(":", OPERATOR));
+      out.append(opt.deco(opt.deliminatorKey, OPERATOR));
       write(out, cn, opt, childIndentStr);
       if (i < node.getChildrenSize() - 1) // No need "," for last entry
-        out.append(opt.deco(",", OPERATOR));
+        out.append(opt.deco(opt.deliminatorValue, OPERATOR));
     }
 
     if (opt.hasIndent() && node.hasChildren())
@@ -85,7 +85,7 @@ public class TDJSONWriter {
 
         write(out, cn, opt, childIndentStr);
         if (i < node.getChildrenSize() - 1) // No need "," for last entry
-          out.append(opt.deco(",", OPERATOR));
+          out.append(opt.deco(opt.deliminatorValue, OPERATOR));
       }
 
       if (opt.hasIndent() && node.hasChildren())

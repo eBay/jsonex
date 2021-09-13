@@ -15,7 +15,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class MapBuilder<K, V> {
-  @Getter final Map<K, V> map = new LinkedHashMap<>(); //NOPMD
+  @Getter final Map<K, V> map = new LinkedHashMap<>();
   public MapBuilder<K, V> put(K key, V val) {
     map.put(key,  val);
     return this;

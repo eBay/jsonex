@@ -11,7 +11,9 @@ package org.jsonex.core.charsource;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.jsonex.core.type.Nullable;
 
+import java.util.Collection;
 import java.util.function.Predicate;
 
 @Slf4j
@@ -47,28 +49,30 @@ public abstract class CharSource {
     return readUntil(predicate, null, 0, Integer.MAX_VALUE);
   }
   /** @return true Terminal conditions matches  */
-  public boolean readUntil(String chars, StringBuilder target, boolean include, int minLen, int maxLen) {
-    return readUntil(s -> chars.indexOf(s.peek(0)) >= 0 == include, target, minLen, maxLen);
+  public boolean readUntil(String chars, @Nullable Collection<String> strs, StringBuilder target, boolean include, int minLen, int maxLen) {
+    return readUntil(s -> (chars.indexOf(s.peek(0)) >= 0 || startsWithAny(strs))== include, target, minLen, maxLen);
   }
-  /** @return true Terminal conditions matches  */
-  public boolean readUntil(String terminator, StringBuilder target) {
-    return readUntil(terminator, target, true, 0, MAX_STRING_LEN);
+  public boolean readUntil(String terminator, StringBuilder target) { return readUntil(terminator, null, target); }
+    /** @return true Terminal conditions matches  */
+  public boolean readUntil(String terminator, Collection<String> strs, StringBuilder target) {
+    return readUntil(terminator, strs, target, true, 0, MAX_STRING_LEN);
   }
+  public String readUntil(String terminator) { return readUntil(terminator, null,0, Integer.MAX_VALUE); }
   /** @return true Terminal conditions matches  */
-  public String readUntil(final String terminator) { return readUntil(terminator, 0, Integer.MAX_VALUE); }
+  public String readUntil(String terminator, Collection<String> strs) { return readUntil(terminator, strs,0, Integer.MAX_VALUE); }
   /** @return true Terminal conditions matches  */
-  public String readUntil(final String terminator, int minLen, int maxLen) {
+  public String readUntil(String terminator, Collection<String> strs, int minLen, int maxLen) {
     StringBuilder sb = new StringBuilder();
-    readUntil(terminator, sb, true, minLen, maxLen);
+    readUntil(terminator, strs, sb, true, minLen, maxLen);
     return sb.toString();
   }
 
   /** @return true Indicates more character in the stream  */
-  public boolean skipUntil(final String chars, final boolean include) {
-    return readUntil(chars, null, include, 0, Integer.MAX_VALUE);
+  public boolean skipUntil(String chars, boolean include) {
+    return readUntil(chars, null, null, include, 0, Integer.MAX_VALUE);
   }
   /** @return true Indicates more character in the stream  */
-  public boolean skipUntil(final String terminator) { return skipUntil(terminator, true); }
+  public boolean skipUntil(String terminator) { return skipUntil(terminator, true); }
   /** @return true Indicates more character in the stream  */
   public boolean skipSpacesAndReturns() { return skipUntil(SPACE_RETURN_CHARS, false); }
   public boolean skipSpacesAndReturnsAndCommas() { return skipUntil(SPACE_RETURN_COMMA_CHARS, false); }
@@ -86,18 +90,18 @@ public abstract class CharSource {
   public boolean skip() { return read(null, 1); }
   public boolean skip(int len) { return read(null, len); }
 
-  public boolean readUntilMatch(final String str, final boolean skipStr, StringBuilder target, int minLen, int maxLen) {
-    boolean matches = readUntil(s -> startsWidth(str), target, minLen, maxLen);
+  public boolean readUntilMatch(String str, boolean skipStr, StringBuilder target, int minLen, int maxLen) {
+    boolean matches = readUntil(s -> startsWith(str), target, minLen, maxLen);
     if (matches && skipStr)
       skip(str.length());
     return matches;
   }
 
-  public boolean readUntilMatch(final String str, final boolean skipStr, StringBuilder target) {
+  public boolean readUntilMatch(String str, boolean skipStr, StringBuilder target) {
     return readUntilMatch(str, skipStr, target, 0, MAX_STRING_LEN);
   }
 
-  public boolean skipUntilMatch(final String str, final boolean skipStr) {
+  public boolean skipUntilMatch(String str, boolean skipStr) {
     return readUntilMatch(str, skipStr, null, 0, Integer.MAX_VALUE);
   }
 
@@ -111,8 +115,17 @@ public abstract class CharSource {
     return sb.toString();
   }
 
-  public boolean startsWidth(String str) {
-    if (isEof(str.length()))
+  public boolean startsWithAny(@Nullable Collection<String> strs) {
+    if (strs != null) {
+      for (String s : strs)
+        if (startsWith(s))
+          return true;
+    }
+    return false;
+  }
+
+  public boolean startsWith(String str) {
+    if (isEof(str.length()-1))
       return false;
     for (int i=0; i<str.length(); i++){
       if(peek(i) != str.charAt(i))
