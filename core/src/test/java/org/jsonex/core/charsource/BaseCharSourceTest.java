@@ -33,7 +33,7 @@ public abstract class BaseCharSourceTest {
     assertEquals(2, cs.getPos());
 
     StringBuilder target = new StringBuilder();
-    assertTrue("should match /*", cs.readUntilMatch("/*", false, target, 0, 1000));
+    assertTrue("should match /*", cs.readUntilMatch(target, "/*", false, 0, 1000));
     assertEquals("Text before ", target.toString());
     assertTrue("should start with /*", cs.startsWith("/*"));
     cs.skip(2);  // skip /*

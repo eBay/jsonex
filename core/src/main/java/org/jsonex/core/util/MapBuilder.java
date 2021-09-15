@@ -14,6 +14,10 @@ import lombok.Getter;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * A simple wrapper of Map to provide chainable put() method to support fluent coding style. This class is more of a wrapper
+ * instead of Builder
+ */
 public class MapBuilder<K, V> {
   @Getter final Map<K, V> map = new LinkedHashMap<>();
   public MapBuilder<K, V> put(K key, V val) {
@@ -22,4 +26,9 @@ public class MapBuilder<K, V> {
   }
   public MapBuilder() {}
   public MapBuilder(K key, V val) { put(key, val); }
+  public Map<K, V> build() { return map; }
+
+  public static <K, V> MapBuilder<K, V> mapOf(K key, V val) {
+    return new MapBuilder<>(key, val);
+  }
 }

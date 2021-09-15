@@ -73,7 +73,7 @@ public class TDJSONParser {
       if(c == '"' || c == '\'' || c == '`') {
         src.skip();
         StringBuilder sb = new StringBuilder();
-        src.readQuotedString(c, sb);
+        src.readQuotedString(sb, c);
         readContinuousString(src, sb);
         return node.setValue(sb.toString());
       }
@@ -95,7 +95,7 @@ public class TDJSONParser {
       if ("\"`'".indexOf(c) < 0)
         break;
       src.skip();
-      src.readQuotedString(c, sb);
+      src.readQuotedString(sb, c);
     }
   }
 

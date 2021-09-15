@@ -63,7 +63,7 @@ public class CSVParser {
         int col = src.bookmark.getCol();
 
         src.skip();  // for "", we will keep one quote
-        src.readUntil(opt.getQuoteCharStr(), sb);
+        src.readUntil(sb, opt.getQuoteCharStr());
 
         if (src.isEof())
           throw new EOFRuntimeException("Can't find matching quote at position:" + pos + ";line:" + line + ";col:" + col);

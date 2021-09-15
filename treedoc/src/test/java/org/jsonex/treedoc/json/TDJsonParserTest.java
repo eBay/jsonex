@@ -3,8 +3,6 @@ package org.jsonex.treedoc.json;
 import lombok.extern.slf4j.Slf4j;
 import org.jsonex.core.charsource.ArrayCharSource;
 import org.jsonex.core.charsource.ReaderCharSource;
-import org.jsonex.core.util.ListUtil;
-import org.jsonex.core.util.MapBuilder;
 import org.jsonex.treedoc.TDNode;
 import org.jsonex.treedoc.TreeDoc;
 import org.junit.Test;
@@ -16,6 +14,8 @@ import java.util.Map;
 
 import static org.jsonex.core.util.FileUtil.loadResource;
 import static org.jsonex.core.util.FileUtil.readResource;
+import static org.jsonex.core.util.ListUtil.listOf;
+import static org.jsonex.core.util.MapBuilder.mapOf;
 import static org.junit.Assert.*;
 
 @Slf4j
@@ -223,14 +223,11 @@ public class TDJsonParserTest {
   }
 
   @Test public void testParseMapToString() {
-    Map<String, Object> map = new MapBuilder<String, Object>()
-        .put("K1", "v1")
+    Map<String, Object> map = mapOf("K1", (Object)"v1")
         .put("k2", 123)
-        .put("k3", new MapBuilder<String, Object>()
-            .put("c", "Test with ,in")
-            .getMap())
-        .put("k4", ListUtil.listOf("ab,c", "def"))
-        .getMap();
+        .put("k3", mapOf("c", "Test with ,in").build())
+        .put("k4", listOf("ab,c", "def"))
+        .build();
     String str = map.toString();
     log.info("testParseMapToString: str=" + str);
     TDNode node = TDJSONParser.get().parse(str, TDJSONOption.ofMapToString());

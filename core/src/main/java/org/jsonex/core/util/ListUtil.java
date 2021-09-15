@@ -19,11 +19,11 @@ import java.util.function.Predicate;
 import static org.jsonex.core.util.LangUtil.safe;
 
 /**
- * A collection of utilities related to Collection classes. Many methods here are a better alternative
+ * A collection of utilities related to Collection classes. Many methods here are better alternatives
  * to Java8 stream with more concise expression
  *
  * Regarding null input, for most of the list transformation methods, it will keep as silent as possible. That
- * means if you give null, I'll give back you null without NPE. The principle is I just don't make it worse,
+ * means if you give a null, I'll give back you null without NPE. The principle is I just don't make it worse,
  * but won't complain it's already bad, I'm just a transformer but not a validator.
  */
 public class ListUtil {

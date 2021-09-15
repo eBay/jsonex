@@ -15,6 +15,11 @@ import static org.jsonex.core.util.StringUtil.padEnd;
 @Accessors(chain = true) @Data
 public class TDJSONOption {
   public enum TextType {OPERATOR, KEY, STRING, NON_STRING}
+
+  public static TDJSONOption ofIndentFactor(int factor) { return new TDJSONOption().setIndentFactor(factor); }
+  public static TDJSONOption ofDefaultRootType(TDNode.Type type) { return new TDJSONOption().setDefaultRootType(type); }
+  public static TDJSONOption ofMapToString() { return new TDJSONOption().setDeliminatorKey("=").setDeliminatorValue(", "); }
+
   String KEY_ID = "$id";
 //  String KEY_REF = "$ref";
 //  String ObJ_START = "{";
@@ -49,10 +54,6 @@ public class TDJSONOption {
 
   /** Node filters, if it returns null, node will be skipped */
   List<NodeFilter> nodeFilters = new ArrayList<>();
-
-  public static TDJSONOption ofIndentFactor(int factor) { return new TDJSONOption().setIndentFactor(factor); }
-  public static TDJSONOption ofDefaultRootType(TDNode.Type type) { return new TDJSONOption().setDefaultRootType(type); }
-  public static TDJSONOption ofMapToString() { return new TDJSONOption().setDeliminatorKey("=").setDeliminatorValue(", "); }
 
   public TDJSONOption setIndentFactor(int _indentFactor) {
     this.indentFactor = _indentFactor;
