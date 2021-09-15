@@ -4,7 +4,6 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsonex.core.type.Lazy;
-import org.jsonex.core.util.ClassUtil;
 import org.jsonex.core.util.FileUtil;
 import org.jsonex.core.util.LangUtil;
 
@@ -12,6 +11,7 @@ import java.io.File;
 import java.util.Objects;
 import java.util.function.Function;
 
+import static org.jsonex.core.util.LangUtil.throwIf;
 import static org.jsonex.core.util.StringUtil.isEmpty;
 
 /**
@@ -43,6 +43,7 @@ public class Snapshot {
 
   public String getFile() {
     int packagePos = testClass.lastIndexOf(".");
+    throwIf(packagePos < 0, () -> new IllegalArgumentException("Class has not package:" + testClass));
     String baseName = testClass.substring(0, packagePos) + ".__snapshot__" +  testClass.substring(packagePos);
     String ext = actual instanceof String ? ".txt" : option.getSerializer().getFileExtension(actual);
     return option.getTestResourceRoot() + "/" +
@@ -103,7 +104,7 @@ public class Snapshot {
 
   /** For testing only */
   public static Snapshot of(String name, Object actual) {
-    StackTraceElement si = ClassUtil.findCallerStackTrace(Snapshot.class);
+    StackTraceElement si = SnapshotUtil.findCallerTestMethod();
     return new Snapshot(si.getClassName(), si.getMethodName(), name, actual);
   }
 }

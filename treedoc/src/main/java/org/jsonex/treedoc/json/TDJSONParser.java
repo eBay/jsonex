@@ -32,6 +32,19 @@ public class TDJSONParser {
   public TDNode parse(CharSource src) { return parse(src, new TDJSONOption()); }
   public TDNode parse(CharSource src, TDJSONOption opt) { return parse(src, opt, new TreeDoc(opt.uri).getRoot()); }
 
+  public TDNode parseAll(Reader reader) { return parseAll(reader, new TDJSONOption()); }
+  public TDNode parseAll(Reader reader, TDJSONOption opt) { return parseAll(new ReaderCharSource(reader), opt); }
+  public TDNode parseAll(CharSource src) { return parseAll(src, new TDJSONOption()); }
+  public TDNode parseAll(String str, TDJSONOption opt) { return parseAll(new ArrayCharSource(str), opt); }
+  /** Parse all the JSON objects in the input stream until EOF and store them inside an root node with array type */
+  public TDNode parseAll(CharSource src, TDJSONOption opt) {
+    TreeDoc doc = TreeDoc.ofArray();
+    int docId = 0;
+    while(src.skipSpacesAndReturnsAndCommas())
+      TDJSONParser.get().parse(src, new TDJSONOption().setDocId(docId++), doc.getRoot().createChild());
+    return doc.getRoot();
+  }
+
   public TDNode parse(CharSource src, TDJSONOption opt, TDNode node) { return parse(src, opt, node, true); }
 
   public TDNode parse(CharSource src, TDJSONOption opt, TDNode node, boolean isRoot) {
@@ -58,18 +71,18 @@ public class TDJSONParser {
       }
 
       if(c == '"' || c == '\'' || c == '`') {
-        src.read();
+        src.skip();
         StringBuilder sb = new StringBuilder();
         src.readQuotedString(c, sb);
         readContinuousString(src, sb);
         return node.setValue(sb.toString());
       }
 
-      String term = ",\n\r";
+      String term = opt.termValue;
       if (node.getParent() != null)  // parent.type can either by ARRAY or MAP.
-        term = node.getParent().getType() == TDNode.Type.ARRAY ? ",\n\r]" : ",\n\r}";
+        term = node.getParent().getType() == TDNode.Type.ARRAY ? opt.termValueInArray : opt.termValueInMap;
 
-      String str = src.readUntil(term, 0, Integer.MAX_VALUE).trim();
+      String str = src.readUntil(term, opt.termValueStrs).trim();
       return node.setValue(ClassUtil.toSimpleObject(str));
     } finally {
       node.setEnd(src.getBookmark());
@@ -81,7 +94,7 @@ public class TDJSONParser {
     while((c = skipSpaceAndComments(src)) != EOF) {
       if ("\"`'".indexOf(c) < 0)
         break;
-      src.read();
+      src.skip();
       src.readQuotedString(c, sb);
     }
   }
@@ -120,7 +133,7 @@ public class TDJSONParser {
   TDNode parseMap(CharSource src, TDJSONOption opt, TDNode node, boolean withStartBracket) {
     node.setType(TDNode.Type.MAP);
     if (withStartBracket)
-      src.read();
+      src.skip();
     for (int i = 0;;) {
       char c = skipSpaceAndComments(src);
       if (c == EOF) {
@@ -130,34 +143,34 @@ public class TDJSONParser {
       }
 
       if (c == '}') {
-        src.read();
+        src.skip();
         break;
       }
 
-      if (c == ',') { // Skip ,
-        src.read();
+      if (src.startsWith(opt.deliminatorValue)) { // Skip ,
+        src.skip(opt.deliminatorValue.length());
         continue;
       }
 
       String key;
       if (c == '"' || c == '\'' || c == '`') {
-        src.read();
+        src.skip();
         key = src.readQuotedString(c);
         c = skipSpaceAndComments(src);
-        if (c == EOF)
-          break;
-        if (c != ':' && c != '{' && c != '[' && c != ',' && c != '}')
-          throw src.createParseRuntimeException("No ':' after key:" + key);
+//        if (c == EOF)
+//          break;
+        if (!src.startsWith(opt.deliminatorKey) && c != '{' && c != '[' && c != ',' && c != '}')
+          throw src.createParseRuntimeException("No '" + opt.deliminatorKey + "' after key:" + key);
       } else {
-        key = src.readUntil(":{[,}", 1, Integer.MAX_VALUE).trim();
+        key = src.readUntil(opt.termKey, opt.termKeyStrs, 1, Integer.MAX_VALUE).trim();
         if (src.isEof())
-          throw src.createParseRuntimeException("No ':' after key:" + key);
+          throw src.createParseRuntimeException("No '" + opt.deliminatorKey + "' after key:" + key);
         c = src.peek();
       }
-      if (c == ':')
-        src.read();
+      if (src.startsWith(opt.deliminatorKey))
+        src.skip(opt.deliminatorKey.length());
 
-      if (c == ',' || c == '}')  // If there's no ':', we consider it as indexed value (array)
+      if (src.startsWith(opt.deliminatorValue) || c == '}')  // If there's no ':', we consider it as indexed value (array)
         node.createChild(i + "").setValue(key);
       else {
         TDNode childNode = parse(src, opt, node.createChild(key), false);
@@ -181,24 +194,24 @@ public class TDJSONParser {
   TDNode parseArray(CharSource src, TDJSONOption opt, TDNode node, boolean withStartBracket) {
     node.setType(TDNode.Type.ARRAY);
     if (withStartBracket)
-      src.read();
+      src.skip();
     while (true) {
       char c = skipSpaceAndComments(src);
       if (c == EOF) {
         if (withStartBracket)
-          throw src.createParseRuntimeException("EOF encountered while expecting matching ']'");
+          throw src.createParseRuntimeException("EOF while expecting matching ']' with '[' at " + node.getStart());
         break;
       }
 
       if (c == ']') {
-        src.read();
+        src.skip();
         break;
       }
 
       parse(src, opt, node.createChild(null), false);
       c = skipSpaceAndComments(src);
-      if (c == ',') {
-        src.read();
+      if (src.startsWith(opt.deliminatorValue)) {
+        src.skip(opt.deliminatorValue.length());
       }
     }
     return node;

@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.jsonex</groupId>
     <artifactId>jcParent</artifactId>
-    <version>0.1.17</version>
+    <version>0.1.21</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>JSONCoder</artifactId>

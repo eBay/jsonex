@@ -23,7 +23,7 @@ import static java.lang.Integer.parseInt;
  * 1. URL + Anchor:  http://a.com/path#/p1/p2
  * 2. URL only:  http://a.com
  * 3. Anchor only:  #/p1/p2
- * 4. Relative with number: 2/p1/p2
+ * 4. Relative with number: 2/p1/p2  (Support removed avoid confusing of array index)
  * 5. Relative with parent: ../p1/p2
  * 6. Anchor with $id reference:  [http://a.com/path]#nodeId
  * </pre>
@@ -33,6 +33,10 @@ public class JSONPointer {
   public static JSONPointer get() { return it.get(); }
 
   public TDPath parse(String str) {
+    return parse(str, false);
+  }
+
+  public TDPath parse(String str, boolean supportRelativeWithNum) {
     TDPath path = new TDPath();
     if (StringUtil.isEmpty(str))
       return path;
@@ -41,7 +45,7 @@ public class JSONPointer {
       str = str.substring(0, str.length() - 1);
 
     if (str.indexOf('#') < 0) {
-      if (parseParts(str, path, true))
+      if (parseParts(str, path, supportRelativeWithNum))
         return path;
       path.setDocPath(str);
       path.addParts(TDPath.Part.ofRoot());

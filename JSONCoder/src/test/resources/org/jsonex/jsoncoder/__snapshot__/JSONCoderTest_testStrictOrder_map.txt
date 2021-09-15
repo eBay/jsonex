@@ -1,0 +1,1 @@
+{"NoneComparable{str='a'}":"value 1","NoneComparable{str='b'}":"value 2"}

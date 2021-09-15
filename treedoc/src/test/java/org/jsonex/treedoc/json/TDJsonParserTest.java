@@ -1,15 +1,18 @@
 package org.jsonex.treedoc.json;
 
+import lombok.extern.slf4j.Slf4j;
 import org.jsonex.core.charsource.ArrayCharSource;
 import org.jsonex.core.charsource.ReaderCharSource;
+import org.jsonex.core.util.ListUtil;
+import org.jsonex.core.util.MapBuilder;
 import org.jsonex.treedoc.TDNode;
 import org.jsonex.treedoc.TreeDoc;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static org.jsonex.core.util.FileUtil.loadResource;
 import static org.jsonex.core.util.FileUtil.readResource;
@@ -131,7 +134,8 @@ public class TDJsonParserTest {
     log.info("testTDPath: node1: " + TestUtil.toJSON(node1));
 
     assertEquals("Some Name 1", node1.getChildValue("name"));
-    assertEquals(10, jp.query(node1, "2/limit").getValue());
+    // Relative with number support removed
+    // assertEquals(10, jp.query(node1, "2/limit").getValue());
   }
 
   @Test public void testToString() {
@@ -189,13 +193,8 @@ public class TDJsonParserTest {
     assertEquals(EXPECTED_STREAM_MERGE_RESULT, node.toString());
   }
 
-  @Test public void testStreamAsSingleDoc() {
-    ReaderCharSource reader = new ReaderCharSource(loadResource(this.getClass(), "stream.json"));
-    TreeDoc doc = TreeDoc.ofArray();
-    int docId = 0;
-    while(reader.skipSpacesAndReturnsAndCommas())
-      TDJSONParser.get().parse(reader, new TDJSONOption().setDocId(docId++), doc.getRoot().createChild());
-    TDNode node = doc.getRoot();
+  @Test public void testParseAll() {
+    TDNode node = TDJSONParser.get().parseAll(loadResource(this.getClass(), "stream.json"));
     log.info("testStream=" + node.toString());
     assertEquals(EXPECTED_STREAM_MERGE_RESULT, node.toString());
 
@@ -204,5 +203,37 @@ public class TDJsonParserTest {
     log.info("testStream=" + node.toString());
     assertEquals("root", node.getKey());
     assertEquals("{a: 1, obj: {$id: '1_0'}, ref: {$ref: '#1_0'}}", node.toString());
+  }
+
+  private static void parseWithException(String str, String expectedError) {
+    String error = null;
+    try {
+      TDNode node = TDJSONParser.get().parse(str);
+    } catch(Exception e) {
+      error = e.getMessage();
+    }
+    assertEquals(expectedError, error);
+  }
+
+  @Test public void testParseMissingClosing () {
+    parseWithException("{abc:1", "EOF while expecting matching '}' with '{' at Bookmark(line=0, col=0, pos=0), Bookmark(line=0, col=6, pos=6), digest:");
+    parseWithException("{a:[abc,def}", "EOF while expecting matching ']' with '[' at Bookmark(line=0, col=3, pos=3), Bookmark(line=0, col=12, pos=12), digest:");
+    parseWithException("{a", "No ':' after key:a, Bookmark(line=0, col=2, pos=2), digest:");
+    parseWithException("{'a'", "No ':' after key:a, Bookmark(line=0, col=4, pos=4), digest:");
+  }
+
+  @Test public void testParseMapToString() {
+    Map<String, Object> map = new MapBuilder<String, Object>()
+        .put("K1", "v1")
+        .put("k2", 123)
+        .put("k3", new MapBuilder<String, Object>()
+            .put("c", "Test with ,in")
+            .getMap())
+        .put("k4", ListUtil.listOf("ab,c", "def"))
+        .getMap();
+    String str = map.toString();
+    log.info("testParseMapToString: str=" + str);
+    TDNode node = TDJSONParser.get().parse(str, TDJSONOption.ofMapToString());
+    assertEquals("{K1: 'v1', k2: 123, k3: {c: 'Test with ,in'}, k4: ['ab,c', 'def']}", node.toString());
   }
 }

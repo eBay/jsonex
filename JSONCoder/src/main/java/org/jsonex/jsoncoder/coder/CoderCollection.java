@@ -33,7 +33,9 @@ public class CoderCollection implements ICoder<Collection> {
     target.setType(TDNode.Type.ARRAY);
     if (ctx.getOption().isStrictOrder()
         && obj instanceof Set && !(obj instanceof SortedSet || obj instanceof LinkedHashSet || obj instanceof EnumSet)) {
-      obj = new TreeSet(obj); // Due to instability of Set iteration order, we copy it to TreeSet to make iteration stable
+      Set set = new TreeSet(FullbackComparator.it); // Due to instability of Set iteration order, we copy it to TreeSet to make iteration stable
+      set.addAll(obj);
+      obj = set;
     }
 
     Type[] actualTypeParameters = ClassUtil.getGenericTypeActualParams(type);

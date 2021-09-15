@@ -35,7 +35,7 @@ public abstract class BaseCharSourceTest {
     StringBuilder target = new StringBuilder();
     assertTrue("should match /*", cs.readUntilMatch("/*", false, target, 0, 1000));
     assertEquals("Text before ", target.toString());
-    assertTrue("should start with /*", cs.startsWidth("/*"));
+    assertTrue("should start with /*", cs.startsWith("/*"));
     cs.skip(2);  // skip /*
 
     target = new StringBuilder();
@@ -73,7 +73,7 @@ public abstract class BaseCharSourceTest {
       cs.readQuotedString(c);
       fail("Should throw error");
     } catch(EOFRuntimeException e) {
-      assertEquals("Can't find matching quote at position:1", e.getMessage());
+      assertEquals("Can't find matching quote at position:1;line:0;col:1", e.getMessage());
       // e.printStackTrace();
     }
   }

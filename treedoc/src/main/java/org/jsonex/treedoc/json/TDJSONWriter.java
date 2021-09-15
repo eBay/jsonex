@@ -13,8 +13,11 @@ import org.jsonex.core.factory.InjectableInstance;
 import org.jsonex.core.util.StringUtil;
 import org.jsonex.treedoc.TDNode;
 import lombok.SneakyThrows;
+import org.jsonex.treedoc.json.TDJSONOption.TextType;
 
 import java.io.IOException;
+
+import static org.jsonex.treedoc.json.TDJSONOption.TextType.*;
 
 public class TDJSONWriter {
 
@@ -31,7 +34,7 @@ public class TDJSONWriter {
   @SneakyThrows
   public <T extends Appendable> T write(T out, TDNode node, TDJSONOption opt, String indentStr) {
     if (node == null)
-      return (T) out.append("null");
+      return (T) out.append(opt.deco("null", NON_STRING));
 
     String childIndentStr = "";
     if (opt.hasIndent())
@@ -46,7 +49,7 @@ public class TDJSONWriter {
 
   @SneakyThrows
   <T extends Appendable> T writeMap(T out, TDNode node, TDJSONOption opt, String indentStr, String childIndentStr) {
-    out.append('{');
+    out.append(opt.deco("{", OPERATOR));
     for (int i = 0; i < node.getChildrenSize(); i++) {
       TDNode cn = opt.applyFilters(node.getChild(i));
       if (cn == null)
@@ -56,24 +59,24 @@ public class TDJSONWriter {
         out.append('\n').append(childIndentStr);
 
       if (!StringUtil.isJavaIdentifier(cn.getKey()) || opt.alwaysQuoteName)  // Quote the key in case  it's not valid java identifier
-        writeQuotedString(out, cn.getKey(), opt.quoteChar);
+        writeQuotedString(out, cn.getKey(), opt, KEY);
       else
-        out.append(cn.getKey());
-      out.append(":");
+        out.append(opt.deco(cn.getKey(), KEY));
+      out.append(opt.deco(opt.deliminatorKey, OPERATOR));
       write(out, cn, opt, childIndentStr);
       if (i < node.getChildrenSize() - 1) // No need "," for last entry
-        out.append(",");
+        out.append(opt.deco(opt.deliminatorValue, OPERATOR));
     }
 
     if (opt.hasIndent() && node.hasChildren())
       out.append('\n').append(indentStr);
 
-    return (T) out.append('}');
+    return (T) out.append(opt.deco("}", OPERATOR));
   }
 
   @SneakyThrows
   <T extends Appendable> T writeArray(T out, TDNode node, TDJSONOption opt, String indentStr, String childIndentStr) {
-    out.append('[');
+    out.append(opt.deco("[", OPERATOR));
     if (node.hasChildren()) {
       for (int i = 0; i < node.getChildrenSize(); i++) {
         TDNode cn = node.getChild(i);
@@ -82,31 +85,31 @@ public class TDJSONWriter {
 
         write(out, cn, opt, childIndentStr);
         if (i < node.getChildrenSize() - 1) // No need "," for last entry
-          out.append(",");
+          out.append(opt.deco(opt.deliminatorValue, OPERATOR));
       }
 
       if (opt.hasIndent() && node.hasChildren())
         out.append('\n').append(indentStr);
     }
 
-    return (T)out.append(']');
+    return (T)out.append(opt.deco("]", OPERATOR));
   }
 
   @SneakyThrows
   <T extends Appendable> T writeSimple(T out, TDNode node, TDJSONOption opt) {
     Object value = node.getValue();
     if (value instanceof String)
-      return writeQuotedString(out, (String)value, opt.quoteChar);
+      return writeQuotedString(out, (String)value, opt, STRING);
 
     if (value instanceof Character)
-      return writeQuotedString(out, String.valueOf(value), opt.quoteChar);
+      return writeQuotedString(out, String.valueOf(value), opt, STRING);
 
-    return (T)out.append(String.valueOf(value));
+    return (T)out.append(opt.deco(String.valueOf(value), NON_STRING));
   }
 
-  <T extends Appendable> T writeQuotedString(T out, String str, char quoteChar) throws IOException {
-    return (T) out.append(quoteChar)
-        .append(StringUtil.cEscape(str, quoteChar, true))
-        .append(quoteChar);
+  <T extends Appendable> T writeQuotedString(T out, String str, TDJSONOption opt, TextType type) throws IOException {
+    return (T) out.append(opt.quoteChar)
+        .append(opt.deco(StringUtil.cEscape(str, opt.quoteChar, true), type))
+        .append(opt.quoteChar);
   }
 }
