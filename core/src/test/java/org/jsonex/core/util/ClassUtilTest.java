@@ -25,13 +25,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
@@ -278,7 +272,18 @@ public class ClassUtilTest {
   }
 
   @Test public void testObjectToSimpleType() {
-    assertEquals((Integer)100, ClassUtil.objectToSimpleType(100, Integer.class));
-    assertEquals((Float)(float)100.1, ClassUtil.objectToSimpleType(100.1, float.class));
+    assertEquals(100, ClassUtil.objectToSimpleType(100, Integer.class));
+    assertEquals(100.1f, ClassUtil.objectToSimpleType(100.1, float.class));
+  }
+
+  @SneakyThrows
+  @Test public void testFindMethod() {
+    MethodWrapper mw = ClassUtil.findMethod(HashMap.class, "<init>", 2, null);
+    assertEquals(HashMap.class.getConstructor(int.class, float.class), mw.getConstructor());
+    assertEquals(new HashMap<>(), mw.invoke(null, new Object[]{1, 0.7f}));
+    assertEquals("java.util.HashMap/<init>(int arg0, float arg1)", mw.toString());
+
+    mw = ClassUtil.findMethod(HashMap.class, "<init>", 1, new Class[]{TreeMap.class});
+    assertEquals(HashMap.class.getConstructor(Map.class), mw.getConstructor());
   }
 }

@@ -614,4 +614,39 @@ public class ClassUtil {
     logger.error("Can't find the caller stack, return a dummy Stacktrace");  // Shouldn't happen
     return UNKNOWN_STACK_TRACE_ELEMENT;  // Shouldn't reach here, return the DUMMY value just to avoid NPE for caller
   }
+
+  static final int SYNTHETIC = 0x00001000;  // Copied from Modifier as it's not accessible.
+  public static MethodWrapper findMethod(Class<?> cls, String method, int numOfParam, @Nullable Class<?>[] paramClasses) {
+    if(method.equals(MethodWrapper.METHOD_INIT)) {
+      for(Constructor<?> c : cls.getConstructors()) {
+        if(c.getParameterTypes().length != numOfParam)
+          continue;
+        if(isParamCompatible(c.getParameterTypes(), paramClasses))
+          return new MethodWrapper(c);
+      }
+    } else {
+      for (Method m : cls.getMethods()) {
+        if (m.getParameterTypes().length != numOfParam || !m.getName().equals(method))
+          continue;
+        if ((SYNTHETIC & m.getModifiers()) != 0)
+          continue;
+        if (isParamCompatible(m.getParameterTypes(), paramClasses))
+          return new MethodWrapper(m);
+      }
+    }
+    throw new IllegalArgumentException("Method Not Found: " + method +
+        " in class:" + cls.getName() + ", numOfParam:" + numOfParam + ", paramClasses:" + paramClasses);
+  }
+
+  private static boolean isParamCompatible(Class<?>[] paramClasses, Class<?>[] formalClasses) {
+    if(formalClasses == null)
+      return true;
+    Assert.isTrue(paramClasses.length == formalClasses.length,
+        "arg.length:" + paramClasses.length + ",types: " + formalClasses.length);
+    for(int i=0; i<paramClasses.length; i++) {
+      if(!paramClasses[i].isAssignableFrom(formalClasses[i]))
+        return false;
+    }
+    return true;
+  }
 }

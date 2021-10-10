@@ -11,6 +11,7 @@ package org.jsonex.core.util;
 
 import org.jsonex.core.type.Identifiable;
 
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -51,6 +52,21 @@ public class ListUtil {
   public static <TSrc, TDest> List<TDest> map(
       Collection<? extends TSrc> source, Function<? super TSrc, ? extends TDest> func) {
     return source == null ? null : map(source, func, new ArrayList<>());
+  }
+
+  public static <TSrc, TDest> TDest[] mapArray(TSrc[] source, Function<? super TSrc, ? extends TDest> func, TDest[] dest) {
+    return mapArrayWithIndex(source, (s, idx) -> func.apply(s), dest);
+  }
+
+  public static <TSrc, TDest> TDest[] mapArrayWithIndex(
+      TSrc[] source, BiFunction<? super TSrc, Integer, ? extends TDest> func, TDest[] dest) {
+    if (source == null)
+      return null;
+    if (dest.length < source.length)
+      dest = (TDest[]) Array.newInstance(dest.getClass().getComponentType(), source.length);
+    for (int i = 0; i < source.length; i++)
+      dest[i] = func.apply(source[i], i);
+    return dest;
   }
 
   public static <C extends Collection<? super TDest>, TSrc, TDest> C flatMapWithIndex(Collection<? extends TSrc> source,
