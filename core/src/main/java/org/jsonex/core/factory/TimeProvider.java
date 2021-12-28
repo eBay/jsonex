@@ -14,6 +14,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A time provider to provide abstraction of system time. So that application logic can avoid direct dependency of system time
@@ -37,4 +38,12 @@ public interface TimeProvider {
 
   Date getDate();
   long getTimeMillis();
+
+  default Date now(int offset, TimeUnit unit) {
+    return new Date(getTimeMillis() + unit.toMillis(offset));
+  }
+  default Date now(int offset) {
+    return new Date(getTimeMillis() + offset);
+  }
+  default Date now() { return getDate(); }
 }

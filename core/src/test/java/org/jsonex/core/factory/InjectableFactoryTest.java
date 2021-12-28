@@ -46,7 +46,7 @@ public class InjectableFactoryTest {
     assertEquals(C.class, i1Fact.get().getClass());
     assertNotSame(i1Fact.get(), i1Fact.get());
 
-    i1Fact = InjectableFactory._0.of(C0::new, CacheGlobal.get());
+    i1Fact = InjectableFactory._0.of(C0::new, ScopeGlobal.get());
     assertEquals(C0.class, i1Fact.get().getClass());
     assertSame(i1Fact.get(), i1Fact.get());
 
@@ -67,7 +67,7 @@ public class InjectableFactoryTest {
   }
 
   @Test public void testThreadLocalCache() throws InterruptedException {
-    final InjectableFactory._0<I1> fact = InjectableFactory._0.of(C::new, CacheThreadLocal.get());
+    final InjectableFactory._0<I1> fact = InjectableFactory._0.of(C::new, ScopeThreadLocal.get());
     final I1[] objs = new I1[3];
     objs[0] = fact.get();
     Thread thread = new Thread(() -> {
@@ -81,7 +81,7 @@ public class InjectableFactoryTest {
   }
 
   @Test public void testSetInstance() {
-    InjectableFactory<Void, I1> i1Fact = InjectableFactory.of((p) -> new C0(), CacheGlobal.get());
+    InjectableFactory<Void, I1> i1Fact = InjectableFactory.of((p) -> new C0(), ScopeGlobal.get());
     I1 inst = new I1() {};
     i1Fact.setInstance(inst);
     assertEquals(inst, i1Fact.get());

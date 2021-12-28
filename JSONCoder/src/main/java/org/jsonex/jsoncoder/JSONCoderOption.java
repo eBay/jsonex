@@ -13,7 +13,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
-import org.jsonex.core.factory.CacheThreadLocal;
+import org.jsonex.core.factory.ScopeThreadLocal;
 import org.jsonex.core.factory.InjectableFactory;
 import org.jsonex.core.type.Tuple;
 import org.jsonex.core.type.Tuple.Pair;
@@ -102,7 +102,7 @@ public class JSONCoderOption {
 
   // For performance reason, we need to cache SimpleDateFormat in the same thread as SimpleDateFormat is not threadsafe
   private static final InjectableFactory._2<String, TimeZone, SimpleDateFormat> dateFormatCache =
-      InjectableFactory._2.of(JSONCoderOption::buildDateFormat, CacheThreadLocal.get());
+      InjectableFactory._2.of(JSONCoderOption::buildDateFormat, ScopeThreadLocal.get());
 
   public SimpleDateFormat getCachedParsingDateFormat() { return getCachedDateFormat(parsingDateFormat); }
   public SimpleDateFormat getCachedDateFormat() { return getCachedDateFormat(dateFormat); }

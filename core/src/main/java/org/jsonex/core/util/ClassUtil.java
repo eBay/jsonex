@@ -228,7 +228,7 @@ public class ClassUtil {
    * It will try getter method first, then try field
    */
   @SneakyThrows
-  public static @Nullable  Object getPropertyValue(@Nullable Class<?> cls, @Nullable Object obj, String propertyName)
+  public static @Nullable Object getPropertyValue(@Nullable Class<?> cls, @Nullable Object obj, String propertyName)
   {
     if (cls == null && obj == null)
       return null;
@@ -616,6 +616,10 @@ public class ClassUtil {
   }
 
   static final int SYNTHETIC = 0x00001000;  // Copied from Modifier as it's not accessible.
+  public static MethodWrapper findMethod(Class<?> cls, String method, int numOfParam) {
+    return findMethod(cls, method, numOfParam, null);
+  }
+
   public static MethodWrapper findMethod(Class<?> cls, String method, int numOfParam, @Nullable Class<?>[] paramClasses) {
     if(method.equals(MethodWrapper.METHOD_INIT)) {
       for(Constructor<?> c : cls.getConstructors()) {

@@ -21,3 +21,4 @@ build.xml
 nb-configuration.xml
 *.versionsBackup
 .gradle
+.factorypath

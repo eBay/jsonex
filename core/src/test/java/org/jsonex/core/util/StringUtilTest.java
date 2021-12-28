@@ -45,6 +45,8 @@ public class StringUtilTest {
   @Test public void testFillString() {
     assertEquals("12  ", StringUtil.fillString("12", 4, ' ', false));
     assertEquals("  12", StringUtil.fillString("12", 4, ' ', true));
+    assertEquals("12  ", StringUtil.fillSpace("12", 4));
+    assertEquals("0012", StringUtil.fillZero("12", 4));
   }
 
   @Test public void testCEscape() {

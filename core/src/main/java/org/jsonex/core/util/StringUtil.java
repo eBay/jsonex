@@ -74,6 +74,14 @@ public class StringUtil {
       return str + sb.toString();
   }
 
+  public static String fillZero(String str,int length) {
+    return fillString(str,length,'0',true);
+  }
+
+  public static String fillSpace(String str,int length) {
+    return fillString(str,length,' ',false);
+  }
+
   private final static String C_ESC_CHAR = "'\"`\\\b\f\n\r\t";
   private final static String C_ESC_SYMB = "'\"`\\bfnrt";
   private final static char MIN_PRINTABLE_CHAR = ' ';
