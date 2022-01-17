@@ -71,19 +71,36 @@ public class LangUtil {
     return obj != null && cls.isAssignableFrom(obj.getClass()) ? func.apply(cls.cast(obj)) : elseFunc.apply(obj);
   }
 
-  public static <T, R> R getIfInstanceOfElseThrow(
+  @SneakyThrows
+  public static <E, T, R> R getIfInstanceOfOrElse(
+      E obj, Class<T> cls, Function<? super T, ? extends R> func, Function<? super E, ? extends R> elseFunc) {
+    if (obj != null && cls.isAssignableFrom(obj.getClass()))
+      return func.apply(cls.cast(obj));
+    return elseFunc.apply(obj);
+  }
+
+  public static <T, R> R getIfInstanceOfOrElseThrow(
       Object obj, Class<T> cls, Function<? super T, ? extends R> func) {
-    return getIfInstanceOfElseThrow(obj, cls, func, () ->
+    return getIfInstanceOfOrElseThrow(obj, cls, func, () ->
         new IllegalStateException("Expect class: " + cls + ";got: " + safe(obj, Object::getClass)));
   }
 
   @SneakyThrows
-  public static <T, R> R getIfInstanceOfElseThrow(
+  public static <T, R> R getIfInstanceOfOrElseThrow(
       Object obj, Class<T> cls, Function<? super T, ? extends R> func, Supplier<Exception> exp) {
     if (obj != null && cls.isAssignableFrom(obj.getClass()))
       return func.apply(cls.cast(obj));
     throw exp.get();
   }
+
+  @SneakyThrows
+  public static <E, T, R> R getIfInstanceOfOrElseThrow(
+      E obj, Class<T> cls, Function<? super T, ? extends R> func, Function<? super E, Exception> exp) {
+    if (obj != null && cls.isAssignableFrom(obj.getClass()))
+      return func.apply(cls.cast(obj));
+    throw exp.apply(obj);
+  }
+
 
   public static <T, T1 extends T, T2 extends T> T orElse(T1 value, T2 fullBack) {
     return value == null ? fullBack : value;

@@ -23,7 +23,7 @@ public class SnapshotOption {
   /** This method is only available if the serializer is SnapshotSerializerJsonCoder */
   @Transient
   public JSONCoderOption getJsonCoderOption() {
-    return getIfInstanceOfElseThrow(serializer, SnapshotSerializerJsonCoder.class, s -> s.getOption());
+    return getIfInstanceOfOrElseThrow(serializer, SnapshotSerializerJsonCoder.class, s -> s.getOption());
   }
 
   public SnapshotOption mutateJsonCoderOption(Function<JSONCoderOption, JSONCoderOption> mutator) {

@@ -3,6 +3,7 @@ package org.jsonex.core.util;
 import org.jsonex.core.type.Nullable;
 
 import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -47,5 +48,15 @@ public class ArrayUtil {
     for (int i = 0; i < ints.length; i++)
       result[i] = ints[i];
     return result;
+  }
+
+  public static <T> T[] subArray(@Nullable T[] array, int start, int length) {
+    if (start < 0)
+      start = array.length + start;
+    return Arrays.copyOfRange(array, start, start + length);
+  }
+
+  public static <T> T[] subArray(@Nullable T[] array, int start) {
+    return subArray(array, start, (array.length - start) % array.length);
   }
 }

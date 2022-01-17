@@ -14,4 +14,8 @@ public class ArrayUtilTest {
     assertArrayEquals(new int[]{1, 2, 3}, ArrayUtil.unbox(new Integer[]{ 1, 2, 3 }));
   }
 
+  @Test public void testSubArray() {
+    assertArrayEquals(new Integer[]{2, 3}, ArrayUtil.subArray(new Integer[]{ 1, 2, 3 }, -2));
+    assertArrayEquals(new Integer[]{2}, ArrayUtil.subArray(new Integer[]{ 1, 2, 3 }, 1, 1));
+  }
 }
