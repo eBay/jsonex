@@ -121,7 +121,7 @@ public class ListUtil {
   }
 
   /**
-   * The list should contain Long values. Otherwise ClassCastException will be thrown.
+   * The list should contain Long values, otherwise ClassCastException will be thrown.
    */
   public static long[] toLongArray(Collection<Object> list) {
     if (list == null)
