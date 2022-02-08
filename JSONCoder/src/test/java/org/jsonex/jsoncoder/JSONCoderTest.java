@@ -123,6 +123,10 @@ public class JSONCoderTest {
     assertEquals(str, toJSONString(tb1));
   }
 
+  @Test public void testEncodeArray() {
+    assertEquals("[1,2,3]", JSONCoder.get().encode(new int[]{1,2,3}));
+  }
+
   @Test public void testCyclicReference() {
     TestBean tb = new TestBean().setBean2(new TestBean2());
     tb.getBean2().testBean = tb;

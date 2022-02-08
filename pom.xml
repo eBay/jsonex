@@ -17,6 +17,7 @@
     <module>csv</module>
     <module>CliArg</module>
     <module>SnapshotTest</module>
+    <module>HiveUDF</module>
   </modules>
 
   <properties>

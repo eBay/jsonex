@@ -42,7 +42,7 @@ public class JSONCoderOption {
     global.addCoder(CoderDate.get(), CoderEnum.get(), CoderXMLGregorianCalendar.get(), CoderAtomicInteger.get(),
         CoderBigInteger.get(), CoderClass.get(), CoderURI.get(), CoderURL.get());
 
-    global.addSkippedClasses(Format.class);
+    global.addSkippedClasses(Format.class, ClassLoader.class);
     global.fallbackDateFormats.add("yyyy-MM-dd HH:mm:ss.SSS.Z");  //Just for backward compatibility.
     global.fallbackDateFormats.add("yyyy/MM/dd HH:mm:ss.SSS.Z");
     global.fallbackDateFormats.add("yyyy-MM-dd HH:mm:ss.SSS");
@@ -90,6 +90,9 @@ public class JSONCoderOption {
    * If true, for java bean type, only field include private will be returned, no setter getter method will be returned.
    */
   @Getter @Setter boolean showPrivateField;
+
+  /** by default, transientField won't be serialized. Set this to true will serialize it */
+  @Getter @Setter boolean showTransientField;
   
   @Getter @Setter String parsingDateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
   /**

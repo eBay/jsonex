@@ -63,7 +63,7 @@ public class CoderObject implements ICoder<Object> {
       if (pd.isImmutable(opt.isShowPrivateField()) && opt.isIgnoreReadOnly())
         continue;  // Only mutable attribute will be encoded
 
-      if (pd.isTransient())
+      if (pd.isTransient() && !opt.isShowTransientField())
         continue;
 
       if (opt.isExcluded(cls, pd.getName(), ctx))
