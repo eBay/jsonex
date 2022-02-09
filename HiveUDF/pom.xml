@@ -9,8 +9,8 @@
     <version>0.1.22</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
-  <artifactId>CliArg</artifactId>
-  <name>CliArg</name>
+  <artifactId>HiveUDF</artifactId>
+  <name>HiveUDF</name>
   <dependencies>
     <dependency>
       <groupId>org.projectlombok</groupId>
@@ -31,9 +31,15 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>SnapshotTest</artifactId>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hive</groupId>
+      <artifactId>hive-exec</artifactId>
+      <version>3.1.2</version>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
 </project>
