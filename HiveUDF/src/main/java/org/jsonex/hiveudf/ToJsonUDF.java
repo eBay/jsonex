@@ -11,11 +11,12 @@ import org.jsonex.jsoncoder.JSONCoder;
 
 
 /**
-  add jar file:///Users/jianwche/opensource/jsonex/HiveUDF/target/HiveUDF-0.1.22.jar;
-  add jar file:///Users/jianwche/opensource/jsonex/JSONCoder/target/JSONCoder-0.1.22.jar;
-  add jar file:///Users/jianwche/opensource/jsonex/core/target/core-0.1.22.jar;
-  add jar file:///Users/jianwche/opensource/jsonex/treedoc/target/treedoc-0.1.22.jar;
-  add jar file:///Users/jianwche/opensource/jsonex/csv/target/csv-0.1.22.jar;
+  add jar ivy://org.jsonex:HiveUDF:0.1.23?transitive=true;
+  add jar file:///Users/jianwche/opensource/jsonex/HiveUDF/target/HiveUDF-0.1.23.jar;
+  add jar file:///Users/jianwche/opensource/jsonex/JSONCoder/target/JSONCoder-0.1.23.jar;
+  add jar file:///Users/jianwche/opensource/jsonex/core/target/core-0.1.23.jar;
+  add jar file:///Users/jianwche/opensource/jsonex/treedoc/target/treedoc-0.1.23.jar;
+  add jar file:///Users/jianwche/opensource/jsonex/csv/target/csv-0.1.23.jar;
   CREATE TEMPORARY FUNCTION to_json AS 'org.jsonex.hiveudf.ToJsonUDF';
   CREATE TEMPORARY FUNCTION to_csv AS 'org.jsonex.hiveudf.ToCSVUDF';
 
