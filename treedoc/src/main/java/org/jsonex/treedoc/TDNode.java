@@ -20,6 +20,7 @@ import org.jsonex.core.util.StringUtil;
 import org.jsonex.treedoc.TDPath.Part;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -245,6 +246,14 @@ public class TDNode {
     }
     sb.append(type == Type.ARRAY ? ']' : '}');
     return sb;
+  }
+
+  public List<Object> childrenValueAsList() {
+    return getChildren() == null ? Collections.emptyList() : ListUtil.map(getChildren(), c -> c.getValue());
+  }
+
+  public List<List<Object>> childrenValueAsListOfList() {
+    return getChildren() == null ? Collections.emptyList() : ListUtil.map(getChildren(), c -> c.childrenValueAsList());
   }
 
   @Override public boolean equals(Object o) {

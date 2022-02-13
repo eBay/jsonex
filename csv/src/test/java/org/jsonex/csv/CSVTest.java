@@ -36,6 +36,6 @@ public class CSVTest {
     } catch (EOFRuntimeException e) {
       error = e.getMessage();
     }
-    assertEquals("Can't find matching quote at position:4;line:0;col:4", error);
+    assertEquals("Can't find matching quote at position:5;line:0;col:5", error);
   }
 }

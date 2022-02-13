@@ -241,6 +241,17 @@ public class ListUtil {
     return sb.toString();
   }
 
+  public static <T> String join(T[] list, char delimiter) { return join(Arrays.asList(list), delimiter); }
+  public static <T> String join(Collection<T> list, char delimiter) {
+    StringBuilder sb = new StringBuilder();
+    for(Object obj : list) {
+      if(sb.length() > 0)
+        sb.append(delimiter);
+      sb.append(obj);
+    }
+    return sb.toString();
+  }
+
   public static <V, C extends Collection<V>> boolean exists(C source, Predicate<? super V> pred) {
     return source == null ? false : first(source, pred).isPresent();
   }

@@ -49,32 +49,38 @@ public class CSVParser {
 
   Object readField(CharSource src, CSVOption opt) {
     StringBuilder sb = new StringBuilder();
-    boolean previousQuoted = false;
-    boolean isString = false;
-    while (!src.isEof() && src.peek() != opt.fieldSep && src.peek() != opt.recordSep) {
-      if (src.peek() == opt.quoteChar) {
-        isString = true;
-        if (previousQuoted)
-          sb.append(opt.quoteChar);
+    if (src.isEof())
+      return sb.toString();
 
+    boolean isString = false;
+    if (src.peek() != opt.quoteChar) {  // Read non-quoted string
+      sb.append(src.readUntil(opt.getFieldAndRecord()).trim());
+    } else {  // Read quoted string
+      isString = true;
+      src.skip();
+      while (!src.isEof() && src.peek() != opt.fieldSep && src.peek() != opt.recordSep) {
         // Not calling getBookmark() to avoid clone an object
         int pos = src.bookmark.getPos();
         int line = src.bookmark.getLine();
         int col = src.bookmark.getCol();
 
-        src.skip();  // for "", we will keep one quote
         src.readUntil(sb, opt.getQuoteCharStr());
-
         if (src.isEof())
           throw new EOFRuntimeException("Can't find matching quote at position:" + pos + ";line:" + line + ";col:" + col);
-        if (src.peek() == opt.quoteChar)
+
+        src.skip();
+        if (src.isEof())
+          break;
+        if (src.peek() == opt.quoteChar) {
+          sb.append(opt.quoteChar);
           src.skip();
-        previousQuoted = true;
-      } else {
-        sb.append(src.readUntil(opt.getFieldAndRecord()).trim());
-        previousQuoted = false;
+        } else {
+          break;
+        }
       }
+      src.skipSpacesAndReturns();
     }
+
     if (!src.isEof() && src.peek() == opt.fieldSep)
       src.skip();  // Skip fieldSep
 

@@ -33,10 +33,6 @@ public class ToJsonUDFTest {
     );
   }
 
-  @Test public void testToJavaObj() {
-    assertEquals("{key:{gender:'m',age:10}}", toJson(ToJsonUDF.toJavaObj(buildMapArgs(), buildMapOI())));
-  }
-
   @SneakyThrows
   @Test public void testEvaluateSingleArg() {
     ToJsonUDF udf = new ToJsonUDF();
@@ -56,10 +52,8 @@ public class ToJsonUDFTest {
         }));
   }
 
-
   private static String toJson(Object obj) {
     JSONCoderOption opt = JSONCoderOption.of().setJsonOption(false, '\'', 0);
     return JSONCoder.encode(obj, opt);
   }
-
 }
