@@ -4,8 +4,10 @@ import org.jsonex.core.type.Nullable;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class ArrayUtil {
   public static <T> int indexOf(@Nullable T[] array, T e) {
@@ -59,4 +61,21 @@ public class ArrayUtil {
   public static <T> T[] subArray(@Nullable T[] array, int start) {
     return subArray(array, start, (array.length - start) % array.length);
   }
+
+  public static <V> Optional<V> first(V[] source, Predicate<? super V> pred) {
+    if (source != null)
+      for (V s : source)
+        if (pred.test(s))
+          return Optional.of(s);
+    return Optional.empty();
+  }
+
+  public static <V> int indexOf(V[] source, Predicate<? super V> pred) {
+    if (source != null)
+      for (int i = 0; i < source.length; i++)
+        if (pred.test(source[i]))
+          return i;
+    return -1;
+  }
+
 }

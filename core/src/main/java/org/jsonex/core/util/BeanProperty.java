@@ -15,8 +15,10 @@ import lombok.ToString;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
+import java.util.Optional;
 import java.util.function.Function;
 
+import static org.jsonex.core.util.ArrayUtil.first;
 import static org.jsonex.core.util.LangUtil.getIfInstanceOf;
 
 /**
@@ -35,7 +37,8 @@ public class BeanProperty {
     if (field != null && Modifier.isTransient(field.getModifiers()))
         return true;
 
-    return getAnnotation(java.beans.Transient.class) != null;
+    // java.beans.Transient.class is not available in Android. we use name matching
+    return getAnnotation("Transient") != null;
   }
 
   public boolean isImmutable(boolean allowPrivate){return setter == null && !isFieldAccessible(allowPrivate); }
@@ -97,7 +100,28 @@ public class BeanProperty {
     
     return null;
   }
-  
+
+  public Annotation getAnnotation(String name) {
+    Optional<Annotation> result;
+    if (getter != null) {
+      result = getAnnotation(getter.getAnnotations(), name);
+      if (result.isPresent())
+        return result.get();
+    }
+    if (field != null) {
+      result = getAnnotation(field.getAnnotations(), name);
+      if (result.isPresent())
+        return result.get();
+    }
+    if (setter != null)
+      return getAnnotation(setter.getAnnotations(), name).orElse(null);
+    return null;
+  }
+
+  private Optional<Annotation> getAnnotation(Annotation[] annot, String name) {
+    return first(annot, a -> a.annotationType().getSimpleName().equals(name));
+  }
+
   public Type getGenericType(){
     if (getter != null)
       return getter.getGenericReturnType();

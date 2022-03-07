@@ -26,10 +26,10 @@ import static org.jsonex.core.util.ListUtil.map;
         "specify field separator or quote.  \n" +
         "Avaliable options: fieldSep:char, quoteChar:char, noHeader:boolean, headers:array<string>",
     extended = "Example:\n"
-        + "  > select to_csv(*) from tbl"
-        + "  > select to_csv('{fieldSep:|,quoteChar:\"\\'\"}', *) from a; from tbl"
-        + "  > select to_csv('{noHead:true}', *) from a; from tbl"
-        + "  > select to_csv('{headers:[,,,col3,]}', *) from a; from tbl"
+        + "  > SELECT to_csv(*) FROM someTable \n"
+        + "  > SELECT to_csv('{fieldSep:|,quoteChar:\"\\'\"}', *) FROM someTable \n"
+        + "  > SELECT to_csv('{noHead:true}', *) FROM someTable \n"
+        + "  > SELECT to_csv('{headers:[,,,col3,]}', *) FROM someTable \n"
 )
 @Slf4j
 public class ToCSVUDF extends GenericUDF {

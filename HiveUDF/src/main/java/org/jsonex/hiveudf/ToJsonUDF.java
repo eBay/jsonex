@@ -20,13 +20,11 @@ import org.jsonex.jsoncoder.JSONCoder;
   CREATE TEMPORARY FUNCTION to_json AS 'org.jsonex.hiveudf.ToJsonUDF';
   CREATE TEMPORARY FUNCTION to_csv AS 'org.jsonex.hiveudf.ToCSVUDF';
 
- create table a(i int, m MAP<STRING, STRUCT<gender:STRING, age:INT>>, s STRUCT<address:STRING, zip:STRING>);
+  create table a(i int, m MAP<STRING, STRUCT<gender:STRING, age:INT>>, s STRUCT<address:STRING, zip:STRING>);
   insert into a values(1, map('ab',named_struct('gender', 'm', 'age', 10), 'cd', named_struct('gender', 'f', 'age', 11)), named_struct('address', 'ca', 'zip', '123'));
   create table a(i int, m ARRAY<STRUCT<gender:STRING, age:INT>>);
   select to_json(*) from a;
- select to_json(s) from a;
-
- 1|[a=[m,10],b=[f,20]]|[ca,123]
+  select to_json(s) from a;
  */
 @Description(name = "to_json",
     value = "to_json(obj1, obj2,...) - Serialize to json. \n",
