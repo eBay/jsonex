@@ -77,7 +77,7 @@ public class Snapshot {
         tempFile.delete();
         result = Result.MATCHES;
         message = null;
-        return this; 
+        return this;
       } catch (Exception e) {
         message = this + " and actual mismatch. The actual is record in file:\nfile://" + tempFile.getAbsolutePath() +
             "\nPlease review the difference. If the change is expected, please override the snapshot file with the tmp file.";
