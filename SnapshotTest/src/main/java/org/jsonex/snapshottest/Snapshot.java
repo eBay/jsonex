@@ -14,6 +14,8 @@ import java.util.function.Function;
 import static org.jsonex.core.util.LangUtil.throwIf;
 import static org.jsonex.core.util.StringUtil.isEmpty;
 
+import org.skyscreamer.jsonassert.JSONAssert;
+
 /**
  * Snapshot is a simple test utility to record actual output into snapshot file when the test is first time run,
  * and for subsequent runs, it will verify the new output against the recorded snapshot value. If there's difference,
@@ -66,18 +68,24 @@ public class Snapshot {
     File tempFile = new File(getTempFile());
     if (file.exists()) {
       String expected = FileUtil.readFile(file);
-      if (Objects.equals(actualString, expected)) {
+      try {
+        String formattedActualString = actualString.replace("`", "\"");
+        String formattedExpectedString = expected.replace("`", "\"");
+        formattedActualString = formattedActualString.replace("\'\"", "`");
+        formattedExpectedString = formattedExpectedString.replace("\'\"", "`");
+        JSONAssert.assertEquals(formattedActualString, formattedExpectedString, false);
         tempFile.delete();
         result = Result.MATCHES;
         message = null;
-        return this;
+        return this; 
+      } catch (Exception e) {
+        message = this + " and actual mismatch. The actual is record in file:\nfile://" + tempFile.getAbsolutePath() +
+            "\nPlease review the difference. If the change is expected, please override the snapshot file with the tmp file.";
+        log.error(message);
+        FileUtil.writeFile(tempFile, actualString);
+        result = Result.MISMATCH;
+        throw new AssertionError(this + " and actual mismatch " + "expected:<" + expected + "> but was:<" + getActualString() + ">");
       }
-      message = this + " and actual mismatch. The actual is record in file:\nfile://" + tempFile.getAbsolutePath() +
-          "\nPlease review the difference. If the change is expected, please override the snapshot file with the tmp file.";
-      log.error(message);
-      FileUtil.writeFile(tempFile, actualString);
-      result = Result.MISMATCH;
-      throw new AssertionError(this + " and actual mismatch " + "expected:<" + expected + "> but was:<" + getActualString() + ">");
     } else {
       message = this + " doesn't exist, will record the initial snapshot in\n file://" + file.getAbsolutePath()
           + "\n snapshot content:\n" + actual;
