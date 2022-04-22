@@ -40,7 +40,7 @@ public class CoderMap implements ICoder<Map> {
     JSONCoderOption opt = ctx.getOption();
 
     Map<?,?> map = (Map<?,?>)obj;
-    if (opt.isStrictOrder()
+    if (opt.isSortMapAndSet()
         && !(map instanceof SortedMap) && ! (map instanceof LinkedHashMap) && ! (map instanceof EnumMap)) {
       TreeMap treeMap = new TreeMap<>(FullbackComparator.it);  // Due to instability of map iterator, we copy it to TreeMap to make it in stable order.
       treeMap.putAll(map);

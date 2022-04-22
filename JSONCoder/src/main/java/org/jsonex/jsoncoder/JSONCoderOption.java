@@ -178,9 +178,15 @@ public class JSONCoderOption {
 
   /**
    * As Java Map and Set implementation, the order may not be strictly consistent cross JVM implementation
-   * set this to true, it will sort the keys in a predicated order
+   * set this to true, it will sort the keys in a deterministic order
    */
-  @Getter @Setter private boolean strictOrder = false;
+  @Getter @Setter private boolean sortMapAndSet = false;
+
+  /**
+   * In JVM implementation, Object getter method iteration order is not deterministic. Set this to true, it will
+   * order the object keys. It won't sort Map's key order, for map or set ordering, please use sortMapAndSet
+   */
+  @Getter @Setter private boolean sortObjectKeys = false;
 
   public JSONCoderOption() { this(global); }
   private JSONCoderOption(JSONCoderOption parent) { this.parent = parent; }

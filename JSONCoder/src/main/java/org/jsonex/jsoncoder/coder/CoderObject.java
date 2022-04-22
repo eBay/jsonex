@@ -30,6 +30,7 @@ import java.lang.reflect.TypeVariable;
 import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
+import java.util.TreeMap;
 import java.util.function.Function;
 
 import static org.jsonex.core.util.LangUtil.getIfInstanceOf;
@@ -56,6 +57,8 @@ public class CoderObject implements ICoder<Object> {
       target.createChild(TYPE_KEY).setValue(obj.getClass().getName());
 
     Map<String, BeanProperty> pds = ClassUtil.getProperties(cls);
+    if (opt.isSortObjectKeys())
+      pds = new TreeMap<>(pds);
     for (BeanProperty pd : pds.values()) {
       if (!pd.isReadable(opt.isShowPrivateField()))
         continue;
