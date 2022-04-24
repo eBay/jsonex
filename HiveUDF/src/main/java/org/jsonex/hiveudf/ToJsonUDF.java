@@ -8,6 +8,7 @@ import org.apache.hadoop.hive.ql.udf.generic.GenericUDF;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorFactory;
 import org.jsonex.jsoncoder.JSONCoder;
+import org.jsonex.jsoncoder.JSONCoderOption;
 
 
 /**
@@ -54,7 +55,7 @@ public class ToJsonUDF extends GenericUDF {
   private static String toJson(Object obj) {
 //    JSONCoderOption opt = JSONCoderOption.of().setShowType(true).setShowPrivateField(true).setDedupWithRef(true)
 //        .setShowTransientField(true).addSkippedClasses(HiveConf.class);
-    return JSONCoder.get().encode(obj);
+    return JSONCoder.get().encode(obj, JSONCoderOption.of().setStrictOrdering(true));
   }
 
   @Override

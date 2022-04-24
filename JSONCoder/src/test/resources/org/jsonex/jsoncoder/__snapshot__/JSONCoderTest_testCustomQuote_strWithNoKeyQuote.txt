@@ -1,75 +1,75 @@
 {
-  fieldInBaseClass:'Overridden Value',
-  treeMap:{
-    key1:'value1'
-  },
-  linkedList1:[
-    'value1'
-  ],
-  intField:100,
-  floatField:1.4,
-  charField:'A',
-  booleanField:false,
-  strField:'String1: \'"',
-  dateField:'1970-01-01T03:23:32.121Z',
+  atomicInteger:1001,
   bean2:{
     enumField:'value2',
     enumField2:12345,
-    strEnum:'strEnumV1',
+    enumMap:{
+      value1:'MapValue1'
+    },
     enumSet:[
       'value1',
       'value2'
     ],
-    enumMap:{
-      value1:'MapValue1'
-    },
+    strEnum:'strEnumV1',
     testBean:{
       $ref:'../../'
     }
   },
+  bean2List:[
+    {
+      enumMap:{},
+      enumSet:[
+        'value1',
+        'value2'
+      ],
+      strField:'AAA'
+    },
+    {
+      enumMap:{},
+      enumSet:[
+        'value1',
+        'value2'
+      ],
+      strField:'BBB'
+    }
+  ],
+  bean2s:[
+    {
+      enumMap:{},
+      enumSet:[
+        'value1',
+        'value2'
+      ],
+      strField:'1'
+    },
+    {
+      enumMap:{},
+      enumSet:[
+        'value1',
+        'value2'
+      ],
+      strField:'2'
+    }
+  ],
+  bigInteger:'123456789012345678901234567890',
+  booleanField:false,
+  charField:'A',
+  dateField:'1970-01-01T03:23:32.121Z',
+  dateNumberMap:[
+    null
+  ],
+  fieldInBaseClass:'Overridden Value',
+  floatField:1.4,
+  intField:100,
   ints:[
     4,
     3,
     2,
     1
   ],
-  bean2s:[
-    {
-      strField:'1',
-      enumSet:[
-        'value1',
-        'value2'
-      ],
-      enumMap:{}
-    },
-    {
-      strField:'2',
-      enumSet:[
-        'value1',
-        'value2'
-      ],
-      enumMap:{}
-    }
-  ],
-  readonlyField:'This\'s a readonly field',
-  atomicInteger:1001,
-  bigInteger:'123456789012345678901234567890',
-  someClass:'java.util.Date',
-  xmlCalendar:'1970-01-01T00:00:00.000Z',
-  dateNumberMap:[
-    null
-  ],
-  publicLinkedList:[
+  linkedList1:[
     'value1'
   ],
-  publicTreeMap:{
-    key1:'value1'
-  },
-  publicStrField:'PublicString',
-  publicMap:{
-    key1:'1970-01-01T00:00:00.000Z',
-    key2:'1970-01-01T00:20:12.121Z'
-  },
   publicBigDecimal1:'123456789012345678901234567',
   publicBigDecimal2:'12',
   publicInts:[
@@ -78,26 +78,26 @@
     2,
     1
   ],
-  bean2List:[
-    {
-      strField:'AAA',
-      enumSet:[
-        'value1',
-        'value2'
-      ],
-      enumMap:{}
-    },
-    {
-      strField:'BBB',
-      enumSet:[
-        'value1',
-        'value2'
-      ],
-      enumMap:{}
-    }
+  publicLinkedList:[
+    'value1'
   ],
+  publicMap:{
+    key1:'1970-01-01T00:00:00.000Z',
+    key2:'1970-01-01T00:20:12.121Z'
+  },
+  publicStrField:'PublicString',
   publicStringSet:[
     'str1',
     'str2'
-  ]
+  ],
+  publicTreeMap:{
+    key1:'value1'
+  },
+  readonlyField:'This\'s a readonly field',
+  someClass:'java.util.Date',
+  strField:'String1: \'"',
+  treeMap:{
+    key1:'value1'
+  },
+  xmlCalendar:'1970-01-01T00:00:00.000Z'
 }

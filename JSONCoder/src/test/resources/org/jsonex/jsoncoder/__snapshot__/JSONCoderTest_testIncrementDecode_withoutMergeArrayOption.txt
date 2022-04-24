@@ -1,31 +1,31 @@
 {
-  "strField":"strVal1",
   "enumField":"value1",
-  "ints":[
-    3,
-    4
-  ],
+  "enumMap":{},
   "enumSet":[
     "value1",
     "value2"
   ],
-  "enumMap":{},
+  "ints":[
+    3,
+    4
+  ],
+  "strField":"strVal1",
   "testBean":{
+    "atomicInteger":100,
+    "booleanField":false,
+    "charField":"\u0000",
+    "dateField":"2017-10-01T00:00:00.000Z",
     "fieldInBaseClass":"Overridden Value",
-    "treeMap":{},
+    "floatField":2.0,
+    "intField":0,
     "linkedList1":[
       "c",
       "d"
     ],
-    "intField":0,
-    "floatField":2.0,
-    "charField":"\u0000",
-    "booleanField":false,
-    "dateField":"2017-10-01T00:00:00.000Z",
-    "readonlyField":"This's a readonly field",
-    "atomicInteger":100,
     "publicLinkedList":[],
+    "publicStrField":"publicStrVal",
     "publicTreeMap":{},
-    "publicStrField":"publicStrVal"
+    "readonlyField":"This's a readonly field",
+    "treeMap":{}
   }
 }

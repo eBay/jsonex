@@ -112,7 +112,23 @@ Please refer the unit test class for more detailed usage patterns:
       .addCoder(new CoderBigInteger());
     String jsonStr = JSONCoder.global.encode(new BigInteger("1234"), opt); 
     ```
- 
+
+## Developer Guild
+- Build with non-determinism check (credit to @chessvivek on PR: https://github.com/eBay/jsonex/pull/47)
+```bash
+mvn edu.illinois:nondex-maven-plugin:1.1.2:nondex -pl JSONCoder
+mvn edu.illinois:nondex-maven-plugin:1.1.2:nondex -pl SnapshotTest
+mvn edu.illinois:nondex-maven-plugin:1.1.2:nondex -pl core
+mvn edu.illinois:nondex-maven-plugin:1.1.2:nondex -pl csv
+mvn edu.illinois:nondex-maven-plugin:1.1.2:nondex -pl treedoc
+# mvn edu.illinois:nondex-maven-plugin:1.1.2:nondex -pl CliArg  # Fail expected, as Cli Annotation depends on field ordering
+mvn edu.illinois:nondex-maven-plugin:1.1.2:nondex -pl HiveUDF
+
+
+
+
+```
+
 ## Limitations and Future enhancements
 * Performance improvement
 * Support of variable placeholder in JSON doc

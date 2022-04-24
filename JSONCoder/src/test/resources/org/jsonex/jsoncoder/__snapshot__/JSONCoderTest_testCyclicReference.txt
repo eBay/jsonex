@@ -1,23 +1,23 @@
 {
-  fieldInBaseClass:`Overridden Value`,
-  treeMap:{},
-  linkedList1:[],
-  intField:0,
-  floatField:0.0,
-  charField:`\u0000`,
-  booleanField:false,
+  atomicInteger:100,
   bean2:{
+    enumMap:{},
     enumSet:[
       `value1`,
       `value2`
     ],
-    enumMap:{},
     testBean:{
       $ref:`../../`
     }
   },
-  readonlyField:`This's a readonly field`,
-  atomicInteger:100,
+  booleanField:false,
+  charField:`\u0000`,
+  fieldInBaseClass:`Overridden Value`,
+  floatField:0.0,
+  intField:0,
+  linkedList1:[],
   publicLinkedList:[],
-  publicTreeMap:{}
+  publicTreeMap:{},
+  readonlyField:`This's a readonly field`,
+  treeMap:{}
 }

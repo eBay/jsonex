@@ -22,3 +22,4 @@ nb-configuration.xml
 *.versionsBackup
 .gradle
 .factorypath
+.nondex

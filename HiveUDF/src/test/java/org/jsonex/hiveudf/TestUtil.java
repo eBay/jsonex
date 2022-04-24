@@ -28,7 +28,7 @@ public class TestUtil {
   }
 
   public static String toJson(Object obj) {
-    JSONCoderOption opt = JSONCoderOption.of().setJsonOption(false, '\'', 0);
+    JSONCoderOption opt = JSONCoderOption.of().setJsonOption(false, '\'', 0).setStrictOrdering(true);
     return JSONCoder.encode(obj, opt);
   }
 }

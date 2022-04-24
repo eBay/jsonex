@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 public class SnapshotSerializerJsonCoder implements SnapshotSerializer<JSONCoderOption, SnapshotSerializerJsonCoder> {
-  @Getter @Setter private transient JSONCoderOption option = JSONCoderOption.ofIndentFactor(2).setSortMapAndSet(true).setSortObjectKeys((true));
+  @Getter @Setter private transient JSONCoderOption option = JSONCoderOption.ofIndentFactor(2).setStrictOrdering(true);
 
   @Override
   public String serialize(Object obj) {

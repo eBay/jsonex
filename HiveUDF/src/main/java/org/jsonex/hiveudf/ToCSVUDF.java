@@ -76,7 +76,7 @@ public class ToCSVUDF extends GenericUDF {
       sb.append(CSVWriter.get().encodeRecord(headers, opt)).append("\n");
     }
     List<Object> values = map(map.values(), v -> v instanceof List || v instanceof Map
-            ? JSONCoder.get().encode(v, new JSONCoderOption().setShowType(true)) : v);
+            ? JSONCoder.get().encode(v, new JSONCoderOption().setStrictOrdering(true)) : v);
     sb.append(CSVWriter.get().encodeRecord(values, opt));
     return sb.toString();
   }

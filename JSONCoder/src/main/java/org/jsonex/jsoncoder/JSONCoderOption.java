@@ -194,7 +194,11 @@ public class JSONCoderOption {
   public static JSONCoderOption ofIndentFactor(int factor) {
     return new JSONCoderOption().setJsonOption(TDJSONOption.ofIndentFactor(factor));
   }
-  
+
+  public JSONCoderOption setStrictOrdering(boolean value) {
+    return setSortMapAndSet(value).setSortObjectKeys(value);
+  }
+
   ICoder<?> findCoder(Class<?> cls){
     for (ICoder<?> bc : coderList){
       if(bc.getType().isAssignableFrom(cls))

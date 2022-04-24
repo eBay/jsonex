@@ -76,7 +76,8 @@ public class ClassUtilTest {
     log.info("Properties.keySet():" + properties.keySet());
     String[] exp = {"fieldA1", "fieldA2", "fieldA3", "fieldA4", "fieldB1", "fieldB2", "fieldB3", "fieldB4", "fieldB5", "fieldB6", "readOnly", "writeOnly"};
     // Java compiler will mass up the order of the getter methods, field order is preserved in most of the java versions
-    assertArrayEquals(exp, properties.keySet().toArray());
+    // assertArrayEquals(exp, properties.keySet().toArray());  // This will fail
+    assertEquals(ListUtil.setOf(exp), properties.keySet());
 
     // Field with setter/getters
     BeanProperty prop = properties.get("fieldB6");
