@@ -9,7 +9,7 @@ public class FileUtil {
   public static Reader loadResource(Class cls, String fileName) {
     InputStream in = cls.getResourceAsStream(fileName);
     if (in == null)
-      throw new RuntimeException("Resource is not round: fileName: " + fileName + ", cls:" + cls.getCanonicalName());
+      throw new RuntimeException("Resource is not found: fileName: " + fileName + ", cls:" + cls.getCanonicalName());
     return new InputStreamReader(in);
   }
 

@@ -100,13 +100,20 @@ public class ListUtil {
     return result;
   }
 
+  /**
+   * convert a Map to another Map by applying keyFunc and valFunc to convert key and values. If converted key is null
+   * the entry will be removed
+   */
   public static <K, V, TK, TV> Map<TK, TV> map(Map<? extends K, ? extends V> source,
       Function<? super K, ? extends TK> keyFunc, Function<? super V, ? extends TV> valFunc) {
     if (source == null)
       return null;
     Map<TK, TV> result = new HashMap<>();
-    for (Map.Entry<? extends K, ? extends V> entry : source.entrySet())
-      result.put(safe(entry.getKey(), keyFunc), safe(entry.getValue(), valFunc));
+    for (Map.Entry<? extends K, ? extends V> entry : source.entrySet()) {
+      TK key = safe(entry.getKey(), keyFunc);
+      if (key != null)
+        result.put(key, safe(entry.getValue(), valFunc));
+    }
     return result;
   }
 
