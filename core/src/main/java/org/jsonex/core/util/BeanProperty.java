@@ -31,6 +31,7 @@ public class BeanProperty {
   @Getter final String name;
   @Getter Method setter;
   @Getter Method getter;
+  @Getter Method hasChecker;
   @Getter Field field;
   
   public boolean isTransient() {
@@ -68,6 +69,8 @@ public class BeanProperty {
   
   public Object get(Object obj){
     try {
+      if (hasChecker != null && Boolean.FALSE.equals(hasChecker.invoke(obj)))
+        return null;
       if (getter != null) {
         getter.setAccessible(true);
         return getter.invoke(obj);

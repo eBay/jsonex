@@ -58,6 +58,13 @@ public class ClassUtilTest {
     @Nullable @Transient
     public void setWriteOnly(String str) { fieldB5 = str; }
     public String getReadOnly() { return fieldB1; }
+
+    public boolean hasFieldWithHasCheck() { return false; };
+    public String getFieldWithHasCheck() { throw new IllegalStateException("fieldWithHasCheck is not available"); }
+
+    public boolean isFieldWithUnionCheck() { return false; };
+    public String getFieldWithUnionCheck() { throw new IllegalStateException("fieldWithUnionCheck is not available"); }
+
   }
 
   @SuppressWarnings({"CanBeFinal", "SameReturnValue", "WeakerAccess"})
@@ -74,7 +81,7 @@ public class ClassUtilTest {
   @Test public void testGetProperties() {
     Map<String, BeanProperty> properties = ClassUtil.getProperties(B.class);
     log.info("Properties.keySet():" + properties.keySet());
-    String[] exp = {"fieldA1", "fieldA2", "fieldA3", "fieldA4", "fieldB1", "fieldB2", "fieldB3", "fieldB4", "fieldB5", "fieldB6", "readOnly", "writeOnly"};
+    String[] exp = {"fieldA1", "fieldA2", "fieldA3", "fieldA4", "fieldB1", "fieldB2", "fieldB3", "fieldB4", "fieldB5", "fieldB6", "fieldWithHasCheck", "fieldWithUnionCheck", "readOnly", "writeOnly"};
     // Java compiler will mass up the order of the getter methods, field order is preserved in most of the java versions
     // assertArrayEquals(exp, properties.keySet().toArray());  // This will fail
     assertEquals(ListUtil.setOf(exp), properties.keySet());
@@ -120,6 +127,10 @@ public class ClassUtilTest {
     assertNull(prop.getAnnotation(DefaultEnum.class));
     assertEquals(Modifier.PUBLIC, prop.getModifier());
     assertTrue(prop.isTransient());
+
+    // Has checker
+    assertNull(properties.get("fieldWithHasCheck").get(b));
+    assertNull(properties.get("fieldWithUnionCheck").get(b));
   }
 
   @Test public void testGetPropertiesWithExceptions () {

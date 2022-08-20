@@ -23,6 +23,7 @@ import java.util.function.Predicate;
 
 import static org.jsonex.core.util.ArrayUtil.indexOf;
 import static org.jsonex.core.util.ListUtil.listOf;
+import static org.jsonex.core.util.StringUtil.lowerFirst;
 
 @SuppressWarnings("ALL")
 public class ClassUtil {
@@ -88,7 +89,7 @@ public class ClassUtil {
     Map<String, BeanProperty> result = beanPropertyCache.get(cls);
     if (result == null) {
       synchronized(beanPropertyCache) {
-        result = _getProperties(cls);
+        result = getPropertiesNoCache(cls);
         beanPropertyCache.put(cls, result);
       }
     }
@@ -97,7 +98,7 @@ public class ClassUtil {
 
   private static final WeakHashMap<Class<?>, Map<String, BeanProperty>> beanPropertyCache = new WeakHashMap<>();
 
-  private static Map<String, BeanProperty> _getProperties(Class<?> cls) {
+  private static Map<String, BeanProperty> getPropertiesNoCache(Class<?> cls) {
     // Find all the getter/setter methods
     // Use TreeMap as method is not in stable order in JVM implementations, so we need to sort them to make stable order
     Map<String, BeanProperty> attributeMap = new TreeMap<>();
@@ -106,46 +107,33 @@ public class ClassUtil {
       if(!Modifier.isPublic(mod) || Modifier.isStatic(mod))
         continue;  //None public, or static, transient
 
-      String name = null;
-      boolean isSetter = false;
-      if (m.getName().startsWith("get"))
-        name = m.getName().substring(3);
-      else if(m.getName().startsWith("is")) {
-        if(m.getReturnType() != Boolean.class && m.getReturnType() != boolean.class)
+      for (BeanMethodType methodType: BeanMethodType.values()) {
+        String name = methodType.checkAndGetName(m);
+        if (name == null)
           continue;
-        name = m.getName().substring(2);
-      } else if(m.getName().startsWith("set")) {
-        isSetter = true;
-        name = m.getName().substring(3);
-      }else
-        continue;
 
-      if (!isSetter && m.getParameterTypes().length != 0)
-        continue;
+        if (name.length() == 0)  // JSON doesn't allow emptdy key, we replace it with ^
+          name = "^";
 
-      if (isSetter && m.getParameterTypes().length != 1)
-        continue;
+        name = lowerFirst(name);
+        if (name.equals("class"))
+          continue;
 
-      if (name.length() == 0)  // JSON doesn't allow empty key, we replace it with ^
-        name = "^";
-
-      name = StringUtil.lowerFirst(name);
-      if(name.equals("class"))
-        continue;
-
-      BeanProperty prop = attributeMap.get(name);
-      if(prop == null){
-        prop = new BeanProperty(name);
-        attributeMap.put(name, prop);
-      }
-
-      if(isSetter)
-        prop.setter = m;
-      else {
-        // For union type in certain framework, isXXX is to indicate if the attribute is available, we will override it
-        // with the actual getter method
-        if (prop.getter == null || prop.getter.getReturnType() == Boolean.TYPE)
-          prop.getter = m;
+        BeanProperty prop = attributeMap.computeIfAbsent(name, k -> new BeanProperty(k));
+        switch (methodType) {
+          case has: prop.hasChecker = m; break;
+          case set: prop.setter = m; break;
+          case is:
+          case get:
+            if (prop.getter == null)
+              prop.getter = m;
+            else if (BeanMethodType.is.checkAndGetName(prop.getter) != null) {
+              // For union type in certain framework, isXXX is to indicate if the attribute is available, we will override it
+              // with the actual getter method
+              prop.hasChecker = prop.getter;
+              prop.getter = m;
+            }
+        }
       }
     }
 
@@ -179,6 +167,24 @@ public class ClassUtil {
 
     fieldMap.putAll(attributeMap);  // Add back those setter/getter with field.
     return fieldMap;
+  }
+
+  private static boolean isReturnBoolean(Method m) {
+    return m.getReturnType() != Boolean.class && m.getReturnType() != boolean.class;
+  }
+
+  private enum BeanMethodType {
+    is { boolean valid(Method m) { return m.getParameterCount() == 0 && !isReturnBoolean(m); } },
+    get { boolean valid(Method m) { return m.getParameterCount() == 0; } },
+    has { boolean valid(Method m) { return m.getParameterCount() == 0 && !isReturnBoolean(m); } },
+    set { boolean valid(Method m) { return m.getParameterCount() == 1; } }
+    ;
+    abstract boolean valid(Method m);
+    String checkAndGetName(Method m) {
+      if (!m.getName().startsWith(this.name()))
+        return null;
+      return valid(m) ? m.getName().substring(this.name().length()) : null;
+    }
   }
 
   /**
