@@ -109,4 +109,19 @@ public class LangUtil {
   public static <T, T1 extends T> T orElse(T1 value, Supplier<? extends T> fullBack) {
     return value == null ? fullBack.get() : value;
   }
+
+  /**
+   *  Simulate Javascript comma operator, run actions in sequence and return the last parameter
+   *  This is useful to combine multiple statement into a single espresso, so that we can avoid code block in lambda
+   */
+  public static <T> T seq(Runnable action, T val) {
+    action.run();
+    return val;
+  }
+
+  public static <T> T seq(Runnable action1, Runnable action2, T val) {
+    action1.run();
+    action2.run();
+    return val;
+  }
 }

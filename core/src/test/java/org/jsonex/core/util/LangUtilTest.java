@@ -57,4 +57,12 @@ public class LangUtilTest {
     LangUtil.doIfInstanceOf(col, List.class, list -> list.set(2, 0));
     assertEquals(ListUtil.setOf(1,2,3), col1);
   }
+
+  @Test public void testSeq() {
+    final int[] i = new int[]{0};
+    Integer val = 123;
+    assertEquals(val, LangUtil.seq(() -> i[0] += 1, val));
+    assertEquals(val, LangUtil.seq(() -> i[0] += 1, () -> i[0] += 1, val));
+    assertEquals(3, i[0]);
+  }
 }

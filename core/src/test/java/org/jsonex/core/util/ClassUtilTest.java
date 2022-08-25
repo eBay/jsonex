@@ -64,7 +64,6 @@ public class ClassUtilTest {
 
     public boolean isFieldWithUnionCheck() { return false; };
     public String getFieldWithUnionCheck() { throw new IllegalStateException("fieldWithUnionCheck is not available"); }
-
   }
 
   @SuppressWarnings({"CanBeFinal", "SameReturnValue", "WeakerAccess"})
