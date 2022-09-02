@@ -65,4 +65,9 @@ public class LangUtilTest {
     assertEquals(val, LangUtil.seq(() -> i[0] += 1, () -> i[0] += 1, val));
     assertEquals(3, i[0]);
   }
+
+  @Test public void testWith() {
+    assertEquals("abcd", LangUtil.with("abc", a -> a + "d"));
+    assertEquals("abcd", LangUtil.with("abc", "d", (a, b) -> a + b));
+  }
 }

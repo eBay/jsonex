@@ -124,6 +124,11 @@ public class ClassUtil {
           case has: prop.hasChecker = m; break;
           case set: prop.setter = m; break;
           case is:
+            if (prop.getter == null)
+              prop.getter = m;
+            else
+              prop.hasChecker = m ;
+            break;
           case get:
             if (prop.getter == null)
               prop.getter = m;

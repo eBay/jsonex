@@ -3,6 +3,7 @@ package org.jsonex.core.util;
 import lombok.SneakyThrows;
 import org.jsonex.core.type.Nullable;
 
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -123,5 +124,17 @@ public class LangUtil {
     action1.run();
     action2.run();
     return val;
+  }
+
+  /**
+   *  Convert a block of code with local variables definitions into an single expression, it's useful to avoid code block
+   *  in lambda statement.
+   */
+  public static <T, R> R with(T val, Function<T, R> action) {
+    return action.apply(val);
+  }
+
+  public static <T1, T2, R> R with(T1 val1, T2 val2, BiFunction<T1, T2, R> action) {
+    return action.apply(val1, val2);
   }
 }

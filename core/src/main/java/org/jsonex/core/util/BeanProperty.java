@@ -79,7 +79,7 @@ public class BeanProperty {
         return field.get(obj);
       }
     } catch(Exception e) {
-      throw new InvokeRuntimeException("error get value:" + name + ", class:" + obj.getClass(), e);
+      throw new InvokeRuntimeException("error get value:" + name + ", class:" + obj.getClass() + ";hasChecker:" + hasChecker, e);
     }
     throw new InvokeRuntimeException("field is not readable: " + name + ", class:" + obj.getClass());
   }
