@@ -28,7 +28,11 @@ public class MapBuilder<K, V> {
   public MapBuilder(K key, V val) { put(key, val); }
   public Map<K, V> build() { return map; }
 
+  @Deprecated // Use of instead
   public static <K, V> MapBuilder<K, V> mapOf(K key, V val) {
+    return new MapBuilder<>(key, val);
+  }
+  public static <K, V> MapBuilder<K, V> of(K key, V val) {
     return new MapBuilder<>(key, val);
   }
 }

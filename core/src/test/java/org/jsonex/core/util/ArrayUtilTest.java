@@ -8,8 +8,7 @@ import java.util.Optional;
 
 import static org.jsonex.core.type.Operator.eq;
 import static org.jsonex.core.util.ListUtilTest.TestCls.F_TYPE;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 public class ArrayUtilTest {
   private TestCls[] buildArray() {
@@ -43,5 +42,6 @@ public class ArrayUtilTest {
     assertEquals(Optional.empty(), ArrayUtil.first(list, eq(F_TYPE, 3)));
     assertEquals(Optional.empty(), ArrayUtil.first(null, eq(F_TYPE, 3)));
     assertEquals(-1, ArrayUtil.indexOf(null, eq(F_TYPE, 2)));
+    assertTrue(ArrayUtil.contains(list, list[2]));
   }
 }

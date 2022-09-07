@@ -19,6 +19,10 @@ public class ArrayUtil {
     return -1;
   }
 
+  public static <T> boolean contains(@Nullable T[] array, T e) {
+    return indexOf(array, e) >= 0;
+  }
+
   public static <TSrc, TDest> TDest[] map(@Nullable TSrc[] source, Function<? super TSrc, ? extends TDest> func, TDest[] dest) {
     return mapWithIndex(source, (s, idx) -> func.apply(s), dest);
   }
@@ -77,5 +81,4 @@ public class ArrayUtil {
           return i;
     return -1;
   }
-
 }
