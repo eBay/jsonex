@@ -27,6 +27,7 @@ import java.util.function.Consumer;
 
 import static org.jsonex.core.util.LangUtil.orElse;
 import static org.jsonex.core.util.ListUtil.last;
+import static org.jsonex.core.util.ListUtil.map;
 
 /** A Node in TreeDoc */
 @RequiredArgsConstructor
@@ -249,11 +250,11 @@ public class TDNode {
   }
 
   public List<Object> childrenValueAsList() {
-    return getChildren() == null ? Collections.emptyList() : ListUtil.map(getChildren(), c -> c.getValue());
+    return getChildren() == null ? Collections.emptyList() : map(getChildren(), c -> c.getValue());
   }
 
   public List<List<Object>> childrenValueAsListOfList() {
-    return getChildren() == null ? Collections.emptyList() : ListUtil.map(getChildren(), c -> c.childrenValueAsList());
+    return getChildren() == null ? Collections.emptyList() : map(getChildren(), c -> c.childrenValueAsList());
   }
 
   @Override public boolean equals(Object o) {
@@ -267,7 +268,8 @@ public class TDNode {
     return Objects.equals(key, tdNode.key) && Objects.equals(value, tdNode.value) && Objects.equals(children, tdNode.children);
   }
 
+  /** Hash code of value and children, key is not included */
   @Override public int hashCode() {
-    return hash.getOrCompute(() -> Objects.hash(key, value, children));
+    return hash.getOrCompute(() -> Objects.hash(value, children, map(children, TDNode::getKey)));
   }
 }
