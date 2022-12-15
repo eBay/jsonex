@@ -64,6 +64,11 @@ public class ClassUtilTest {
 
     public boolean isFieldWithUnionCheck() { return false; };
     public String getFieldWithUnionCheck() { throw new IllegalStateException("fieldWithUnionCheck is not available"); }
+
+    // To support Java 17 Record feature
+    private String fieldWithSameGetterMethodName;
+    public String fieldWithSameGetterMethodName() { return fieldWithSameGetterMethodName; }
+
   }
 
   @SuppressWarnings({"CanBeFinal", "SameReturnValue", "WeakerAccess"})
@@ -80,8 +85,9 @@ public class ClassUtilTest {
   @Test public void testGetProperties() {
     Map<String, BeanProperty> properties = ClassUtil.getProperties(B.class);
     log.info("Properties.keySet():" + properties.keySet());
-    String[] exp = {"fieldA1", "fieldA2", "fieldA3", "fieldA4", "fieldB1", "fieldB2", "fieldB3", "fieldB4", "fieldB5", "fieldB6", "fieldWithHasCheck", "fieldWithUnionCheck", "readOnly", "writeOnly"};
-    // Java compiler will mass up the order of the getter methods, field order is preserved in most of the java versions
+    String[] exp = {"fieldA1", "fieldA2", "fieldA3", "fieldA4", "fieldB1", "fieldB2", "fieldB3", "fieldB4", "fieldB5", "fieldB6",
+        "fieldWithSameGetterMethodName", "fieldWithHasCheck", "fieldWithUnionCheck", "readOnly", "writeOnly"};
+    // Java compiler will mess up the order of the getter methods, field order is preserved in most of the java versions
     // assertArrayEquals(exp, properties.keySet().toArray());  // This will fail
     assertEquals(ListUtil.setOf(exp), properties.keySet());
 
@@ -130,6 +136,10 @@ public class ClassUtilTest {
     // Has checker
     assertNull(properties.get("fieldWithHasCheck").get(b));
     assertNull(properties.get("fieldWithUnionCheck").get(b));
+
+    // Support getter with the same name as field name to support java 17 Record pattern
+    prop = properties.get("fieldWithSameGetterMethodName");
+    assertEquals("fieldWithSameGetterMethodName", prop.getter.getName());
   }
 
   @Test public void testGetPropertiesWithExceptions () {

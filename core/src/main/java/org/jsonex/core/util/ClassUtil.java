@@ -21,6 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.function.Predicate;
 
+import static org.jsonex.core.util.ArrayUtil.first;
 import static org.jsonex.core.util.ArrayUtil.indexOf;
 import static org.jsonex.core.util.ListUtil.listOf;
 import static org.jsonex.core.util.StringUtil.lowerFirst;
@@ -102,7 +103,8 @@ public class ClassUtil {
     // Find all the getter/setter methods
     // Use TreeMap as method is not in stable order in JVM implementations, so we need to sort them to make stable order
     Map<String, BeanProperty> attributeMap = new TreeMap<>();
-    for (Method m : getAllMethods(cls)) {
+    Method[] methods = getAllMethods(cls);
+    for (Method m : methods) {
       int mod = m.getModifiers();
       if(!Modifier.isPublic(mod) || Modifier.isStatic(mod))
         continue;  //None public, or static, transient
@@ -165,6 +167,14 @@ public class ClassUtil {
       BeanProperty prop = attributeMap.remove(name);
       if (prop == null) {
         prop = new BeanProperty(name);
+        final BeanProperty fProp = prop;
+        final String fName = name;
+        // For java 17 record feature, it didn't following javabean convention,
+        // the getter method name is the same as field name.
+        Optional<Method> method = first(methods, m ->
+            m.getName().equals(fName) && m.getParameterCount() == 0
+                && Modifier.isPublic(m.getModifiers()) && m.getReturnType() == f.getType());
+        method.ifPresent(m -> fProp.getter = m);
       }
       fieldMap.put(name, prop);
       prop.field = f;
