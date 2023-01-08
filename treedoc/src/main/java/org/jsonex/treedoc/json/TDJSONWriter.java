@@ -49,7 +49,7 @@ public class TDJSONWriter {
 
   @SneakyThrows
   <T extends Appendable> T writeMap(T out, TDNode node, TDJSONOption opt, String indentStr, String childIndentStr) {
-    out.append(opt.deco("{", OPERATOR));
+    out.append(opt.deco(opt.deliminatorObjectStart.substring(0, 1), OPERATOR));
     for (int i = 0; i < node.getChildrenSize(); i++) {
       TDNode cn = opt.applyFilters(node.getChild(i));
       if (cn == null)
@@ -71,12 +71,12 @@ public class TDJSONWriter {
     if (opt.hasIndent() && node.hasChildren())
       out.append('\n').append(indentStr);
 
-    return (T) out.append(opt.deco("}", OPERATOR));
+    return (T) out.append(opt.deco(opt.deliminatorObjectEnd.substring(0, 1), OPERATOR));
   }
 
   @SneakyThrows
   <T extends Appendable> T writeArray(T out, TDNode node, TDJSONOption opt, String indentStr, String childIndentStr) {
-    out.append(opt.deco("[", OPERATOR));
+    out.append(opt.deco(opt.deliminatorArrayStart.substring(0, 1), OPERATOR));
     if (node.hasChildren()) {
       for (int i = 0; i < node.getChildrenSize(); i++) {
         TDNode cn = node.getChild(i);
@@ -92,7 +92,7 @@ public class TDJSONWriter {
         out.append('\n').append(indentStr);
     }
 
-    return (T)out.append(opt.deco("]", OPERATOR));
+    return (T) out.append(opt.deco(opt.deliminatorArrayEnd.substring(0, 1), OPERATOR));
   }
 
   @SneakyThrows
@@ -104,7 +104,7 @@ public class TDJSONWriter {
     if (value instanceof Character)
       return writeQuotedString(out, String.valueOf(value), opt, STRING);
 
-    return (T)out.append(opt.deco(String.valueOf(value), NON_STRING));
+    return (T) out.append(opt.deco(String.valueOf(value), NON_STRING));
   }
 
   <T extends Appendable> T writeQuotedString(T out, String str, TDJSONOption opt, TextType type) throws IOException {

@@ -1,6 +1,9 @@
 package org.jsonex.treedoc.json;
 
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.jsonex.treedoc.TDNode;
 
@@ -28,6 +31,10 @@ public class TDJSONOption {
 //  String ARRAY_END = "]";
   String deliminatorKey = ":";
   String deliminatorValue = ",";
+  String deliminatorObjectStart = "{";
+  String deliminatorObjectEnd = "}";
+  String deliminatorArrayStart = "[";
+  String deliminatorArrayEnd = "]";
 
   /** The source */
   //final CharSource source;
@@ -63,9 +70,6 @@ public class TDJSONOption {
 
   public boolean hasIndent() { return !indentStr.isEmpty(); }
 
-  public TDJSONOption setDeliminatorKey(String val) { deliminatorKey = val; buildTerms(); return this; }
-  public TDJSONOption setDeliminatorValue(String val) { deliminatorValue = val; buildTerms(); return this; }
-
   public TDNode applyFilters(TDNode n) {
     for (NodeFilter f : nodeFilters) {
       if (n == null)
@@ -86,17 +90,35 @@ public class TDJSONOption {
     return textDecorator == null ? text : textDecorator.apply(text, type);
   }
 
+  public TDJSONOption setDeliminatorObject(String start, String end) {
+    deliminatorObjectStart = start;
+    deliminatorObjectEnd = end;
+    return this;
+  }
+
+  public TDJSONOption setDeliminatorArray(String start, String end) {
+    deliminatorArrayStart = start;
+    deliminatorArrayEnd = end;
+    return this;
+  }
+
   // Package scopes used by parser
+  @Setter(AccessLevel.NONE) @Getter(AccessLevel.NONE)
   String termValue;
+  @Setter(AccessLevel.NONE) @Getter(AccessLevel.NONE)
   String termValueInMap;
+  @Setter(AccessLevel.NONE) @Getter(AccessLevel.NONE)
   String termValueInArray;
+  @Setter(AccessLevel.NONE) @Getter(AccessLevel.NONE)
   String termKey;
+  @Setter(AccessLevel.NONE) @Getter(AccessLevel.NONE)
   Collection<String> termValueStrs;
+  @Setter(AccessLevel.NONE) @Getter(AccessLevel.NONE)
   Collection<String> termKeyStrs;
 
-  void buildTerms() {
+  public void buildTerms() {
     termValue = "\n\r";
-    termKey = "{[}";
+    termKey = deliminatorObjectStart + deliminatorObjectEnd + deliminatorArrayStart;
     termValueStrs = new ArrayList<>();
     termKeyStrs = new ArrayList<>();
     if (deliminatorValue.length() == 1) {  // If more than 1, will use separate string collection as term
@@ -111,7 +133,7 @@ public class TDJSONOption {
     else
       termKeyStrs.add(deliminatorKey);
 
-    termValueInMap = termValue + "}";
-    termValueInArray = termValue + "]";
+    termValueInMap = termValue + deliminatorObjectEnd;
+    termValueInArray = termValue + deliminatorArrayEnd;
   }
 }

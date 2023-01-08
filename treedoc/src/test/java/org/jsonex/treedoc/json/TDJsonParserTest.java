@@ -1,10 +1,12 @@
 package org.jsonex.treedoc.json;
 
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.jsonex.core.charsource.ArrayCharSource;
 import org.jsonex.core.charsource.ReaderCharSource;
 import org.jsonex.treedoc.TDNode;
 import org.jsonex.treedoc.TreeDoc;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.Reader;
@@ -205,6 +207,18 @@ public class TDJsonParserTest {
     assertEquals("{a: 1, obj: {$id: '1_0'}, ref: {$ref: '#1_0'}}", node.toString());
   }
 
+  @Test public void testParseWithCustomDeliminator() {
+    String str = "(a=va; c=(d=23; strs=<a; b>))";
+    TDJSONOption opt = new TDJSONOption()
+        .setDeliminatorKey("=")
+        .setDeliminatorValue(";")
+        .setDeliminatorObject("(", ")")
+        .setDeliminatorArray("<", ">");
+    TDNode node = TDJSONParser.get().parse(str, opt);
+    assertEquals("{a: 'va', c: {d: 23, strs: ['a', 'b']}}", node.toString());
+    assertEquals("(a=\"va\";c=(d=23;strs=<\"a\";\"b\">))", TDJSONWriter.get().writeAsString(node, opt.setAlwaysQuoteName(false)));
+  }
+
   private static void parseWithException(String str, String expectedError) {
     String error = null;
     try {
@@ -232,5 +246,26 @@ public class TDJsonParserTest {
     log.info("testParseMapToString: str=" + str);
     TDNode node = TDJSONParser.get().parse(str, TDJSONOption.ofMapToString());
     assertEquals("{K1: 'v1', k2: 123, k3: {c: 'Test with ,in'}, k4: ['ab,c', 'def']}", node.toString());
+  }
+
+  @Ignore
+  @Test public void testParseObjectToString() {
+    TestCls test = new TestCls("va", new TestCls1(23, new String[]{"a", "b"}));
+    String str = test.toString();
+    log.info("testParseObjectToString: str=" + str);
+    TDNode node = TDJSONParser.get().parse(str, TDJSONOption.ofMapToString());
+    assertEquals("{K1: 'v1', k2: 123, k3: {c: 'Test with ,in'}, k4: ['ab,c', 'def']}", node.toString());
+  }
+
+  @Data
+  public static class TestCls {
+    public final String a;
+    public final TestCls1 c;
+  }
+
+  @Data
+  public static class TestCls1 {
+    public final int d;
+    public final String[] strs;
   }
 }

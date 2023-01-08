@@ -127,7 +127,7 @@ public class LangUtil {
   }
 
   /**
-   *  Convert a block of code with local variables definitions into an single expression, it's useful to avoid code block
+   *  Convert a block of code with local variables definitions into a single expression, it's useful to avoid code block
    *  in lambda statement.
    */
   public static <T, R> R with(T val, Function<T, R> action) {
