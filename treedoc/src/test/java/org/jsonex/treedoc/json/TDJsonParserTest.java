@@ -6,7 +6,6 @@ import org.jsonex.core.charsource.ArrayCharSource;
 import org.jsonex.core.charsource.ReaderCharSource;
 import org.jsonex.treedoc.TDNode;
 import org.jsonex.treedoc.TreeDoc;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.Reader;
@@ -248,13 +247,12 @@ public class TDJsonParserTest {
     assertEquals("{K1: 'v1', k2: 123, k3: {c: 'Test with ,in'}, k4: ['ab,c', 'def']}", node.toString());
   }
 
-  @Ignore
   @Test public void testParseObjectToString() {
     TestCls test = new TestCls("va", new TestCls1(23, new String[]{"a", "b"}));
-    String str = test.toString();
+    String str = test.toString();  // TDJsonParserTest.TestCls(a=va, c=TDJsonParserTest.TestCls1(d=23, strs=[a, b]))
     log.info("testParseObjectToString: str=" + str);
-    TDNode node = TDJSONParser.get().parse(str, TDJSONOption.ofMapToString());
-    assertEquals("{K1: 'v1', k2: 123, k3: {c: 'Test with ,in'}, k4: ['ab,c', 'def']}", node.toString());
+    TDNode node = TDJSONParser.get().parse(str, new TDJSONOption().setDeliminatorObject("(", ")").setDeliminatorKey("=") );
+    assertEquals("{$type:\"TDJsonParserTest.TestCls\",a:\"va\",c:{$type:\"TDJsonParserTest.TestCls1\",d:23,strs:[\"a\",\"b\"]}}", TDJSONWriter.get().writeAsString(node, new TDJSONOption().setAlwaysQuoteName(false)));
   }
 
   @Data

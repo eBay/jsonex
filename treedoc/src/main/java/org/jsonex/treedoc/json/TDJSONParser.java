@@ -87,7 +87,13 @@ public class TDJSONParser {
         term = node.getParent().getType() == TDNode.Type.ARRAY ? opt.termValueInArray : opt.termValueInMap;
 
       String str = src.readUntil(term, opt.termValueStrs).trim();
-      return node.setValue(ClassUtil.toSimpleObject(str));
+      node.setValue(ClassUtil.toSimpleObject(str));
+      if (!src.isEof() && contains(opt.deliminatorObjectStart, src.peek())) {
+        // A value with type in the form of `type{attr1:val1:attr2:val2}
+        node.createChild(opt.KEY_TYPE).setValue(node.getValue());
+        return parseMap(src, opt, node, true);
+      }
+      return node;
     } finally {
       node.setEnd(src.getBookmark());
     }

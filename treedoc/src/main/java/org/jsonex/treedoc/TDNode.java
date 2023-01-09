@@ -74,7 +74,7 @@ public class TDNode {
       return cn;
     }
 
-    // special handling for textproto due to it's bad design that allows duplicated keys
+    // special handling for textproto due to its bad design that allows duplicated keys
     TDNode existNode = children.get(childIndex);
     if (!existNode.deduped) {
       TDNode listNode = new TDNode(this, name).setType(Type.ARRAY);

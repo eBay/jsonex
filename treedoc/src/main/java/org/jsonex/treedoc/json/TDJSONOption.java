@@ -24,6 +24,7 @@ public class TDJSONOption {
   public static TDJSONOption ofMapToString() { return new TDJSONOption().setDeliminatorKey("=").setDeliminatorValue(", "); }
 
   String KEY_ID = "$id";
+  String KEY_TYPE = "$type";
 //  String KEY_REF = "$ref";
 //  String ObJ_START = "{";
 //  String ObJ_END = "}";
@@ -117,7 +118,7 @@ public class TDJSONOption {
   Collection<String> termKeyStrs;
 
   public void buildTerms() {
-    termValue = "\n\r";
+    termValue = "\n\r" + deliminatorObjectStart;  // support tree with a type in the form of "type{attr1:val1}"
     termKey = deliminatorObjectStart + deliminatorObjectEnd + deliminatorArrayStart;
     termValueStrs = new ArrayList<>();
     termKeyStrs = new ArrayList<>();
