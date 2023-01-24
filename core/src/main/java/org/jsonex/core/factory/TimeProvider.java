@@ -27,17 +27,25 @@ public interface TimeProvider {
   class Impl implements TimeProvider {
     @Override public Date getDate() { return new Date(); }
     @Override public long getTimeMillis() { return System.currentTimeMillis(); }
+    @Override public long getNanoTime() { return System.nanoTime(); }
   }
 
   @Accessors(chain = true)
   class Mock implements TimeProvider {
-    @Setter @Getter long timeMillis = System.currentTimeMillis();
-    @Override public Date getDate() { return new Date(timeMillis); }
-    public void add(long offset) { timeMillis += offset; }
+    @Setter @Getter long nanoTime = System.nanoTime();
+
+    @Override public long getTimeMillis() { return TimeUnit.NANOSECONDS.toMillis(nanoTime); }
+    public TimeProvider setTimeMillis(long ms) { nanoTime = TimeUnit.MILLISECONDS.toNanos(ms); return this; }
+
+    @Override public Date getDate() { return new Date(getTimeMillis()); }
+    @Deprecated
+    public void add(long offset) { nanoTime += TimeUnit.MILLISECONDS.toNanos(offset); }
+    public void sleepMs(long offset) { nanoTime += TimeUnit.MILLISECONDS.toNanos(offset); }
   }
 
   Date getDate();
   long getTimeMillis();
+  long getNanoTime();
 
   default Date now(int offset, TimeUnit unit) {
     return new Date(getTimeMillis() + unit.toMillis(offset));

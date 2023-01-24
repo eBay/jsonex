@@ -10,6 +10,7 @@
 package org.jsonex.core.util;
 
 import org.jsonex.core.factory.TimeProvider;
+import org.junit.After;
 import org.junit.Test;
 
 import java.util.Date;
@@ -33,9 +34,12 @@ public class TimeProviderTest {
     mock.setTimeMillis(1000);
     assertEquals(1000, TimeProvider.get().getTimeMillis());
 
-    mock.add(1000);
+    mock.sleepMs(1000);
     assertEquals(2000, TimeProvider.get().getTimeMillis());
     assertEquals(2000, TimeProvider.get().getDate().getTime());
+  }
+
+  @After public void after() {
     TimeProvider.it.reset();
   }
 }
