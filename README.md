@@ -55,14 +55,14 @@ Please refer the unit test class for more detailed usage patterns:
     You can get current version by searching [maven central](https://search.maven.org/search?q=g:org.jsonex)
 
 - Simple Serialization / Deserialization
-    ```java
+    ```java 
       // serialization
       JSONCoder.global.encode(o)
       // de-serialization
       SomeClass obj = JSONCoder.global.decode(str, SomeClass.class);
     ```
 - Filter out fields and classes
-    ```java
+    ```java 
    JSONCoderOption opt = new JSONCoderOption();
     // For TestBean2 and it's sub-classes, only include field: "enumField2", "testBean"
     opt.addFilterFor(TestBean2.class, include("enumField2", "testBean"));("field1ForClass1", "field2ForClass1");
@@ -75,21 +75,21 @@ Please refer the unit test class for more detailed usage patterns:
     String result = JSONCoder.encode(bean, opt);
     ```
 - Mask out certain fields: for privacy reason, quite often when we serialize an object, we need to maskout certain fields such as emailAddress, here's example to do that:
-  ```java
+  ```java 
   String result = JSONCoder.encode(bean, JSONCoderOption.ofIndentFactor(2).addFilterFor(SomeBean.class, mask("field1", "field2")));
   ```
    
 - Deserialize with generic types
-    ```java
+    ```java 
     String str = "['str1', 'str2', 'str3']";
     List<String> result = JSONCoder.global.decode(new DecodeReq<List<String>>(){}.setSource(str));
     ```
 - Deserialize and merge to existing object (Incremental decode)
-    ```java
+    ```java 
     TestBean bean = JSONCoder.global.decodeTo(jsonStr, bean);
     ```
 - Set custom Quote and custom indentations
-    ```java
+    ```java 
     JSONCoderOption opt = new JSONCoderOption();
     opt.getJsonOption().setQuoteChar('`');
     opt.getJsonOption().setIndentFactor(2);
@@ -123,10 +123,6 @@ mvn edu.illinois:nondex-maven-plugin:1.1.2:nondex -pl csv
 mvn edu.illinois:nondex-maven-plugin:1.1.2:nondex -pl treedoc
 # mvn edu.illinois:nondex-maven-plugin:1.1.2:nondex -pl CliArg  # Fail expected, as Cli Annotation depends on field ordering
 mvn edu.illinois:nondex-maven-plugin:1.1.2:nondex -pl HiveUDF
-
-
-
-
 ```
 
 ## Limitations and Future enhancements

@@ -15,6 +15,7 @@ import java.util.function.BiFunction;
 
 import static org.jsonex.core.util.StringUtil.padEnd;
 
+// TODO: separate parser and writer options
 @Accessors(chain = true) @Data
 public class TDJSONOption {
   public enum TextType {OPERATOR, KEY, STRING, NON_STRING}
@@ -104,37 +105,31 @@ public class TDJSONOption {
   }
 
   // Package scopes used by parser
-  @Setter(AccessLevel.NONE) @Getter(AccessLevel.NONE)
-  String termValue;
-  @Setter(AccessLevel.NONE) @Getter(AccessLevel.NONE)
-  String termValueInMap;
-  @Setter(AccessLevel.NONE) @Getter(AccessLevel.NONE)
-  String termValueInArray;
-  @Setter(AccessLevel.NONE) @Getter(AccessLevel.NONE)
-  String termKey;
-  @Setter(AccessLevel.NONE) @Getter(AccessLevel.NONE)
-  Collection<String> termValueStrs;
-  @Setter(AccessLevel.NONE) @Getter(AccessLevel.NONE)
-  Collection<String> termKeyStrs;
+  @Setter(AccessLevel.NONE) @Getter(AccessLevel.NONE) String _termValue;
+  @Setter(AccessLevel.NONE) @Getter(AccessLevel.NONE) String _termValueInMap;
+  @Setter(AccessLevel.NONE) @Getter(AccessLevel.NONE) String _termValueInArray;
+  @Setter(AccessLevel.NONE) @Getter(AccessLevel.NONE) String _termKey;
+  @Setter(AccessLevel.NONE) @Getter(AccessLevel.NONE) Collection<String> _termValueStrs;
+  @Setter(AccessLevel.NONE) @Getter(AccessLevel.NONE) Collection<String> _termKeyStrs;
 
   public void buildTerms() {
-    termValue = "\n\r" + deliminatorObjectStart;  // support tree with a type in the form of "type{attr1:val1}"
-    termKey = deliminatorObjectStart + deliminatorObjectEnd + deliminatorArrayStart;
-    termValueStrs = new ArrayList<>();
-    termKeyStrs = new ArrayList<>();
+    _termValue = "\n\r" + deliminatorObjectStart;  // support tree with a type in the form of "type{attr1:val1}"
+    _termKey = deliminatorObjectStart + deliminatorObjectEnd + deliminatorArrayStart;
+    _termValueStrs = new ArrayList<>();
+    _termKeyStrs = new ArrayList<>();
     if (deliminatorValue.length() == 1) {  // If more than 1, will use separate string collection as term
-      termValue += deliminatorValue;
-      termKey += deliminatorValue;
+      _termValue += deliminatorValue;
+      _termKey += deliminatorValue;
     } else {
-      termValueStrs.add(deliminatorValue);
-      termKeyStrs.add(deliminatorValue);
+      _termValueStrs.add(deliminatorValue);
+      _termKeyStrs.add(deliminatorValue);
     }
     if (deliminatorKey.length() == 1)
-      termKey += deliminatorKey;
+      _termKey += deliminatorKey;
     else
-      termKeyStrs.add(deliminatorKey);
+      _termKeyStrs.add(deliminatorKey);
 
-    termValueInMap = termValue + deliminatorObjectEnd;
-    termValueInArray = termValue + deliminatorArrayEnd;
+    _termValueInMap = _termValue + deliminatorObjectEnd;
+    _termValueInArray = _termValue + deliminatorArrayEnd;
   }
 }

@@ -26,8 +26,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 import static org.jsonex.core.util.LangUtil.orElse;
-import static org.jsonex.core.util.ListUtil.last;
-import static org.jsonex.core.util.ListUtil.map;
+import static org.jsonex.core.util.ListUtil.*;
 
 /** A Node in TreeDoc */
 @RequiredArgsConstructor
@@ -36,6 +35,9 @@ import static org.jsonex.core.util.ListUtil.map;
 public class TDNode {
   public final static String ID_KEY = "$id";
   public final static String REF_KEY = "$ref";
+
+  public final static String COLUMN_KEY = "@key";
+  public final static String COLUMN_VALUE = "@value";
 
   public enum Type { MAP, ARRAY, SIMPLE }
   @Getter TreeDoc doc;
@@ -250,11 +252,49 @@ public class TDNode {
   }
 
   public List<Object> childrenValueAsList() {
-    return getChildren() == null ? Collections.emptyList() : map(getChildren(), c -> c.getValue());
+    return getChildren() == null ? Collections.emptyList() : map(getChildren(), c -> orElse(c.getValue(), c));
   }
 
   public List<List<Object>> childrenValueAsListOfList() {
-    return getChildren() == null ? Collections.emptyList() : map(getChildren(), c -> c.childrenValueAsList());
+    return getChildren() == null ? Collections.emptyList() : map(getChildren(), TDNode::childrenValueAsList);
+  }
+
+  public List<Object> childrenValueAsList(List<String> keys, List<Object> target) {
+    for (String k : keys) {
+      if (k == COLUMN_KEY)
+        continue;
+      if (k == COLUMN_VALUE)
+        target.add(value);
+      else
+        target.add(getChildValue(k));
+    }
+    return target;
+  }
+
+  public List<List<Object>> childrenValueAsListOfList(List<String> keys) {
+    return getChildren() == null ? Collections.emptyList() :
+        map(getChildren(), c -> c.childrenValueAsList(keys, keys.get(0).equals(COLUMN_KEY) ? listOf(c.key) : listOf()));
+  }
+
+  /** Get union of keys for all children, it's used for represent children in a table view */
+  public List<String> getChildrenKeys() {
+    List<String> result = new ArrayList<>();
+    if (this.type == Type.SIMPLE || children == null)
+      return result;
+    // Add the key column
+    result.add(COLUMN_KEY);
+    boolean hasValue = false;
+    for (TDNode c : children) {
+      if (c.value != null)
+        hasValue = true;
+      for (TDNode cc : c.getChildren()) {
+        if (!result.contains(cc.key))
+          result.add(cc.key);
+      }
+    }
+    if (hasValue)
+      result.add(1, COLUMN_VALUE);
+    return result;
   }
 
   @Override public boolean equals(Object o) {

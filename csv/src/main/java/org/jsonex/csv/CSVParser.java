@@ -7,6 +7,11 @@ import org.jsonex.treedoc.TDNode;
 import org.jsonex.treedoc.TreeDoc;
 
 import java.io.Reader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import static org.jsonex.core.util.ListUtil.map;
 
 public class CSVParser {
   private static String SPACE_CHARS = " \r";
@@ -20,23 +25,45 @@ public class CSVParser {
   public TDNode parse(String str, CSVOption opt) { return parse(new ArrayCharSource(str), opt); }
   public TDNode parse(CharSource src, CSVOption opt) { return parse(src, opt, new TreeDoc(null).getRoot()); }
   public TDNode parse(CharSource src, CSVOption opt, TDNode root) {
+    opt.buildTerms();
+    List<String> fields = null;
     root.setType(TDNode.Type.ARRAY);
+    if (opt.includeHeader) {
+      fields = map(readNonEmptyRecord(src, opt), Object::toString);
+      if (fields.isEmpty())
+        return root;
+      if (fields.get(0) == TDNode.COLUMN_KEY)
+        root.setType(TDNode.Type.MAP);
+    }
+
     while (!src.isEof()) {
       if (!src.skipChars(SPACE_CHARS))
         break;
-      readRecord(src, opt, root);
+      readRecord(src, opt, root, fields);
     }
     return root;
   }
 
-  void readRecord(CharSource src, CSVOption opt, TDNode root) {
-    TDNode row = new TDNode(root.getDoc(), null).setType(TDNode.Type.ARRAY);
+  void readRecord(CharSource src, CSVOption opt, TDNode root, List<String> fields) {
+    TDNode row = new TDNode(root.getDoc(), null).setType(fields == null ? TDNode.Type.ARRAY: TDNode.Type.MAP);
     row.setStart(src.getBookmark());
+    int i = 0;
     while (!src.isEof() && src.peek() != opt.recordSep) {
       if (!src.skipChars(SPACE_CHARS))
         break;
       Bookmark start = src.getBookmark();
-      TDNode field = row.createChild().setValue(readField(src, opt));
+      Object val = readField(src, opt);
+      String key = null;
+      if (fields != null) {
+        if (i >= fields.size())
+          throw src.createParseRuntimeException("The row has more columns than headers");
+        key = fields.get(i++);
+        if (key == TDNode.COLUMN_KEY) {
+          row.setKey(key);
+          continue;
+        }
+      }
+      TDNode field = row.createChild(key).setValue(val);
       field.setStart(start).setEnd(src.getBookmark());
     }
     row.setEnd(src.getBookmark());
@@ -44,7 +71,27 @@ public class CSVParser {
       root.addChild(row);
     if (!src.isEof())
       src.read();  // Skip the recordSep
+  }
 
+  public List<Object> readNonEmptyRecord(CharSource src, CSVOption opt) {
+    while(!src.isEof()) {
+      List<Object> res = readRecord(src, opt);
+      if (!res.isEmpty())
+        return res;
+    }
+    return Collections.emptyList();
+  }
+
+  public List<Object> readRecord(CharSource src, CSVOption opt) {
+    List<Object> result = new ArrayList<>();
+    while (!src.isEof() && src.peek() != opt.recordSep) {
+      if (!src.skipChars(SPACE_CHARS))
+        break;
+      result.add(readField(src, opt));
+    }
+    if (!src.isEof())
+      src.read();  // Skip the recordSep
+    return result;
   }
 
   Object readField(CharSource src, CSVOption opt) {
@@ -54,7 +101,7 @@ public class CSVParser {
 
     boolean isString = false;
     if (src.peek() != opt.quoteChar) {  // Read non-quoted string
-      sb.append(src.readUntil(opt.getFieldAndRecord()).trim());
+      sb.append(src.readUntil(opt._fieldAndRecord).trim());
     } else {  // Read quoted string
       isString = true;
       src.skip();
@@ -64,9 +111,9 @@ public class CSVParser {
         int line = src.bookmark.getLine();
         int col = src.bookmark.getCol();
 
-        src.readUntil(sb, opt.getQuoteCharStr());
+        src.readUntil(sb, opt._quoteCharStr);
         if (src.isEof())
-          throw new EOFRuntimeException("Can't find matching quote at position:" + pos + ";line:" + line + ";col:" + col);
+          throw src.createParseRuntimeException("Can't find matching quote at position:" + pos + ";line:" + line + ";col:" + col);
 
         src.skip();
         if (src.isEof())

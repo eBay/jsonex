@@ -82,11 +82,11 @@ public class TDJSONParser {
         return node.setValue(sb.toString());
       }
 
-      String term = opt.termValue;
+      String term = opt._termValue;
       if (node.getParent() != null)  // parent.type can either be ARRAY or MAP.
-        term = node.getParent().getType() == TDNode.Type.ARRAY ? opt.termValueInArray : opt.termValueInMap;
+        term = node.getParent().getType() == TDNode.Type.ARRAY ? opt._termValueInArray : opt._termValueInMap;
 
-      String str = src.readUntil(term, opt.termValueStrs).trim();
+      String str = src.readUntil(term, opt._termValueStrs).trim();
       node.setValue(ClassUtil.toSimpleObject(str));
       if (!src.isEof() && contains(opt.deliminatorObjectStart, src.peek())) {
         // A value with type in the form of `type{attr1:val1:attr2:val2}
@@ -176,7 +176,7 @@ public class TDJSONParser {
             && !contains(opt.deliminatorObjectEnd, c))
           throw src.createParseRuntimeException("No '" + opt.deliminatorKey + "' after key:" + key);
       } else {
-        key = src.readUntil(opt.termKey, opt.termKeyStrs, 1, Integer.MAX_VALUE).trim();
+        key = src.readUntil(opt._termKey, opt._termKeyStrs, 1, Integer.MAX_VALUE).trim();
         if (src.isEof())
           throw src.createParseRuntimeException("No '" + opt.deliminatorKey + "' after key:" + key);
         c = src.peek();

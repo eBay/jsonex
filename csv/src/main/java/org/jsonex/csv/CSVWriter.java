@@ -6,6 +6,7 @@ import org.jsonex.core.util.ClassUtil;
 import org.jsonex.treedoc.TDNode;
 
 import java.util.Collection;
+import java.util.List;
 
 import static org.jsonex.core.util.ListUtil.join;
 import static org.jsonex.core.util.ListUtil.map;
@@ -18,12 +19,21 @@ public class CSVWriter {
   public String writeAsString(TDNode node, CSVOption opt) { return write(new StringBuilder(), node, opt).toString(); }
 
   public <T extends Appendable> T write(T out, TDNode node, CSVOption opt) {
-    writeRecords(out, node.childrenValueAsListOfList(), opt);
+    opt.buildTerms();
+    if (!opt.includeHeader) {
+      writeRecords(out, node.childrenValueAsListOfList(), opt);
+    } else {
+      List<String> keys = node.getChildrenKeys();
+      if (node.getType() == TDNode.Type.ARRAY && !keys.isEmpty())
+        keys.remove( 0);  // Remove array index key
+      append(out, _encodeRecord(keys, opt), opt._recordSepStr);
+      writeRecords(out, node.childrenValueAsListOfList(keys), opt);
+    }
     return out;
   }
 
   public <T extends Appendable, C extends Collection<Object>> T writeRecords(T out, Collection<C> records, CSVOption opt) {
-    records.forEach(r -> append(out, encodeRecord(r, opt), opt.getRecordSepStr()));
+    records.forEach(r -> append(out, _encodeRecord(r, opt), opt._recordSepStr));
     return out;
   }
 
@@ -33,12 +43,16 @@ public class CSVWriter {
       out.append(s);
   }
 
-  public <T> String encodeRecord(Collection<T> fields, CSVOption opt) {
+  public  <T> String encodeRecord(Collection<T> fields, CSVOption opt) {
+    return _encodeRecord(fields, opt.buildTerms());
+  }
+
+  private <T> String _encodeRecord(Collection<T> fields, CSVOption opt) {
     return join(map(fields, f -> encodeField(f, opt)), opt.fieldSep);
   }
 
   private String encodeField(Object field, CSVOption opt) {
-    String quote = opt.getQuoteCharStr();
+    String quote = opt._quoteCharStr;
     String str = "" + field;
     if (needQuote(field, opt)) {
       if (str.contains(quote))
@@ -55,8 +69,8 @@ public class CSVWriter {
     if (str.isEmpty())
       return false;
     return str.charAt(0) == opt.getQuoteChar()
-        || str.contains(opt.getFieldSepStr())
-        || str.contains(opt.getRecordSepStr())
+        || str.contains(opt._fieldSepStr)
+        || str.contains(opt._recordSepStr)
         || ClassUtil.toSimpleObject(str) != str;
   }
 }
