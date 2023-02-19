@@ -26,6 +26,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 import static org.jsonex.core.util.LangUtil.orElse;
+import static org.jsonex.core.util.LangUtil.safe;
 import static org.jsonex.core.util.ListUtil.*;
 
 /** A Node in TreeDoc */
@@ -261,12 +262,14 @@ public class TDNode {
 
   public List<Object> childrenValueAsList(List<String> keys, List<Object> target) {
     for (String k : keys) {
-      if (k == COLUMN_KEY)
+      if (k.equals(COLUMN_KEY))
         continue;
-      if (k == COLUMN_VALUE)
+      if (k.equals(COLUMN_VALUE))
         target.add(value);
-      else
-        target.add(getChildValue(k));
+      else {
+        TDNode c = getChild(k);
+        target.add(safe(c, ignore -> orElse(c.value, c)));
+      }
     }
     return target;
   }

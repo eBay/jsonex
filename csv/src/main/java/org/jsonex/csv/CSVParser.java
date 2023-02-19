@@ -32,7 +32,7 @@ public class CSVParser {
       fields = map(readNonEmptyRecord(src, opt), Object::toString);
       if (fields.isEmpty())
         return root;
-      if (fields.get(0) == TDNode.COLUMN_KEY)
+      if (fields.get(0).equals(TDNode.COLUMN_KEY))
         root.setType(TDNode.Type.MAP);
     }
 
@@ -58,8 +58,8 @@ public class CSVParser {
         if (i >= fields.size())
           throw src.createParseRuntimeException("The row has more columns than headers");
         key = fields.get(i++);
-        if (key == TDNode.COLUMN_KEY) {
-          row.setKey(key);
+        if (key.equals(TDNode.COLUMN_KEY)) {
+          row.setKey(val.toString());
           continue;
         }
       }
