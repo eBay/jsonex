@@ -52,13 +52,13 @@ public class CSVTest {
 
   @Test public void testReadField() {
     assertEquals("ab'cd", CSVParser.get().readField(new ArrayCharSource("'ab''cd'"),
-        new CSVOption().setQuoteChar('\'').buildTerms()));
+        new CSVOption().setQuoteChar('\'')));
   }
 
   @Test public void testReadFieldMissingQuote() {
     String error = "";
     try {
-      CSVParser.get().readField(new ArrayCharSource("'ab''cd"), new CSVOption().setQuoteChar('\'').buildTerms());
+      CSVParser.get().readField(new ArrayCharSource("'ab''cd"), new CSVOption().setQuoteChar('\''));
     } catch (ParseRuntimeException e) {
       error = e.getMessage();
     }

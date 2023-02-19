@@ -18,7 +18,24 @@ public class CSVOption {
   @Getter(value= AccessLevel.NONE) @Setter(value=AccessLevel.NONE) String _quoteCharStr;
   @Getter(value= AccessLevel.NONE) @Setter(value=AccessLevel.NONE) String _recordSepStr;
 
-  CSVOption buildTerms() {
+  { buildTerms(); }
+
+  public CSVOption setFieldSep(char fieldSep) {
+    this.fieldSep = fieldSep;
+    return buildTerms();
+  }
+
+  public CSVOption setRecordSep(char recordSep) {
+    this.recordSep = recordSep;
+    return buildTerms();
+  }
+
+  public CSVOption setQuoteChar(char quoteChar) {
+    this.quoteChar = quoteChar;
+    return buildTerms();
+  }
+
+  private CSVOption buildTerms() {
     _fieldAndRecord = "" + fieldSep + recordSep;
     _fieldSepStr = "" + fieldSep;
     _quoteCharStr = "" + quoteChar;

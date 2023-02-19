@@ -25,7 +25,6 @@ public class CSVParser {
   public TDNode parse(String str, CSVOption opt) { return parse(new ArrayCharSource(str), opt); }
   public TDNode parse(CharSource src, CSVOption opt) { return parse(src, opt, new TreeDoc(null).getRoot()); }
   public TDNode parse(CharSource src, CSVOption opt, TDNode root) {
-    opt.buildTerms();
     List<String> fields = null;
     root.setType(TDNode.Type.ARRAY);
     if (opt.includeHeader) {

@@ -19,21 +19,20 @@ public class CSVWriter {
   public String writeAsString(TDNode node, CSVOption opt) { return write(new StringBuilder(), node, opt).toString(); }
 
   public <T extends Appendable> T write(T out, TDNode node, CSVOption opt) {
-    opt.buildTerms();
     if (!opt.includeHeader) {
       writeRecords(out, node.childrenValueAsListOfList(), opt);
     } else {
       List<String> keys = node.getChildrenKeys();
       if (node.getType() == TDNode.Type.ARRAY && !keys.isEmpty())
         keys.remove( 0);  // Remove array index key
-      append(out, _encodeRecord(keys, opt), opt._recordSepStr);
+      append(out, encodeRecord(keys, opt), opt._recordSepStr);
       writeRecords(out, node.childrenValueAsListOfList(keys), opt);
     }
     return out;
   }
 
   public <T extends Appendable, C extends Collection<Object>> T writeRecords(T out, Collection<C> records, CSVOption opt) {
-    records.forEach(r -> append(out, _encodeRecord(r, opt), opt._recordSepStr));
+    records.forEach(r -> append(out, encodeRecord(r, opt), opt._recordSepStr));
     return out;
   }
 
@@ -43,11 +42,7 @@ public class CSVWriter {
       out.append(s);
   }
 
-  public  <T> String encodeRecord(Collection<T> fields, CSVOption opt) {
-    return _encodeRecord(fields, opt.buildTerms());
-  }
-
-  private <T> String _encodeRecord(Collection<T> fields, CSVOption opt) {
+  public <T> String encodeRecord(Collection<T> fields, CSVOption opt) {
     return join(map(fields, f -> encodeField(f, opt)), opt.fieldSep);
   }
 
