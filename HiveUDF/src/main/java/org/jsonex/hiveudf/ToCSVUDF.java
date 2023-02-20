@@ -66,7 +66,7 @@ public class ToCSVUDF extends GenericUDF {
       map.remove(firstKey);
     }
     if (recordNum++ == 0 && !opt.noHeader) {
-      List<String> headers = new ArrayList<>(map.keySet());
+      List<Object> headers = new ArrayList<>(map.keySet());
       if (opt.headers != null) {
         for (int i = 0; i < headers.size(); i++)
           if (i < opt.headers.length && !StringUtil.isEmpty(opt.headers[i]))

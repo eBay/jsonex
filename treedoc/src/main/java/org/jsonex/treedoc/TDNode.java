@@ -290,10 +290,10 @@ public class TDNode {
     for (TDNode c : children) {
       if (c.value != null)
         hasValue = true;
-      for (TDNode cc : c.getChildren()) {
-        if (!result.contains(cc.key))
-          result.add(cc.key);
-      }
+      if (c.children != null)
+        for (TDNode cc : c.getChildren())
+          if (!result.contains(cc.key))
+            result.add(cc.key);
     }
     if (hasValue)
       result.add(1, COLUMN_VALUE);
