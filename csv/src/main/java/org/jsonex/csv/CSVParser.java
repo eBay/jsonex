@@ -124,7 +124,7 @@ public class CSVParser {
           break;
         }
       }
-      src.skipSpacesAndReturns();
+      src.skipChars(" \t");
     }
 
     if (!src.isEof() && src.peek() == opt.fieldSep)
