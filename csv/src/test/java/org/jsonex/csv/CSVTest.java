@@ -14,41 +14,31 @@ import static org.junit.Assert.assertEquals;
 
 @Slf4j
 public class CSVTest {
-  @Test public void testParseAndWriteWithoutHeader() {
-    CSVOption opt = new CSVOption().setIncludeHeader(false);
-    TDNode node = CSVParser.get().parse(FileUtil.loadResource(CSVTest.class, "test.csv"), opt);
+  private void testParseAndWrite(CSVOption opt, String file) {
+    TDNode node = CSVParser.get().parse(FileUtil.loadResource(CSVTest.class, file), opt);
     assertMatchesSnapshot("parsed", node.toString());
     String str = CSVWriter.get().writeAsString(node, opt.setFieldSep('|'));
     assertMatchesSnapshot("asString", str);
     TDNode node1 = CSVParser.get().parse(str, opt);
     assertEquals(node, node1);
+  }
+
+  @Test public void testParseAndWriteWithoutHeader() {
+    testParseAndWrite(new CSVOption().setIncludeHeader(false), "test.csv");
   }
 
   @Test public void testParseAndWriteWithHeader() {
-    CSVOption opt = new CSVOption();
-    TDNode node = CSVParser.get().parse(FileUtil.loadResource(CSVTest.class, "test.csv"), opt);
-    assertMatchesSnapshot("parsed", node.toString());
-    String str = CSVWriter.get().writeAsString(node, opt.setFieldSep('|'));
-    assertMatchesSnapshot("asString", str);
-    TDNode node1 = CSVParser.get().parse(str, opt);
-    assertEquals(node, node1);
+    testParseAndWrite(new CSVOption(), "test.csv");
   }
 
   @Test public void testParseAndWriteObj() {
-    CSVOption opt = new CSVOption();
-    TDNode node = CSVParser.get().parse(FileUtil.loadResource(CSVTest.class, "testObj.csv"), opt);
-    assertMatchesSnapshot("parsed", node.toString());
-    String str = CSVWriter.get().writeAsString(node, opt.setFieldSep('|'));
-    assertMatchesSnapshot("asString", str);
-    TDNode node1 = CSVParser.get().parse(str, opt);
-    assertEquals(node, node1);
+    testParseAndWrite(new CSVOption(), "testObj.csv");
   }
 
   @Test public void testJSONValue() {
     String json = "[{f1: v1, f2: {a: 1}}]";
     assertMatchesSnapshot(CSVWriter.get().writeAsString(TDJSONParser.get().parse(json)));
   }
-
 
   @Test public void testReadField() {
     assertEquals("ab'cd", CSVParser.get().readField(new ArrayCharSource("'ab''cd'"),
