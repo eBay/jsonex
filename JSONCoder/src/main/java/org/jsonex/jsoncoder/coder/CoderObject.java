@@ -15,10 +15,7 @@ import org.jsonex.core.factory.InjectableInstance;
 import org.jsonex.core.util.BeanProperty;
 import org.jsonex.core.util.ClassUtil;
 import org.jsonex.core.util.StringUtil;
-import org.jsonex.jsoncoder.BeanCoderContext;
-import org.jsonex.jsoncoder.BeanCoderException;
-import org.jsonex.jsoncoder.ICoder;
-import org.jsonex.jsoncoder.JSONCoderOption;
+import org.jsonex.jsoncoder.*;
 import org.jsonex.jsoncoder.fieldTransformer.FieldTransformer.FieldInfo;
 import org.jsonex.treedoc.TDNode;
 import org.jsonex.treedoc.json.TDJSONWriter;
@@ -50,7 +47,8 @@ public class CoderObject implements ICoder<Object> {
     JSONCoderOption opt = ctx.getOption();
 
     Class<?> cls = obj.getClass();  // Use the real object;
-    if (opt.isIgnoreSubClassFields(cls) && type != null)
+    FieldSelectOption selectOpt = opt.getFieldSelectOption(cls);
+    if (selectOpt.isIgnoreSubClassFields() && type != null)
       cls = ClassUtil.getGenericClass(type);
 
     if (opt.isShowType() || cls != obj.getClass())
@@ -60,13 +58,13 @@ public class CoderObject implements ICoder<Object> {
     if (opt.isSortObjectKeys())
       pds = new TreeMap<>(pds);
     for (BeanProperty pd : pds.values()) {
-      if (!pd.isReadable(opt.isShowPrivateField()))
+      if (!pd.isReadable(selectOpt.isShowPrivateField()))
         continue;
 
-      if (pd.isImmutable(opt.isShowPrivateField()) && opt.isIgnoreReadOnly())
+      if (pd.isImmutable(selectOpt.isShowPrivateField()) && selectOpt.isIgnoreReadOnly())
         continue;  // Only mutable attribute will be encoded
 
-      if (pd.isTransient() && !opt.isShowTransientField())
+      if (pd.isTransient() && !selectOpt.isShowTransientField())
         continue;
 
       if (opt.isExcluded(cls, pd.getName(), ctx))

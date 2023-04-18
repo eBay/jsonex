@@ -13,10 +13,11 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
-import org.jsonex.core.factory.ScopeThreadLocal;
 import org.jsonex.core.factory.InjectableFactory;
+import org.jsonex.core.factory.ScopeThreadLocal;
 import org.jsonex.core.type.Tuple;
 import org.jsonex.core.type.Tuple.Pair;
+import org.jsonex.core.type.Union.Union2;
 import org.jsonex.core.util.ClassUtil;
 import org.jsonex.jsoncoder.coder.*;
 import org.jsonex.jsoncoder.fieldTransformer.FieldTransformer;
@@ -40,7 +41,7 @@ public class JSONCoderOption {
   @Getter final static JSONCoderOption global = new JSONCoderOption(null);
   static {
     global.addCoder(CoderDate.get(), CoderEnum.get(), CoderXMLGregorianCalendar.get(), CoderAtomicInteger.get(),
-        CoderBigInteger.get(), CoderClass.get(), CoderURI.get(), CoderURL.get());
+        CoderAtomicBoolean.get(), CoderBigInteger.get(), CoderClass.get(), CoderURI.get(), CoderURL.get());
 
     global.addSkippedClasses(Format.class, ClassLoader.class);
     global.fallbackDateFormats.add("yyyy-MM-dd HH:mm:ss.SSS.Z");  //Just for backward compatibility.
@@ -62,16 +63,6 @@ public class JSONCoderOption {
   @Getter @Setter int maxElementsPerNode = 2000;
 
   /**
-   * If true, when convert from an java bean, the readonly field will be ignored
-   */
-  @Getter @Setter boolean ignoreReadOnly;
-  
-  /**
-   * If true, subclass field won't be encoded
-   */
-  @Getter @Setter boolean ignoreSubClassFields;
-    
-  /**
    * If true, enum name will be encoded
    */
   @Getter @Setter boolean showEnumName;
@@ -85,15 +76,7 @@ public class JSONCoderOption {
    * If true, duplicated object will be serialized as a reference to existing object's hash
    */
   @Getter @Setter boolean dedupWithRef;
-  
-  /**
-   * If true, for java bean type, only field include private will be returned, no setter getter method will be returned.
-   */
-  @Getter @Setter boolean showPrivateField;
 
-  /** by default, transientField won't be serialized. Set this to true will serialize it */
-  @Getter @Setter boolean showTransientField;
-  
   @Getter @Setter String parsingDateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
   /**
    * Used by {@link CoderDate}.encode()}, If Date format is null, date will be encoded as long with value of Date.getTime()
@@ -138,6 +121,8 @@ public class JSONCoderOption {
 
 
   @Getter private final List<Pair<Class<?>, FieldTransformer>> filters = new ArrayList<>();
+  @Getter private final List<Pair<Union2<Class<?>, String>, FieldSelectOption>> fieldSelectOptions = new ArrayList<>();
+  @Getter FieldSelectOption defaultFieldSelectOption = new FieldSelectOption();
   @Getter private final List<ICoder<?>> coderList = new ArrayList<>();
   
   /**
@@ -145,8 +130,8 @@ public class JSONCoderOption {
    * e.g. BO object as there are no proper implementation of equals and hashCode 
    * which could cause duplicated copy of Object to be output.
    * 
-   * The priority is based on the index of the wrapper. So if want to add highest priority
-   * need to use equalsWrapper.add(0, wrapper).
+   * The priority is based on the index of the wrapper. So to add for the highest priority
+   * it needs to use equalsWrapper.add(0, wrapper).
    * 
    */
   @Getter private final List<EqualsWrapper<?>> equalsWrapper = new ArrayList<>();
@@ -166,12 +151,12 @@ public class JSONCoderOption {
   @Getter @Setter private LogLevel warnLogLevel = LogLevel.INFO;
 
   /**
-   * Accept specified sub-class using `$type` attribute. This feature is disabled by default for security reason
+   * Accept specified subclass using `$type` attribute. This feature is disabled by default for security reason
    */
   @Getter @Setter private boolean allowPolymorphicClasses = false;
 
   /**
-   * Merge array. By default, when decode to exiting object, array or collection will be override instead of merge.
+   * Merge array. By default, when decode to exiting object, array or collection will be overridden instead of merge.
    * If this set true, it will merge the array (concatenation)
    */
   @Getter @Setter private boolean mergeArray = false;
@@ -223,10 +208,10 @@ public class JSONCoderOption {
   
   public FieldInfo transformField(Class<?> cls, FieldInfo fieldInfo, BeanCoderContext ctx) {
     for (Pair<Class<?>, FieldTransformer> filter : filters) {
-      if (!filter._1.isAssignableFrom(cls))
+      if (!filter._0.isAssignableFrom(cls))
         continue;
       // TODO: Fix when to stop the filter chain strategy
-      fieldInfo = filter._2.apply(fieldInfo, ctx);
+      fieldInfo = filter._1.apply(fieldInfo, ctx);
     }
     
     return parent == null ? fieldInfo : parent.transformField(cls, fieldInfo, ctx);
@@ -234,9 +219,9 @@ public class JSONCoderOption {
 
   public boolean isExcluded(Class<?> cls, String name, BeanCoderContext ctx) {
     for (Pair<Class<?>, FieldTransformer> filter : filters) {
-      if (!filter._1.isAssignableFrom(cls))
+      if (!filter._0.isAssignableFrom(cls))
         continue;
-      if (!filter._2.shouldInclude(name, ctx))
+      if (!filter._1.shouldInclude(name, ctx))
         return true;
     }
     return parent == null ? false : parent.isExcluded(cls, name, ctx);
@@ -262,16 +247,6 @@ public class JSONCoderOption {
     if (parent == null)
       throw exp == null ? new ParseException(dateStr, 0) : exp;
     return parent.parseDateFullback(dateStr);
-  }
-  
-  @SuppressWarnings({ "rawtypes", "unchecked" })
-  public boolean isIgnoreSubClassFields(Class<?> cls){
-    if(ignoreSubClassFields)
-      return true;
-    for(Class iCls : ignoreSubClassFieldsClasses)
-      if(iCls.isAssignableFrom(cls))
-        return true;
-    return parent != null && parent.isIgnoreSubClassFields(cls);
   }
 
   public JSONCoderOption addDefaultFilter(FieldTransformer filter) {
@@ -325,4 +300,47 @@ public class JSONCoderOption {
         .setIndentFactor(indentFactor);
     return this;
   }
+
+  public FieldSelectOption getFieldSelectOption(Class<?> cls) {
+    for (Pair<Union2<Class<?>, String>, FieldSelectOption> opt : fieldSelectOptions) {
+      if (matches(opt._0, cls))
+        return opt._1;
+    }
+    return defaultFieldSelectOption;
+  }
+
+  private static boolean matches(Union2<Class<?>, String> key, Class<?> cls) {
+    if (key._0 != null)
+      return key._0.isAssignableFrom(cls);
+    // Package
+    String pkg = key._1;
+    String clsPkg = cls.getPackage().getName();
+    // TODO: optimize to avoid create lots of string object with substring
+    return pkg.endsWith("*") ? clsPkg.startsWith(pkg.substring(0, pkg.length() - 1)) : clsPkg == pkg;
+  }
+
+  public JSONCoderOption addFieldSelectOptionFor(Class<?> cls, FieldSelectOption filter) {
+    return addFieldSelectOptionFor(cls, filter, false);
+  }
+
+  public JSONCoderOption addFieldSelectOptionFor(Class<?> cls, FieldSelectOption opt, boolean last) {
+    Pair<Union2<Class<?>, String>, FieldSelectOption> clsOpt = Pair.of(Union2.of_0(cls), opt);
+    doIfElse(last, () -> fieldSelectOptions.add(clsOpt), () -> fieldSelectOptions.add(0, clsOpt));
+    return this;
+  }
+
+  public JSONCoderOption addFieldSelectOptionForPackage(String pkg, FieldSelectOption filter) {
+    return addFieldSelectOptionForPackage(pkg, filter, false);
+  }
+
+  public JSONCoderOption addFieldSelectOptionForPackage(String pkg, FieldSelectOption opt, boolean last) {
+    Pair<Union2<Class<?>, String>, FieldSelectOption> clsOpt = Pair.of(Union2.of_1(pkg), opt);
+    doIfElse(last, () -> fieldSelectOptions.add(clsOpt), () -> fieldSelectOptions.add(0, clsOpt));
+    return this;
+  }
+
+  public JSONCoderOption setIgnoreReadOnly(boolean v) { defaultFieldSelectOption.setIgnoreReadOnly(v); return this;}
+  public JSONCoderOption setShowPrivateField(boolean v) { defaultFieldSelectOption.setShowPrivateField(v); return this;}
+  public JSONCoderOption setShowTransientField(boolean v) { defaultFieldSelectOption.setShowTransientField(v); return this;}
+  public JSONCoderOption setIgnoreSubClassFields(boolean v) { defaultFieldSelectOption.setIgnoreSubClassFields(v); return this;}
 }
