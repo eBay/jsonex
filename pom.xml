@@ -142,9 +142,16 @@
           </execution>
           <execution>
             <id>jacoco-site</id>
-            <phase>post-integration-test</phase>
+            <phase>package</phase>
             <goals>
               <goal>report</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>jacoco-site-aggregate</id>
+            <phase>post-site</phase>
+            <goals>
+              <goal>report-aggregate</goal>
             </goals>
           </execution>
         </executions>

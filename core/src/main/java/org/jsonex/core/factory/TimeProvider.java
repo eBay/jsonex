@@ -13,6 +13,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
@@ -27,12 +29,12 @@ public interface TimeProvider {
   class Impl implements TimeProvider {
     @Override public Date getDate() { return new Date(); }
     @Override public long getTimeMillis() { return System.currentTimeMillis(); }
-    @Override public long getNanoTime() { return System.nanoTime(); }
+    @Override public long getNanoTime() { return systemEpochNanoTime(); }
   }
 
   @Accessors(chain = true)
   class Mock implements TimeProvider {
-    @Setter @Getter long nanoTime = System.nanoTime();
+    @Setter @Getter long nanoTime = systemEpochNanoTime();
 
     @Override public long getTimeMillis() { return TimeUnit.NANOSECONDS.toMillis(nanoTime); }
     public TimeProvider setTimeMillis(long ms) { nanoTime = TimeUnit.MILLISECONDS.toNanos(ms); return this; }
@@ -46,6 +48,11 @@ public interface TimeProvider {
   Date getDate();
   long getTimeMillis();
   long getNanoTime();
+
+  default long systemEpochNanoTime() {
+    Instant clock = Clock.systemDefaultZone().instant();
+    return clock.getEpochSecond() * 1000_000_000L + clock.getNano();
+  }
 
   default Date now(int offset, TimeUnit unit) {
     return new Date(getTimeMillis() + unit.toMillis(offset));

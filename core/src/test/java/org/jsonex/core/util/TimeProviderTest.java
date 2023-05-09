@@ -21,9 +21,11 @@ import static junit.framework.Assert.assertEquals;
 public class TimeProviderTest {
   @Test public void testTimeProvider() {
     TimeProvider.get().getDate();  // Warm up, so that following test could pass
+    TimeProvider.get().getNanoTime();  // Warm up Clock Instance as the class loader will take 20ms which will break test
     // Flaky testing only if CPU is super slow
     assertEquals(new Date(), TimeProvider.get().getDate());
     assertEquals(System.currentTimeMillis(), TimeProvider.get().getTimeMillis());
+    assertEquals(System.currentTimeMillis(), TimeProvider.get().getNanoTime() / 1_000_000);
     assertEquals(System.currentTimeMillis() + 1000, TimeProvider.get().now(1, TimeUnit.SECONDS).getTime());
     assertEquals(System.currentTimeMillis() - 2000, TimeProvider.get().now(-2000).getTime());
   }
