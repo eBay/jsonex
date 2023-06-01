@@ -252,4 +252,10 @@ public class ListUtilTest {
 
     assertEquals(result, ListUtil.mergeWith(target, source));
   }
+
+  @Test public void testReduce() {
+    List<String> str = ListUtil.listOf("Hello", "world");
+    assertEquals("Hello world ", ListUtil.reduce(str, "", (sum, item) -> sum + item + " "));
+    assertEquals("Hello world ", ListUtil.reduceTo(str, new StringBuilder(), (sum, item) -> sum.append(item + " ")).toString());
+  }
 }

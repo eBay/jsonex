@@ -5,6 +5,7 @@ import org.jsonex.core.type.Nullable;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -80,5 +81,20 @@ public class ArrayUtil {
         if (pred.test(source[i]))
           return i;
     return -1;
+  }
+
+  public static <V, T> T reduce(V[] source, T identity, BiFunction<T, V, T> accumulate) {
+    T result = identity;
+    if (source != null)
+      for (V s : source)
+        result = accumulate.apply(result, s);
+    return result;
+  }
+
+  public static <V, T> T reduceTo(V[] source, T result, BiConsumer<T, V> accumulate) {
+    if (source != null)
+      for (V s : source)
+        accumulate.accept(result, s);
+    return result;
   }
 }

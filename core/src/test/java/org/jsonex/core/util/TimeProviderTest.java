@@ -26,8 +26,11 @@ public class TimeProviderTest {
     assertEquals(new Date(), TimeProvider.get().getDate());
     assertEquals(System.currentTimeMillis(), TimeProvider.get().getTimeMillis());
     assertEquals(System.currentTimeMillis(), TimeProvider.get().getNanoTime() / 1_000_000);
-    assertEquals(System.currentTimeMillis() + 1000, TimeProvider.get().now(1, TimeUnit.SECONDS).getTime());
-    assertEquals(System.currentTimeMillis() - 2000, TimeProvider.get().now(-2000).getTime());
+    assertEquals(System.currentTimeMillis() + 1000, TimeProvider.now(1, TimeUnit.SECONDS));
+    assertEquals(System.currentTimeMillis() - 2000, TimeProvider.now(-2000));
+    assertEquals(TimeProvider.get().getTimeMillis(), TimeProvider.millis());
+    // assertEquals(TimeProvider.get().getNanoTime(), TimeProvider.nano());  // Won't equals
+    assertEquals(TimeProvider.get().getTimeMillis() - 1000, TimeProvider.duration(1000));
   }
 
   @Test public void testMock() {

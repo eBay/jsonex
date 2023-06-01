@@ -12,6 +12,7 @@ package org.jsonex.core.util;
 import org.jsonex.core.type.Identifiable;
 
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -387,5 +388,20 @@ public class ListUtil {
       l1.addAll(l2);
       return l1;
     });
+  }
+
+  public static <V, T> T reduce(List<V> source, T identity, BiFunction<T, V, T> accumulate) {
+    T result = identity;
+    if (source != null)
+      for (V s : source)
+        result = accumulate.apply(result, s);
+    return result;
+  }
+
+  public static <V, T> T reduceTo(List<V> source, T result, BiConsumer<T, V> accumulate) {
+    if (source != null)
+      for (V s : source)
+        accumulate.accept(result, s);
+    return result;
   }
 }

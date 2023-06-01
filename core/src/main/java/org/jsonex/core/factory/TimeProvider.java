@@ -26,6 +26,12 @@ public interface TimeProvider {
   InjectableInstance<TimeProvider> it = InjectableInstance.of(Impl.class);
   static TimeProvider get() { return it.get(); }
 
+  static long millis() { return get().getTimeMillis(); }
+  static long nano() { return get().getNanoTime(); }
+  static long duration(long since) { return get().getTimeMillis() - since; }
+  static long now(long offset) { return get().getTimeMillis() + offset; }
+  static long now(long offset, TimeUnit unit) { return get().getTimeMillis() + unit.toMillis(offset); }
+
   class Impl implements TimeProvider {
     @Override public Date getDate() { return new Date(); }
     @Override public long getTimeMillis() { return System.currentTimeMillis(); }
@@ -53,12 +59,4 @@ public interface TimeProvider {
     Instant clock = Clock.systemDefaultZone().instant();
     return clock.getEpochSecond() * 1000_000_000L + clock.getNano();
   }
-
-  default Date now(int offset, TimeUnit unit) {
-    return new Date(getTimeMillis() + unit.toMillis(offset));
-  }
-  default Date now(int offset) {
-    return new Date(getTimeMillis() + offset);
-  }
-  default Date now() { return getDate(); }
 }

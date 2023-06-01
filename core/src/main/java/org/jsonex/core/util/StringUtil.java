@@ -24,7 +24,21 @@ public class StringUtil {
    * Truncates the rightmost characters of a String to a desired length
    */
   public static String getLeft(String src, int length) { return src == null || length > src.length() ? src : src.substring(0, length); }
-  
+
+  public static String getLeft(String src, char sep) {
+    if (src == null)
+      return src;
+    int p = src.indexOf(sep);
+    return p < 0 ? src : src.substring(0, p);
+  }
+
+  public static String getRight(String src, char sep) {
+    if (src == null)
+      return src;
+    int p = src.lastIndexOf(sep);
+    return p < 0 ? src : src.substring(p+1);
+  }
+
   /**
    * Truncates the leftmost characters of a String to a desired length
    */

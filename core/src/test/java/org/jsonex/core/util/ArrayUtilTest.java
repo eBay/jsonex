@@ -44,4 +44,9 @@ public class ArrayUtilTest {
     assertEquals(-1, ArrayUtil.indexOf(null, eq(F_TYPE, 2)));
     assertTrue(ArrayUtil.contains(list, list[2]));
   }
+
+  @Test public void testReduce() {
+    String[] str = {"Hello", "world"};
+    assertEquals("Hello world ", ArrayUtil.reduce(str, "", (sum, item) -> sum + item + " "));
+  }
 }

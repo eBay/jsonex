@@ -30,6 +30,9 @@ public class StringUtilTest {
 
     assertEquals("234", StringUtil.getRight("1234", 3));
     assertEquals("1234", StringUtil.getRight("1234", 5));
+
+    assertEquals("abc", StringUtil.getLeft("abc=def=ghi", '='));
+    assertEquals("ghi", StringUtil.getRight("abc=def=ghi", '='));
   }
 
   @Test public void testIsDigitOnly() {
