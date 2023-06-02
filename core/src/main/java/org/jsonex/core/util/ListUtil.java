@@ -30,7 +30,7 @@ import static org.jsonex.core.util.LangUtil.safe;
 public class ListUtil {
   /** Map with index. Have to use a different name as Java type inference has difficult to distinguish BiFuncion and Function */
   public static <C extends Collection<? super TDest>, TSrc, TDest> C mapWithIndex(
-      Collection<? extends TSrc> source, BiFunction<? super TSrc, Integer, ? extends TDest> func, C dest) {
+      Iterable<? extends TSrc> source, BiFunction<? super TSrc, Integer, ? extends TDest> func, C dest) {
     if (source != null) {
       int idx = 0;
       for (TSrc src : source)
@@ -40,21 +40,21 @@ public class ListUtil {
   }
 
   public static <C extends Collection<? super TDest>, TSrc, TDest> C map(
-      Collection<? extends TSrc> source, Function<? super TSrc, ? extends TDest> func, C dest) {
+      Iterable<? extends TSrc> source, Function<? super TSrc, ? extends TDest> func, C dest) {
     return mapWithIndex(source, (e, i) ->  func.apply(e), dest);
   }
 
   public static <TSrc, TDest> List<TDest> mapWithIndex(
-      Collection<? extends TSrc> source, BiFunction<? super TSrc, Integer, ? extends TDest> func) {
+      Iterable<? extends TSrc> source, BiFunction<? super TSrc, Integer, ? extends TDest> func) {
     return source == null ? null : mapWithIndex(source, func, new ArrayList<>());
   }
 
   public static <TSrc, TDest> List<TDest> map(
-      Collection<? extends TSrc> source, Function<? super TSrc, ? extends TDest> func) {
+      Iterable<? extends TSrc> source, Function<? super TSrc, ? extends TDest> func) {
     return source == null ? null : map(source, func, new ArrayList<>());
   }
 
-  public static <C extends Collection<? super TDest>, TSrc, TDest> C flatMapWithIndex(Collection<? extends TSrc> source,
+  public static <C extends Collection<? super TDest>, TSrc, TDest> C flatMapWithIndex(Iterable<? extends TSrc> source,
       BiFunction<? super TSrc, Integer, ? extends Collection< ? extends TDest>> func, C dest) {
     if (source != null) {
       int idx = 0;
@@ -68,22 +68,22 @@ public class ListUtil {
   }
 
   public static <C extends Collection<? super TDest>, TSrc, TDest> C flatMap(
-      Collection<? extends TSrc> source, Function<? super TSrc, ? extends Collection< ? extends TDest>> func, C dest) {
+      Iterable<? extends TSrc> source, Function<? super TSrc, ? extends Collection< ? extends TDest>> func, C dest) {
     return flatMapWithIndex(source, (e, i) ->  func.apply(e), dest);
   }
 
-  public static <TSrc, TDest> List<TDest> flatMapWithIndex(Collection<? extends TSrc> source,
+  public static <TSrc, TDest> List<TDest> flatMapWithIndex(Iterable<? extends TSrc> source,
       BiFunction<? super TSrc, Integer, ? extends Collection< ? extends TDest>> func) {
     return source == null ? null : flatMapWithIndex(source, func, new ArrayList<>());
   }
 
   public static <TSrc, TDest> List<TDest> flatMap(
-      Collection<? extends TSrc> source, Function<? super TSrc, ? extends Collection< ? extends TDest>> func) {
+      Iterable<? extends TSrc> source, Function<? super TSrc, ? extends Collection< ? extends TDest>> func) {
     return source == null ? null : flatMap(source, func, new ArrayList<>());
   }
 
   public static <TSrc, TDest> Set<TDest> unique(
-      Collection<? extends TSrc> source, Function<? super TSrc, ? extends TDest> func) {
+      Iterable<? extends TSrc> source, Function<? super TSrc, ? extends TDest> func) {
     return source == null ? null : map(source, func, new HashSet<>());
   }
 
@@ -92,7 +92,7 @@ public class ListUtil {
   }
 
   public static <K, E> Map<K, List<E>> groupBy(
-      Collection<? extends E> source, Function<? super E, ? extends K> classifier) {
+      Iterable<? extends E> source, Function<? super E, ? extends K> classifier) {
     if (source == null)
       return null;
     Map<K, List<E>> result = new LinkedHashMap<>();
@@ -151,23 +151,23 @@ public class ListUtil {
     return result;
   }
 
-  public static <K, V> Map<K, V> toMap(Collection<V> source, Function<? super V, ? extends K> keyFunc) {
+  public static <K, V> Map<K, V> toMap(Iterable<V> source, Function<? super V, ? extends K> keyFunc) {
     return toMap(source, keyFunc, Function.identity());
   }
 
   public static <S, K, V> Map<K, V> toMap(
-      Collection<S> source, Function<? super S, ? extends K> keyFunc, Function<? super S, ? extends V> valFunc) {
+      Iterable<S> source, Function<? super S, ? extends K> keyFunc, Function<? super S, ? extends V> valFunc) {
     return toMapInto(source, keyFunc, valFunc, new LinkedHashMap<>());
   }
 
   // Have to use different name, as Java compile will confuse the overloaded methods with generics.
   public static <K, V, D extends Map<? super K, ? super V>> D toMapInto(
-      Collection<V> source, Function<? super V, ? extends K> keyFunc, D dest) {
+      Iterable<V> source, Function<? super V, ? extends K> keyFunc, D dest) {
     return toMapInto(source, keyFunc, i -> i, dest);
   }
 
   public static <S, K, V, D extends Map<? super K, ? super V>> D toMapInto(
-      Collection<S> source, Function<? super S, ? extends K> keyFunc, Function<? super S, ? extends V> valFunc, D dest) {
+      Iterable<S> source, Function<? super S, ? extends K> keyFunc, Function<? super S, ? extends V> valFunc, D dest) {
     if (source == null)
       return null;
     for (S s : source)
@@ -175,7 +175,7 @@ public class ListUtil {
     return dest;
   }
 
-  public static <V, S extends Collection<? extends V>, D extends Collection<? super V>> D filter(
+  public static <V, S extends Iterable<? extends V>, D extends Collection<? super V>> D filter(
       S source, Predicate<? super V> pred, D dest) {
     if (source != null)
       for (V s : source)
@@ -184,7 +184,7 @@ public class ListUtil {
     return dest;
   }
 
-  public static <V, C extends Collection<? extends V>> List<V> filter(C source, Predicate<? super V> pred) {
+  public static <V, C extends Iterable<? extends V>> List<V> filter(C source, Predicate<? super V> pred) {
     return source == null ? null : filter(source, pred, new ArrayList<>());
   }
 
@@ -260,11 +260,11 @@ public class ListUtil {
     return sb.toString();
   }
 
-  public static <V, C extends Collection<V>> boolean exists(C source, Predicate<? super V> pred) {
+  public static <V, C extends Iterable<V>> boolean exists(C source, Predicate<? super V> pred) {
     return source == null ? false : first(source, pred).isPresent();
   }
 
-  public static <V, C extends Collection<V>> Optional<V> first(C source, Predicate<? super V> pred) {
+  public static <V, C extends Iterable<V>> Optional<V> first(C source, Predicate<? super V> pred) {
     if (source != null)
       for (V s : source)
         if (pred.test(s))
@@ -280,7 +280,7 @@ public class ListUtil {
     return -1;
   }
 
-  public static <V, S extends Collection<? extends V>, D extends Collection<? super V>> D takeBetween(
+  public static <V, S extends Iterable<? extends V>, D extends Collection<? super V>> D takeBetween(
       S source, Predicate<? super V> dropPred, Predicate<? super V> whilePred, D dest) {
     if (source != null) {
       boolean startTaking = false;
@@ -297,26 +297,26 @@ public class ListUtil {
   }
 
   /** This is a combination of dropWhile and takeWhile */
-  public static <V, S extends Collection<? extends V>> List<V> takeBetween(
+  public static <V, S extends Iterable<? extends V>> List<V> takeBetween(
       S source, Predicate<? super V> dropPred, Predicate<? super V> whilePred) {
     return source == null ? null : takeBetween(source, dropPred, whilePred, new ArrayList<>());
   }
 
-  public static <V, S extends Collection<? extends V>, D extends Collection<? super V>> D takeWhile(
+  public static <V, S extends Iterable<? extends V>, D extends Collection<? super V>> D takeWhile(
       S source, Predicate<? super V> pred, D dest) {
     return takeBetween(source, (v) -> false, pred, dest);
   }
 
-  public static <V, S extends Collection<? extends V>> List<V> takeWhile(S source, Predicate<? super V> pred) {
+  public static <V, S extends Iterable<? extends V>> List<V> takeWhile(S source, Predicate<? super V> pred) {
     return source == null ? null : takeWhile(source, pred, new ArrayList<>());
   }
 
-  public static <V, S extends Collection<? extends V>, D extends Collection<? super V>> D dropWhile(
+  public static <V, S extends Iterable<? extends V>, D extends Collection<? super V>> D dropWhile(
       S source, Predicate<? super V> pred, D dest) {
     return takeBetween(source, pred, v -> true, dest);
   }
 
-  public static <V, S extends Collection<? extends V>> List<V> dropWhile(S source, Predicate<? super V> pred) {
+  public static <V, S extends Iterable<? extends V>> List<V> dropWhile(S source, Predicate<? super V> pred) {
     return dropWhile(source, pred, new ArrayList<>());
   }
 
@@ -326,16 +326,17 @@ public class ListUtil {
     return list.isEmpty() ? Optional.empty() : Optional.of(list.get(list.size() - 1));
   }
 
-  public static <T> Optional<T> first(Collection<T> list) {
+  public static <T> Optional<T> first(Iterable<T> list) {
     if (list == null)
       return Optional.empty();
-    return list.isEmpty() ? Optional.empty() : Optional.of(list.iterator().next());
+    Iterator<T> it = list.iterator();
+    return it.hasNext() ? Optional.of(list.iterator().next()) : Optional.empty();
   }
 
-  public static <T> boolean containsAny(Collection<? super T> list, Collection<? extends T> elements) {
+  public static <T> boolean containsAny(Iterable<T> list, Collection<? extends T> elements) {
     if (list != null)
-      for (T e : elements)
-        if (list.contains(e))
+      for (T e : list)
+        if (elements.contains(e))
           return true;
     return false;
   }
@@ -390,7 +391,7 @@ public class ListUtil {
     });
   }
 
-  public static <V, T> T reduce(List<V> source, T identity, BiFunction<T, V, T> accumulate) {
+  public static <V, T> T reduce(Iterable<V> source, T identity, BiFunction<T, V, T> accumulate) {
     T result = identity;
     if (source != null)
       for (V s : source)
@@ -398,7 +399,7 @@ public class ListUtil {
     return result;
   }
 
-  public static <V, T> T reduceTo(List<V> source, T result, BiConsumer<T, V> accumulate) {
+  public static <V, T> T reduceTo(Iterable<V> source, T result, BiConsumer<T, V> accumulate) {
     if (source != null)
       for (V s : source)
         accumulate.accept(result, s);
