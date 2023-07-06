@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import org.jsonex.core.type.Nullable;
 import org.jsonex.treedoc.TDNode;
 
 import java.net.URI;
@@ -43,8 +44,11 @@ public class TDJSONOption {
   URI uri;
 
   // Used for JSONParser
-  /** In case there's no enclosed '[' of '{' on the root level, the default type. */
-  TDNode.Type defaultRootType = TDNode.Type.SIMPLE;
+  /**
+   * In case there's no enclosed '[' of '{' on the root level, the default type.
+   * By default, it will try to interpreter as a single value (either map, if there's ":", or a simple value.)
+   */
+  @Nullable TDNode.Type defaultRootType;
 
   // Used for JSONWriter
   int indentFactor;
@@ -113,7 +117,7 @@ public class TDJSONOption {
   @Setter(AccessLevel.NONE) @Getter(AccessLevel.NONE) Collection<String> _termKeyStrs;
 
   public void buildTerms() {
-    _termValue = "\n\r" + deliminatorObjectStart;  // support tree with a type in the form of "type{attr1:val1}"
+    _termValue = "\n\r" + deliminatorKey + deliminatorObjectStart;  // support tree with a type in the form of "type{attr1:val1}", key1:key2:type{att1:val1}
     _termKey = deliminatorObjectStart + deliminatorObjectEnd + deliminatorArrayStart;
     _termValueStrs = new ArrayList<>();
     _termKeyStrs = new ArrayList<>();
@@ -129,7 +133,7 @@ public class TDJSONOption {
     else
       _termKeyStrs.add(deliminatorKey);
 
-    _termValueInMap = _termValue + deliminatorObjectEnd;
+    _termValueInMap = _termValue + deliminatorObjectEnd + deliminatorArrayEnd; // It's possible object end is omitted for path compression. e.g [a:b:c]
     _termValueInArray = _termValue + deliminatorArrayEnd;
   }
 }

@@ -22,6 +22,7 @@ import org.jsonex.core.util.ClassUtil;
 import org.jsonex.jsoncoder.coder.*;
 import org.jsonex.jsoncoder.fieldTransformer.FieldTransformer;
 import org.jsonex.jsoncoder.fieldTransformer.FieldTransformer.FieldInfo;
+import org.jsonex.treedoc.TDNode;
 import org.jsonex.treedoc.json.TDJSONOption;
 import org.slf4j.Logger;
 
@@ -137,7 +138,7 @@ public class JSONCoderOption {
   @Getter private final List<EqualsWrapper<?>> equalsWrapper = new ArrayList<>();
   
   // JSON coder config
-  @Getter @Setter private TDJSONOption jsonOption = new TDJSONOption();
+  @Getter @Setter private TDJSONOption jsonOption = TDJSONOption.ofDefaultRootType(TDNode.Type.SIMPLE);
 
   public enum LogLevel {
     OFF { public void log(Logger log, String msg, Throwable e) { /* Noop */ }},

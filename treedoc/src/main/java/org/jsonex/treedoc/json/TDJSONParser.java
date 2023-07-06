@@ -41,7 +41,7 @@ public class TDJSONParser {
     TreeDoc doc = TreeDoc.ofArray();
     int docId = 0;
     while(src.skipSpacesAndReturnsAndCommas())
-      TDJSONParser.get().parse(src, new TDJSONOption().setDocId(docId++), doc.getRoot().createChild());
+      TDJSONParser.get().parse(src, TDJSONOption.ofDefaultRootType(TDNode.Type.MAP).setDocId(docId++), doc.getRoot().createChild());
     return doc.getRoot();
   }
 
@@ -64,7 +64,7 @@ public class TDJSONParser {
       if (contains(opt.deliminatorArrayStart, c))
         return parseArray(src, opt, node, true);
 
-      if (isRoot) {
+      if (isRoot && opt.defaultRootType != null) {
         switch (opt.defaultRootType) {
           case MAP:
             return parseMap(src, opt, node, false);
@@ -82,17 +82,29 @@ public class TDJSONParser {
         return node.setValue(sb.toString());
       }
 
+      if (isRoot && opt.defaultRootType == TDNode.Type.SIMPLE) {
+        return node.setValue(ClassUtil.toSimpleObject(src.readUntil("\r\n")));
+      }
+
       String term = opt._termValue;
       if (node.getParent() != null)  // parent.type can either be ARRAY or MAP.
         term = node.getParent().getType() == TDNode.Type.ARRAY ? opt._termValueInArray : opt._termValueInMap;
 
       String str = src.readUntil(term, opt._termValueStrs).trim();
-      node.setValue(ClassUtil.toSimpleObject(str));
+      if (!src.isEof() && contains(opt.deliminatorKey, src.peek())) {  // it's a path compression such as: a:b:c,d:e -> {a: {b: c}}
+        src.skip();
+        node.setType(TDNode.Type.MAP);
+        parse(src, opt, node.createChild(str), false);
+        return node;
+      }
+
       if (!src.isEof() && contains(opt.deliminatorObjectStart, src.peek())) {
         // A value with type in the form of `type{attr1:val1:attr2:val2}
-        node.createChild(opt.KEY_TYPE).setValue(node.getValue());
+        node.createChild(opt.KEY_TYPE).setValue(str);
         return parseMap(src, opt, node, true);
       }
+      // A simple value
+      node.setValue(ClassUtil.toSimpleObject(str));
       return node;
     } finally {
       node.setEnd(src.getBookmark());

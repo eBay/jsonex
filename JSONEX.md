@@ -75,12 +75,13 @@ line2`,
 <tr><th>Feature</th><th>JSONex</th><th>JSON</th></tr>
 <tr>
   <td>optional json top level braces - object</td>
-  <td><code>a:1</code></td>
+  <td><code>a:1,b:2</code></td>
   <td>
 
 ```json
 {
-  "a":1
+  "a": 1,
+  "b": 2
 }
 ```
   </td>
@@ -92,6 +93,20 @@ line2`,
 
 ```json
 ["a", "b", 1]
+```
+  </td>
+</tr>
+<tr>
+  <td>optional json top level braces - array of objects</td>
+  <td><code>{a:1},{b:2},c</code></td>
+  <td>
+
+```json
+[
+  {"a": 1},
+  {"b": 2},
+  "c"
+]
 ```
   </td>
 </tr>
@@ -130,6 +145,42 @@ line2`,
 ```
   </td>
 </tr>
+<tr>
+  <td>Optional Quotes</td>
+  <td><code>{a: value1, b: value2}</code></td>
+  <td>
+
+```json
+{"a": "value1", "b": "value2"}
+```
+  </td>
+</tr>
+<tr>
+  <td>Commas are allowed for last element</td>
+  <td><code>{a: 1, b: 2, }</code></td>
+  <td>
+
+```json
+{"a": 1, "b": 2}
+```
+  </td>
+</tr>
+<tr>
+  <td>Multi-line value</td>
+  <td><pre>{
+    a: 
+      `abc 
+       line2`, 
+    b: 2 
+  }</pre></td>
+  <td>
+
+```json
+{"a": "abc\nline2", "b": 2}
+```
+  </td>
+</tr>
+
 </table>
 
 
