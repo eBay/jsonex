@@ -252,7 +252,7 @@ public class TDJsonParserTest {
     TestCls test = new TestCls("va", new TestCls1(23, new String[]{"a", "b"}));
     String str = test.toString();  // TDJsonParserTest.TestCls(a=va, c=TDJsonParserTest.TestCls1(d=23, strs=[a, b]))
     TDJSONOption opt = new TDJSONOption().setDeliminatorObject("(", ")").setDeliminatorKey("=");
-    testParse(str, opt, "{$type:\"TDJsonParserTest.TestCls\",a:\"va\",c:{$type:\"TDJsonParserTest.TestCls1\",d:23,strs:[\"a\",\"b\"]}}");
+    testParse(str, opt, "{$type:'TDJsonParserTest.TestCls',a:'va',c:{$type:'TDJsonParserTest.TestCls1',d:23,strs:['a','b']}}");
   }
 
   @Test public void testParsePathCompression() {

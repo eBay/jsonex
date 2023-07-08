@@ -37,7 +37,8 @@ public class TDJSONParser {
   public TDNode parseAll(CharSource src) { return parseAll(src, new TDJSONOption()); }
   public TDNode parseAll(String str, TDJSONOption opt) { return parseAll(new ArrayCharSource(str), opt); }
   /** Parse all the JSON objects in the input stream until EOF and store them inside a root node with array type */
-  public TDNode parseAll(CharSource src, TDJSONOption opt) {
+  public TDNode parseAll(CharSource src, TDJSONOption option) {
+    TDJSONOption opt = option.setDefaultRootType(TDNode.Type.MAP);
     TreeDoc doc = TreeDoc.ofArray();
     int docId = 0;
     while(src.skipSpacesAndReturnsAndCommas())
