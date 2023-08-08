@@ -11,27 +11,28 @@ import static org.jsonex.core.util.ListUtil.isIn;
 import static org.jsonex.core.util.StringUtil.noNull;
 
 /**
- * Represent an command line parameter, it can be either argument or option
- * If index is not null indicate it's argument
- *   Argument default to required unless explicitly specified.
- *   required argument can't follow non-required argument which index less than it
+ *
+ * <pre>
+ * Represent a command line parameter, it can be either argument or option
+ * If index is not null indicate it is an argument.
+ *    Argument default to required unless explicitly specified.
+ *    Required argument can't follow non-required argument which index less than it
  * If index is null indicates it's an option, option default to not required, unless specified
- *
- * For option of Boolean type, it will be mapped as flag, that means the value of the option can be omitted.
- *
+ *    For option of Boolean type, it will be mapped as flag, that means the value of the option can be omitted.
+
  * For Param of complex type or array/list, the value can be specified as JSON(ex) string, the top level "{" or "[",
  * can be, omitted. The quote for key and value can be omitted.
- *
- * For array parameters, it also possible to specify the values as separate options. The values will be merged
- *
+
+ * For array parameters, it is also possible to specify the values as separate options. The values will be merged
+
  * Following Annotation will be processed for each parameter:
- *
  * {@link Name}  Name of the parameter, optional, default to field name
  * {@link ShortName}  The optional short name
  * {@link Description}  The optional description
  * {@link Index}  Indicate this an indexed parameter
  * {@link Required}  Indicate if this field is required. all the index fields are required unless explicitly indicated.
  *     All the non-index fields are not required unless explicitly indicated.
+ * </pre>
  */
 @Data
 public class Param {

@@ -20,6 +20,7 @@ import static org.jsonex.core.util.ListUtil.first;
 import static org.jsonex.core.util.ListUtil.setAt;
 
 /**
+ * <pre>
  * CLI specification based on annotated java bean of `cls`. Following annotations will be processed:
  *
  * Class level:
@@ -27,8 +28,9 @@ import static org.jsonex.core.util.ListUtil.setAt;
  *   {@link Summary}: Summary of the command (Optional)
  *   {@link Description}: Description of the command (Optional)
  *   {@link Examples}: Array of string representation of samples usages (Optional)
- *
  * For field level annotations, please refer to class {@link Param}
+ *
+ * </pre>
  *
  * @param <T>
  */

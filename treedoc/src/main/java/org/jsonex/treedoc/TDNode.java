@@ -15,25 +15,31 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.jsonex.core.charsource.Bookmark;
 import org.jsonex.core.type.Lazy;
+import static org.jsonex.core.util.LangUtil.orElse;
+import static org.jsonex.core.util.LangUtil.safe;
 import org.jsonex.core.util.ListUtil;
+import static org.jsonex.core.util.ListUtil.last;
+import static org.jsonex.core.util.ListUtil.listOf;
+import static org.jsonex.core.util.ListUtil.map;
 import org.jsonex.core.util.StringUtil;
 import org.jsonex.treedoc.TDPath.Part;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Consumer;
-
-import static org.jsonex.core.util.LangUtil.orElse;
-import static org.jsonex.core.util.LangUtil.safe;
-import static org.jsonex.core.util.ListUtil.*;
 
 /** A Node in TreeDoc */
 @RequiredArgsConstructor
 // @Getter @Setter
 @Accessors(chain = true)
 public class TDNode {
+  private final static int SIZE_TO_INIT_NAME_INDEX = 64;
   public final static String ID_KEY = "$id";
   public final static String REF_KEY = "$ref";
 
@@ -58,6 +64,7 @@ public class TDNode {
   transient private boolean deduped;
   transient private final Lazy<Integer> hash = new Lazy<>();
   transient private final Lazy<String> str = new Lazy<>();
+  transient private Map<String, Integer> nameIndex;  // Will only initialize when size is big enough
 
   public TDNode(TDNode parent, String key) { this.doc = parent.doc; this.parent = parent; this.key = key; }
   public TDNode(TreeDoc doc, String key) { this.doc = doc; this.key = key; }
@@ -101,7 +108,18 @@ public class TDNode {
     if (node.key == null)  // Assume it's array element
       node.key = "" + getChildrenSize();
     children.add(node);
+    if (children.size() > SIZE_TO_INIT_NAME_INDEX && nameIndex == null)
+      initNameIndex();
     return touch();
+  }
+
+  private void initNameIndex() {
+    nameIndex = new HashMap<>();
+    for (int i = 0; i< children.size(); i++) {
+      TDNode child = children.get(i);
+      if (child.key != null)
+        nameIndex.put(child.key, i);
+    }
   }
 
   public void swapWith(TDNode to) {
@@ -129,8 +147,12 @@ public class TDNode {
     return idx < 0 ? null : children.get(idx);
   }
 
-  int indexOf(TDNode node) { return ListUtil.indexOf(children, n -> n == node); }
-  int indexOf(String name) { return ListUtil.indexOf(children, n -> n.getKey().equals(name)); }
+  int indexOf(TDNode node) {
+    return nameIndex != null ? indexOf(node.key) : ListUtil.indexOf(children, n -> n == node);
+  }
+  int indexOf(String name) {
+    return nameIndex != null ? orElse(nameIndex.get(name), -1) : ListUtil.indexOf(children, n -> n.getKey().equals(name));
+  }
   int index() { return parent == null ? 0 : parent.indexOf(this); }
 
   public Object getChildValue(String name) {
@@ -206,8 +228,8 @@ public class TDNode {
   public boolean isLeaf() { return getChildrenSize() == 0; }
 
   private TDNode touch() {
-    hash.clear();;
-    str.clear();;
+    hash.clear();
+    str.clear();
     if (parent != null)
       parent.touch();
     return this;
@@ -285,15 +307,19 @@ public class TDNode {
     if (this.type == Type.SIMPLE || children == null)
       return result;
     // Add the key column
+    Set<String> keySet = new HashSet<>();
     result.add(COLUMN_KEY);
+    keySet.add(COLUMN_KEY);
     boolean hasValue = false;
     for (TDNode c : children) {
       if (c.value != null)
         hasValue = true;
       if (c.children != null)
         for (TDNode cc : c.getChildren())
-          if (!result.contains(cc.key))
+          if (!keySet.contains(cc.key)) {
             result.add(cc.key);
+            keySet.add(cc.key);
+          }
     }
     if (hasValue)
       result.add(1, COLUMN_VALUE);

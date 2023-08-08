@@ -1,20 +1,26 @@
 package org.jsonex.cliarg;
 
-import org.jsonex.core.util.BeanConvertContext;
-import org.jsonex.core.util.ClassUtil;
-import org.jsonex.jsoncoder.JSONCoder;
-import org.jsonex.jsoncoder.JSONCoderOption;
-import org.jsonex.treedoc.TDNode.Type;
-import org.jsonex.treedoc.json.TDJSONOption;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.*;
-
+import org.jsonex.core.util.BeanConvertContext;
+import org.jsonex.core.util.ClassUtil;
 import static org.jsonex.core.util.LangUtil.doIf;
+import static org.jsonex.core.util.LangUtil.doIfNotNull;
 import static org.jsonex.core.util.ListUtil.isIn;
+import org.jsonex.jsoncoder.JSONCoder;
+import org.jsonex.jsoncoder.JSONCoderOption;
+import org.jsonex.treedoc.TDNode.Type;
+import org.jsonex.treedoc.json.TDJSONOption;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Parse the input command line arguments against the {@link CLISpec}. The parsed result will be stored in the target
@@ -106,7 +112,7 @@ public class CLIParser<T> {
     }
     Param param = spec.indexedParams.get(paramIndex++);
     missingParams.remove(param.name);
-    param.property.set(target, parseValue(param, arg));
+    doIfNotNull(parseValue(param, arg), v -> param.property.set(target, v));
   }
 
   private Object parseValue(Param param, String value)  {
@@ -124,7 +130,8 @@ public class CLIParser<T> {
           ? JSONCoder.decode(value, cls, opt)
           : JSONCoder.decodeTo(value, param.getProperty().get(target), opt.setMergeArray(true));
     } catch (Exception e) {
-      log.error("Error parsing parameter:" + param.name, e);
+      errorMessages.put(param.name,  value + ";" + e.toString());
+      // log.error("Error parsing parameter:" + param.name, e);
     }
     return null;
   }
@@ -133,9 +140,9 @@ public class CLIParser<T> {
 
   public String getErrorsAsString() {
     StringBuilder sb = new StringBuilder();
-    doIf(!missingParams.isEmpty(), () -> sb.append("\nMissing required arguments:" + missingParams));
-    doIf(!extraArgs.isEmpty(), () -> sb.append("\nUnexpected arguments:" + extraArgs));
-    doIf(!errorMessages.isEmpty(), () -> sb.append("\nError parsing following arguments:" + errorMessages));
+    doIf(!missingParams.isEmpty(), () -> sb.append("\nMissing required arguments:").append(missingParams));
+    doIf(!extraArgs.isEmpty(), () -> sb.append("\nUnexpected arguments:").append(extraArgs));
+    doIf(!errorMessages.isEmpty(), () -> sb.append("\nError parsing following arguments:").append(errorMessages));
     return sb.toString();
   }
 }
