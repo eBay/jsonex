@@ -108,7 +108,9 @@ public class TDNode {
     if (node.key == null)  // Assume it's array element
       node.key = "" + getChildrenSize();
     children.add(node);
-    if (children.size() > SIZE_TO_INIT_NAME_INDEX && nameIndex == null)
+    if (nameIndex != null)
+      nameIndex.put(node.key, children.size() - 1);
+    else if (children.size() > SIZE_TO_INIT_NAME_INDEX)
       initNameIndex();
     return touch();
   }
