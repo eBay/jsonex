@@ -36,7 +36,7 @@ public class CSVTest {
   }
 
   @Test public void testJSONValue() {
-    String json = "[{f1: v1, f2: {a: 1， b: 2}}, {f2:null, f3: 3}]";
+    String json = "[{f1: v1, f2: {a: 1， b: 2}}, {f2:'', f3: 3}]";
     assertMatchesSnapshot(CSVWriter.get().writeAsString(TDJSONParser.get().parse(json)));
   }
 
