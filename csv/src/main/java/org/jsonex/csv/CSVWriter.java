@@ -46,6 +46,8 @@ public class CSVWriter {
   }
 
   private String encodeField(Object field, CSVOption opt) {
+    if (field == null)
+      return "";
     String quote = opt._quoteCharStr;
     String str = String.valueOf(field);
     if (needQuote(field, str, opt)) {

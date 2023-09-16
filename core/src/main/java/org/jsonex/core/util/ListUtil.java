@@ -10,14 +10,25 @@
 package org.jsonex.core.util;
 
 import org.jsonex.core.type.Identifiable;
+import static org.jsonex.core.util.LangUtil.safe;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
-
-import static org.jsonex.core.util.LangUtil.safe;
 
 /**
  * A collection of utilities related to Collection classes. Many methods here are better alternatives
@@ -241,8 +252,9 @@ public class ListUtil {
   public static <T> String join(T[] list, String delimiter) { return join(Arrays.asList(list), delimiter); }
   public static <T> String join(Collection<T> list, String delimiter) {
     StringBuilder sb = new StringBuilder();
+    int i = 0;
     for(Object obj : list) {
-      if(sb.length() > 0)
+      if(i++ > 0)
         sb.append(delimiter);
       sb.append(obj);
     }
@@ -252,8 +264,9 @@ public class ListUtil {
   public static <T> String join(T[] list, char delimiter) { return join(Arrays.asList(list), delimiter); }
   public static <T> String join(Collection<T> list, char delimiter) {
     StringBuilder sb = new StringBuilder();
+    int i = 0;
     for(Object obj : list) {
-      if(sb.length() > 0)
+      if(i++ > 0)
         sb.append(delimiter);
       sb.append(obj);
     }
