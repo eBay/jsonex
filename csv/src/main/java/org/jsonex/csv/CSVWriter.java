@@ -3,13 +3,12 @@ package org.jsonex.csv;
 import lombok.SneakyThrows;
 import org.jsonex.core.factory.InjectableInstance;
 import org.jsonex.core.util.ClassUtil;
+import static org.jsonex.core.util.ListUtil.join;
+import static org.jsonex.core.util.ListUtil.map;
 import org.jsonex.treedoc.TDNode;
 
 import java.util.Collection;
 import java.util.List;
-
-import static org.jsonex.core.util.ListUtil.join;
-import static org.jsonex.core.util.ListUtil.map;
 
 public class CSVWriter {
   public final static InjectableInstance<CSVWriter> instance = InjectableInstance.of(CSVWriter.class);
@@ -48,8 +47,8 @@ public class CSVWriter {
 
   private String encodeField(Object field, CSVOption opt) {
     String quote = opt._quoteCharStr;
-    String str = "" + field;
-    if (needQuote(field, opt)) {
+    String str = String.valueOf(field);
+    if (needQuote(field, str, opt)) {
       if (str.contains(quote))
         str = str.replace(quote, quote + quote);
       return quote + str + quote;
@@ -57,15 +56,12 @@ public class CSVWriter {
     return str;
   }
 
-  private static boolean needQuote(Object field, CSVOption opt) {
-    if (!(field instanceof String))
-      return false;
-    String str = (String)field;
+  private static boolean needQuote(Object field, String str, CSVOption opt) {
     if (str.isEmpty())
       return false;
     return str.charAt(0) == opt.getQuoteChar()
         || str.contains(opt._fieldSepStr)
         || str.contains(opt._recordSepStr)
-        || ClassUtil.toSimpleObject(str) != str;
+        || ClassUtil.toSimpleObject(str) != field;
   }
 }

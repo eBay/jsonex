@@ -238,7 +238,7 @@ public class TDNode {
   }
 
   @Override public String toString() {
-    return str.getOrCompute(() -> toString(new StringBuilder(), true, true, 100000).toString());
+    return str.getOrCompute(() -> toString(new StringBuilder(), false, true, 100000).toString());
   }
 
   public StringBuilder toString(StringBuilder sb, boolean includeRootKey, boolean includeReservedKeys, int limit) {
