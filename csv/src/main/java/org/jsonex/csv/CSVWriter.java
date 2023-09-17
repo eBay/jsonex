@@ -50,6 +50,8 @@ public class CSVWriter {
       return "";
     String quote = opt._quoteCharStr;
     String str = String.valueOf(field);
+    if (str.isEmpty())
+      return str;
     if (needQuote(field, str, opt)) {
       if (str.contains(quote))
         str = str.replace(quote, quote + quote);

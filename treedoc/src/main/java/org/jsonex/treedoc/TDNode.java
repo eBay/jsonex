@@ -246,7 +246,8 @@ public class TDNode {
       sb.append(key + ": ");
 
     if (value != null) {
-      if (!(value instanceof String)) {
+      // Don't quote if not inclueRootKey
+      if (!(value instanceof String) || !includeRootKey) {
         sb.append(value);
       } else {
         String str = StringUtil.cEscape((String) value, '\'');
