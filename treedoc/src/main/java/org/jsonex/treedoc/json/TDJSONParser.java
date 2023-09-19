@@ -100,7 +100,7 @@ public class TDJSONParser {
       }
 
       if (!src.isEof() && contains(opt.deliminatorObjectStart, src.peek())) {
-        // A value with type in the form of `type{attr1:val1:attr2:val2}
+        // Type wrapper: A value with type in the form of `type{attr1:val1:attr2:val2}
         node.createChild(opt.KEY_TYPE).setValue(str);
         return parseMap(src, opt, node, true);
       }

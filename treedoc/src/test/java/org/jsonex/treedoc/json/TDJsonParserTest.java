@@ -216,7 +216,7 @@ public class TDJsonParserTest {
         .setDeliminatorArray("<", ">");
     TDNode node = TDJSONParser.get().parse(str, opt);
     assertEquals("{a: 'va', c: {d: 23, strs: ['a', 'b']}}", node.toString());
-    assertEquals("(a=`va`;c=(d=23;strs=<`a`;`b`>))", TDJSONWriter.get().writeAsString(node, opt.setAlwaysQuoteName(false).setQuoteChar('`')));
+    assertEquals("(a=`va`;c=(d=23;strs=<`a`;`b`>))", TDJSONWriter.get().writeAsString(node, opt.setAlwaysQuoteKey(false).setQuoteChar('`')));
   }
 
   private static void parseWithException(String str, String expectedError) {
@@ -268,7 +268,7 @@ public class TDJsonParserTest {
 
   private void testParse(String str, TDJSONOption opt, String expectedJson) {
     TDNode node = TDJSONParser.get().parse(str, opt);
-    assertEquals(expectedJson, TDJSONWriter.get().writeAsString(node, new TDJSONOption().setAlwaysQuoteName(false).setQuoteChar('\'')));
+    assertEquals(expectedJson, TDJSONWriter.get().writeAsString(node, new TDJSONOption().setAlwaysQuoteKey(false).setQuoteChar('\'')));
   }
 
   @Data

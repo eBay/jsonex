@@ -19,9 +19,22 @@ import org.jsonex.core.type.Tuple;
 import org.jsonex.core.type.Tuple.Pair;
 import org.jsonex.core.type.Union.Union2;
 import org.jsonex.core.util.ClassUtil;
-import org.jsonex.jsoncoder.coder.*;
+import static org.jsonex.core.util.LangUtil.doIfElse;
+import static org.jsonex.core.util.LangUtil.orElse;
+import static org.jsonex.core.util.LangUtil.safe;
+import static org.jsonex.core.util.ListUtil.listOf;
+import org.jsonex.jsoncoder.coder.CoderAtomicBoolean;
+import org.jsonex.jsoncoder.coder.CoderAtomicInteger;
+import org.jsonex.jsoncoder.coder.CoderBigInteger;
+import org.jsonex.jsoncoder.coder.CoderClass;
+import org.jsonex.jsoncoder.coder.CoderDate;
+import org.jsonex.jsoncoder.coder.CoderEnum;
+import org.jsonex.jsoncoder.coder.CoderURI;
+import org.jsonex.jsoncoder.coder.CoderURL;
+import org.jsonex.jsoncoder.coder.CoderXMLGregorianCalendar;
 import org.jsonex.jsoncoder.fieldTransformer.FieldTransformer;
 import org.jsonex.jsoncoder.fieldTransformer.FieldTransformer.FieldInfo;
+import static org.jsonex.jsoncoder.fieldTransformer.FieldTransformer.exclude;
 import org.jsonex.treedoc.TDNode;
 import org.jsonex.treedoc.json.TDJSONOption;
 import org.slf4j.Logger;
@@ -29,12 +42,15 @@ import org.slf4j.Logger;
 import java.text.Format;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicReference;
-
-import static org.jsonex.core.util.LangUtil.*;
-import static org.jsonex.core.util.ListUtil.listOf;
-import static org.jsonex.jsoncoder.fieldTransformer.FieldTransformer.exclude;
 
 @SuppressWarnings("UnusedReturnValue")
 @Accessors(chain=true) @Slf4j
@@ -295,9 +311,14 @@ public class JSONCoderOption {
     return this;
   }
 
+  // Keep this for backward compatible
   public JSONCoderOption setJsonOption(boolean alwaysQuoteName, char quoteChar, int indentFactor) {
-    jsonOption.setAlwaysQuoteName(alwaysQuoteName)
-        .setQuoteChar(quoteChar)
+    return setJsonOption(alwaysQuoteName, String.valueOf(quoteChar), indentFactor);
+  }
+
+  public JSONCoderOption setJsonOption(boolean alwaysQuoteName, String quoteChars, int indentFactor) {
+    jsonOption.setAlwaysQuoteKey(alwaysQuoteName)
+        .setQuoteChars(quoteChars)
         .setIndentFactor(indentFactor);
     return this;
   }

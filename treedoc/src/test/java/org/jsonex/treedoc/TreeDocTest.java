@@ -13,7 +13,7 @@ public class TreeDocTest {
   @Test public void testDedupeNodes() {
     TDNode node = TDJSONParser.get().parse(readResource(getClass(), "test.json"));
     node.getDoc().dedupeNodes();
-    String result = TDJSONWriter.get().writeAsString(node, TDJSONOption.ofIndentFactor(2).setAlwaysQuoteName(false));
+    String result = TDJSONWriter.get().writeAsString(node, TDJSONOption.ofIndentFactor(2).setAlwaysQuoteKey(false));
     assertEquals(FileUtil.readResource(getClass(), "test_deduped.json"), result);
   }
 }

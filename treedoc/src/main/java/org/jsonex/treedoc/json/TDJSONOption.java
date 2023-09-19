@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.jsonex.core.type.Nullable;
+import static org.jsonex.core.util.StringUtil.padEnd;
 import org.jsonex.treedoc.TDNode;
 
 import java.net.URI;
@@ -14,12 +15,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.BiFunction;
 
-import static org.jsonex.core.util.StringUtil.padEnd;
-
 // TODO: separate parser and writer options
 @Accessors(chain = true) @Data
 public class TDJSONOption {
-  public enum TextType {OPERATOR, KEY, STRING, NON_STRING}
+  public enum TextType {OPERATOR, KEY, STRING, NON_STRING, TYPE}
 
   public static TDJSONOption ofIndentFactor(int factor) { return new TDJSONOption().setIndentFactor(factor); }
   public static TDJSONOption ofDefaultRootType(TDNode.Type type) { return new TDJSONOption().setDefaultRootType(type); }
@@ -52,8 +51,14 @@ public class TDJSONOption {
 
   // Used for JSONWriter
   int indentFactor;
-  boolean alwaysQuoteName = true;
-  char quoteChar = '"';
+  boolean alwaysQuoteKey = true;
+  boolean alwaysQuoteValue = true;
+  boolean useTypeWrapper = false;
+  /**
+   * QuoteChar can have multiple value. When multiple value is provided, it will dynamically choose the best one
+   * to minimize the escape. For example "\"\'", if the string contains a lot of single quote, it will use double quote.
+   */
+  String quoteChars = "\"";
   String indentStr = "";
   BiFunction<String, TextType, String> textDecorator;
 
@@ -71,6 +76,12 @@ public class TDJSONOption {
   public TDJSONOption setIndentFactor(int _indentFactor) {
     this.indentFactor = _indentFactor;
     indentStr = padEnd("", indentFactor);
+    return this;
+  }
+
+  /** Keep this for backward compatibility */
+  public TDJSONOption setQuoteChar(char quoteChars) {
+    this.quoteChars = String.valueOf(quoteChars);
     return this;
   }
 
@@ -113,6 +124,8 @@ public class TDJSONOption {
   @Setter(AccessLevel.NONE) @Getter(AccessLevel.NONE) String _termValueInMap;
   @Setter(AccessLevel.NONE) @Getter(AccessLevel.NONE) String _termValueInArray;
   @Setter(AccessLevel.NONE) @Getter(AccessLevel.NONE) String _termKey;
+  /** Quote need if a string contains any chars */
+  @Setter(AccessLevel.NONE) @Getter(AccessLevel.NONE) String _quoteNeededChars;
   @Setter(AccessLevel.NONE) @Getter(AccessLevel.NONE) Collection<String> _termValueStrs;
   @Setter(AccessLevel.NONE) @Getter(AccessLevel.NONE) Collection<String> _termKeyStrs;
 
@@ -135,5 +148,6 @@ public class TDJSONOption {
 
     _termValueInMap = _termValue + deliminatorObjectEnd + deliminatorArrayEnd; // It's possible object end is omitted for path compression. e.g [a:b:c]
     _termValueInArray = _termValue + deliminatorArrayEnd;
+    _quoteNeededChars = _termValue + deliminatorObjectEnd + deliminatorArrayEnd + deliminatorKey + quoteChars;
   }
 }

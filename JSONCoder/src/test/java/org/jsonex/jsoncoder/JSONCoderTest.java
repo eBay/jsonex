@@ -172,7 +172,7 @@ public class JSONCoderTest {
         str.indexOf("'String1: \\'\"'") > 0);
     assertEquals(toJSONString(JSONCoder.global.decode(str, TestBean.class), codeOption), str);
 
-    codeOption.getJsonOption().setAlwaysQuoteName(false);  // Make quote optional for attribute names
+    codeOption.getJsonOption().setAlwaysQuoteKey(false);  // Make quote optional for attribute names
     str = toJSONString(buildTestBean(), codeOption);
     assertMatchesSnapshot("strWithNoKeyQuote", str);
 

@@ -222,5 +222,13 @@ public class StringUtil {
   public static String toTrimmedStr(Object o, int len) { return StringUtil.getLeft(String.valueOf(o), len); }
 
   public static String noNull(Object o) { return o == null ? "" : o.toString(); }
+
+  public static int indexOfAnyChar(String str, String toMatch) {
+    for (int i = 0; i < str.length(); i++) {
+      if (toMatch.indexOf(str.charAt(i)) >= 0)
+        return i;
+    }
+    return -1;
+  }
 }
 
