@@ -148,6 +148,6 @@ public class TDJSONOption {
 
     _termValueInMap = _termValue + deliminatorObjectEnd + deliminatorArrayEnd; // It's possible object end is omitted for path compression. e.g [a:b:c]
     _termValueInArray = _termValue + deliminatorArrayEnd;
-    _quoteNeededChars = _termValue + deliminatorObjectEnd + deliminatorArrayEnd + deliminatorKey + quoteChars;
+    _quoteNeededChars = _termValue + deliminatorObjectEnd + deliminatorArrayEnd + deliminatorKey + deliminatorValue + quoteChars;
   }
 }

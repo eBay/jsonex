@@ -4,20 +4,25 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.jsonex.core.charsource.ArrayCharSource;
 import org.jsonex.core.charsource.ReaderCharSource;
+import static org.jsonex.core.util.FileUtil.loadResource;
+import static org.jsonex.core.util.FileUtil.readResource;
+import static org.jsonex.core.util.ListUtil.listOf;
+import static org.jsonex.core.util.MapBuilder.mapOf;
 import org.jsonex.treedoc.TDNode;
 import org.jsonex.treedoc.TreeDoc;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import static org.jsonex.core.util.FileUtil.loadResource;
-import static org.jsonex.core.util.FileUtil.readResource;
-import static org.jsonex.core.util.ListUtil.listOf;
-import static org.jsonex.core.util.MapBuilder.mapOf;
-import static org.junit.Assert.*;
 
 @Slf4j
 public class TDJsonParserTest {
@@ -100,7 +105,7 @@ public class TDJsonParserTest {
   }
 
   @Test public void testRootMap() {
-    TDNode node = TDJSONParser.get().parse("'a':1\nb:2",
+    TDNode node = TDJSONParser.get().parse("'a':1\nb:2,",
         TDJSONOption.ofDefaultRootType(TDNode.Type.MAP));
     assertEquals(1, node.getValueByPath("a"));
     assertEquals(2, node.getValueByPath("b"));
