@@ -1,8 +1,12 @@
 package org.jsonex.csv;
 
-import org.jsonex.core.charsource.*;
+import org.jsonex.core.charsource.ArrayCharSource;
+import org.jsonex.core.charsource.Bookmark;
+import org.jsonex.core.charsource.CharSource;
+import org.jsonex.core.charsource.ReaderCharSource;
 import org.jsonex.core.factory.InjectableInstance;
 import org.jsonex.core.util.ClassUtil;
+import static org.jsonex.core.util.ListUtil.map;
 import org.jsonex.treedoc.TDNode;
 import org.jsonex.treedoc.TreeDoc;
 
@@ -10,8 +14,6 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import static org.jsonex.core.util.ListUtil.map;
 
 public class CSVParser {
   private static String SPACE_CHARS = " \r";
@@ -104,7 +106,7 @@ public class CSVParser {
     } else {  // Read quoted string
       isString = true;
       src.skip();
-      while (!src.isEof() && src.peek() != opt.fieldSep && src.peek() != opt.recordSep) {
+      while (!src.isEof()) {
         // Not calling getBookmark() to avoid clone an object
         int pos = src.bookmark.getPos();
         int line = src.bookmark.getLine();

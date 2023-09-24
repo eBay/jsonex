@@ -66,6 +66,6 @@ public class CSVWriter {
     return str.charAt(0) == opt.getQuoteChar()
         || str.contains(opt._fieldSepStr)
         || str.contains(opt._recordSepStr)
-        || ClassUtil.toSimpleObject(str) != field;
+        || (field instanceof String && !(ClassUtil.toSimpleObject(str) instanceof String));
   }
 }
