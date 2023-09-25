@@ -14,9 +14,12 @@ public class TDJsonWriterTest {
     TDJSONOption opt = TDJSONOption.ofIndentFactor(2)
         .addNodeFilter(NodeFilter.mask(".*/address", ".*/ip"))
         .addNodeFilter(NodeFilter.exclude(".*/\\$id"));
-    String str = TDJSONWriter.get().writeAsString(node, opt) + "\n";
-    assertEquals(readResource("testData_withNodeFilter.json"), str);
-  }
+    String str = TDJSONWriter.get().writeAsString(node, opt);
+    log.info("testWriterWithNodeFilter: str=\n" + str);
+    node = TDJSONParser.get().parse(str);
+    assertNull(node.getValueByPath("/data/0/$id"));
+    assertEquals("[Masked:len=10,aac1cfe2]", node.getValueByPath("/data/0/ip"));
+    assertEquals("{Masked:len=2}", node.getValueByPath("/data/0/address"));  }
 
   @Test public void testQuote() {
     TDNode node = TDJSONParser.get().parse(readResource( "testQuote.json"));

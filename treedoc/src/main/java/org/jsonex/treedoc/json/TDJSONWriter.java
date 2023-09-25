@@ -107,7 +107,7 @@ public class TDJSONWriter {
     if (value instanceof Character)
       value = String.valueOf(value);
     return value instanceof String
-        ? writeQuotedString(out, String.valueOf(value), opt, STRING, opt.alwaysQuoteValue)
+        ? writeQuotedString(out, (String)value, opt, STRING, opt.alwaysQuoteValue)
         : (T) out.append(opt.deco(String.valueOf(value), NON_STRING));
   }
 
@@ -129,8 +129,7 @@ public class TDJSONWriter {
 
     // Determine which quote char to use
     int counts[] = new int[opt.quoteChars.length()];
-    for(int i = 0; i < str.length(); i++) {
-      char ch = str.charAt(i);
+    for(char ch : str.toCharArray()) {
       int idx = opt.quoteChars.indexOf(ch);
       if (idx >= 0)
         counts[idx]++;

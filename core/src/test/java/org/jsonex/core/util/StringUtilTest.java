@@ -95,4 +95,9 @@ public class StringUtilTest {
   @Test public void testToTrimmedStr() {
     assertEquals("12", StringUtil.toTrimmedStr("1234", 2));
   }
+
+  @Test public void testIndexOfAnyChar() {
+    assertEquals(1, StringUtil.indexOfAnyChar("1234", "234"));
+    assertEquals(-1, StringUtil.indexOfAnyChar("1234", "567"));
+  }
 }
