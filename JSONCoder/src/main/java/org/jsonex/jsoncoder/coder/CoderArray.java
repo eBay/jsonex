@@ -31,6 +31,8 @@ public class CoderArray implements ICoder<Object> {
   public TDNode encode(Object obj, Type type, BeanCoderContext ctx, TDNode target) {
     target.setType(TDNode.Type.ARRAY);
     Class<?> cls = ClassUtil.getGenericClass(type);
+    if (cls == null)
+      cls = obj.getClass();
     for (int i = 0; i < Array.getLength(obj) && i < ctx.getOption().getMaxElementsPerNode(); i++)
       ctx.encode(Array.get(obj, i), cls.getComponentType(), target.createChild());
     return target;

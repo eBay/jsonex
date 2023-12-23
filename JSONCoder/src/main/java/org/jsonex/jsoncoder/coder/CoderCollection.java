@@ -31,7 +31,7 @@ public class CoderCollection implements ICoder<Collection> {
 
   @Override public TDNode encode(Collection obj, Type type, BeanCoderContext ctx, TDNode target) {
     target.setType(TDNode.Type.ARRAY);
-    if (ctx.getOption().isStrictOrder()
+    if (ctx.getOption().isSortMapAndSet()
         && obj instanceof Set && !(obj instanceof SortedSet || obj instanceof LinkedHashSet || obj instanceof EnumSet)) {
       Set set = new TreeSet(FullbackComparator.it); // Due to instability of Set iteration order, we copy it to TreeSet to make iteration stable
       set.addAll(obj);

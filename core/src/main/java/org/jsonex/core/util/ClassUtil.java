@@ -21,8 +21,10 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.function.Predicate;
 
+import static org.jsonex.core.util.ArrayUtil.first;
 import static org.jsonex.core.util.ArrayUtil.indexOf;
 import static org.jsonex.core.util.ListUtil.listOf;
+import static org.jsonex.core.util.StringUtil.lowerFirst;
 
 @SuppressWarnings("ALL")
 public class ClassUtil {
@@ -88,7 +90,7 @@ public class ClassUtil {
     Map<String, BeanProperty> result = beanPropertyCache.get(cls);
     if (result == null) {
       synchronized(beanPropertyCache) {
-        result = _getProperties(cls);
+        result = getPropertiesNoCache(cls);
         beanPropertyCache.put(cls, result);
       }
     }
@@ -97,55 +99,48 @@ public class ClassUtil {
 
   private static final WeakHashMap<Class<?>, Map<String, BeanProperty>> beanPropertyCache = new WeakHashMap<>();
 
-  private static Map<String, BeanProperty> _getProperties(Class<?> cls) {
+  private static Map<String, BeanProperty> getPropertiesNoCache(Class<?> cls) {
     // Find all the getter/setter methods
     // Use TreeMap as method is not in stable order in JVM implementations, so we need to sort them to make stable order
     Map<String, BeanProperty> attributeMap = new TreeMap<>();
-    for (Method m : getAllMethods(cls)) {
+    Method[] methods = getAllMethods(cls);
+    for (Method m : methods) {
       int mod = m.getModifiers();
       if(!Modifier.isPublic(mod) || Modifier.isStatic(mod))
         continue;  //None public, or static, transient
 
-      String name = null;
-      boolean isSetter = false;
-      if (m.getName().startsWith("get"))
-        name = m.getName().substring(3);
-      else if(m.getName().startsWith("is")) {
-        if(m.getReturnType() != Boolean.class && m.getReturnType() != boolean.class)
+      for (BeanMethodType methodType: BeanMethodType.values()) {
+        String name = methodType.checkAndGetName(m);
+        if (name == null)
           continue;
-        name = m.getName().substring(2);
-      } else if(m.getName().startsWith("set")) {
-        isSetter = true;
-        name = m.getName().substring(3);
-      }else
-        continue;
 
-      if (!isSetter && m.getParameterTypes().length != 0)
-        continue;
+        if (name.length() == 0)  // JSON doesn't allow emptdy key, we replace it with ^
+          name = "^";
 
-      if (isSetter && m.getParameterTypes().length != 1)
-        continue;
+        name = lowerFirst(name);
+        if (name.equals("class"))
+          continue;
 
-      if (name.length() == 0)  // JSON doesn't allow empty key, we replace it with ^
-        name = "^";
-
-      name = StringUtil.lowerFirst(name);
-      if(name.equals("class"))
-        continue;
-
-      BeanProperty prop = attributeMap.get(name);
-      if(prop == null){
-        prop = new BeanProperty(name);
-        attributeMap.put(name, prop);
-      }
-
-      if(isSetter)
-        prop.setter = m;
-      else {
-        // For union type in certain framework, isXXX is to indicate if the attribute is available, we will override it
-        // with the actual getter method
-        if (prop.getter == null || prop.getter.getReturnType() == Boolean.TYPE)
-          prop.getter = m;
+        BeanProperty prop = attributeMap.computeIfAbsent(name, k -> new BeanProperty(k));
+        switch (methodType) {
+          case has: prop.hasChecker = m; break;
+          case set: prop.setter = m; break;
+          case is:
+            if (prop.getter == null)
+              prop.getter = m;
+            else
+              prop.hasChecker = m ;
+            break;
+          case get:
+            if (prop.getter == null)
+              prop.getter = m;
+            else if (BeanMethodType.is.checkAndGetName(prop.getter) != null) {
+              // For union type in certain framework, isXXX is to indicate if the attribute is available, we will override it
+              // with the actual getter method
+              prop.hasChecker = prop.getter;
+              prop.getter = m;
+            }
+        }
       }
     }
 
@@ -172,6 +167,14 @@ public class ClassUtil {
       BeanProperty prop = attributeMap.remove(name);
       if (prop == null) {
         prop = new BeanProperty(name);
+        final BeanProperty fProp = prop;
+        final String fName = name;
+        // For java 17 record feature, it didn't following javabean convention,
+        // the getter method name is the same as field name.
+        Optional<Method> method = first(methods, m ->
+            m.getName().equals(fName) && m.getParameterCount() == 0
+                && Modifier.isPublic(m.getModifiers()) && m.getReturnType() == f.getType());
+        method.ifPresent(m -> fProp.getter = m);
       }
       fieldMap.put(name, prop);
       prop.field = f;
@@ -179,6 +182,24 @@ public class ClassUtil {
 
     fieldMap.putAll(attributeMap);  // Add back those setter/getter with field.
     return fieldMap;
+  }
+
+  private static boolean isReturnBoolean(Method m) {
+    return m.getReturnType() != Boolean.class && m.getReturnType() != boolean.class;
+  }
+
+  private enum BeanMethodType {
+    is { boolean valid(Method m) { return m.getParameterCount() == 0 && !isReturnBoolean(m); } },
+    get { boolean valid(Method m) { return m.getParameterCount() == 0; } },
+    has { boolean valid(Method m) { return m.getParameterCount() == 0 && !isReturnBoolean(m); } },
+    set { boolean valid(Method m) { return m.getParameterCount() == 1; } }
+    ;
+    abstract boolean valid(Method m);
+    String checkAndGetName(Method m) {
+      if (!m.getName().startsWith(this.name()))
+        return null;
+      return valid(m) ? m.getName().substring(this.name().length()) : null;
+    }
   }
 
   /**
@@ -228,7 +249,7 @@ public class ClassUtil {
    * It will try getter method first, then try field
    */
   @SneakyThrows
-  public static @Nullable  Object getPropertyValue(@Nullable Class<?> cls, @Nullable Object obj, String propertyName)
+  public static @Nullable Object getPropertyValue(@Nullable Class<?> cls, @Nullable Object obj, String propertyName)
   {
     if (cls == null && obj == null)
       return null;
@@ -613,5 +634,44 @@ public class ClassUtil {
     }
     logger.error("Can't find the caller stack, return a dummy Stacktrace");  // Shouldn't happen
     return UNKNOWN_STACK_TRACE_ELEMENT;  // Shouldn't reach here, return the DUMMY value just to avoid NPE for caller
+  }
+
+  static final int SYNTHETIC = 0x00001000;  // Copied from Modifier as it's not accessible.
+  public static MethodWrapper findMethod(Class<?> cls, String method, int numOfParam) {
+    return findMethod(cls, method, numOfParam, null);
+  }
+
+  public static MethodWrapper findMethod(Class<?> cls, String method, int numOfParam, @Nullable Class<?>[] paramClasses) {
+    if(method.equals(MethodWrapper.METHOD_INIT)) {
+      for(Constructor<?> c : cls.getConstructors()) {
+        if(c.getParameterTypes().length != numOfParam)
+          continue;
+        if(isParamCompatible(c.getParameterTypes(), paramClasses))
+          return new MethodWrapper(c);
+      }
+    } else {
+      for (Method m : cls.getMethods()) {
+        if (m.getParameterTypes().length != numOfParam || !m.getName().equals(method))
+          continue;
+        if ((SYNTHETIC & m.getModifiers()) != 0)
+          continue;
+        if (isParamCompatible(m.getParameterTypes(), paramClasses))
+          return new MethodWrapper(m);
+      }
+    }
+    throw new IllegalArgumentException("Method Not Found: " + method +
+        " in class:" + cls.getName() + ", numOfParam:" + numOfParam + ", paramClasses:" + paramClasses);
+  }
+
+  private static boolean isParamCompatible(Class<?>[] paramClasses, Class<?>[] formalClasses) {
+    if(formalClasses == null)
+      return true;
+    Assert.isTrue(paramClasses.length == formalClasses.length,
+        "arg.length:" + paramClasses.length + ",types: " + formalClasses.length);
+    for(int i=0; i<paramClasses.length; i++) {
+      if(!paramClasses[i].isAssignableFrom(formalClasses[i]))
+        return false;
+    }
+    return true;
   }
 }

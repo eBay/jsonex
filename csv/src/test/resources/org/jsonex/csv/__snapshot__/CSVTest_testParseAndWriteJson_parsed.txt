@@ -1,0 +1,1 @@
+[{val: '[{"kind":"exact","field_path":"k8s_environment","value":"production"}]', count: 73, percent: 0.24333333333333335}, {val: '[{"kind":"exact","field_path":"k8s_environment","value":"production"},{"kind":"regex","field_path":"k8s_namespace"}]', count: 61, percent: 0.20333333333333334}]

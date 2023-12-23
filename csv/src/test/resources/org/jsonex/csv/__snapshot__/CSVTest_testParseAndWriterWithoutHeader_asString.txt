@@ -1,0 +1,5 @@
+field1|field2|field3|field4
+v11|v12|v13|1
+v21|"v2l1
+V2l2"|v23|true
+v31"v31|v32""v32|v33|"3"

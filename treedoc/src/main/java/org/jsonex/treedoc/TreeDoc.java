@@ -6,10 +6,9 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import java.net.URI;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
+import static java.lang.String.format;
 import static org.jsonex.core.util.LangUtil.doIfNotNull;
 import static org.jsonex.core.util.ListUtil.mapKeys;
 
@@ -63,5 +62,33 @@ public class TreeDoc {
     }
 
     return result;
+  }
+
+  /**
+   * Dedupe the nodes that are with the same contends by comparing the hash
+   */
+  public void dedupeNodes() {
+    Map<Integer, TDNode> hashToNodeMap = new LinkedHashMap<>();
+    Queue<TDNode> queue = new LinkedList<>();
+    queue.add(root);
+    while(!queue.isEmpty()) {
+      TDNode n = queue.poll();
+      if (n.isLeaf())
+        continue;  // Don't dedupe leaf node and array node
+      int hash = n.hashCode();
+      TDNode refNode = hashToNodeMap.get(hash);
+      if ( refNode != null && refNode.getType() == TDNode.Type.MAP) {
+        if (refNode.getChild(TDNode.ID_KEY) == null)
+          refNode.createChild(TDNode.ID_KEY).setValue(format("%x", hash));
+        n.children.clear();;
+        n.setType(TDNode.Type.MAP).createChild(TDNode.REF_KEY).setValue(format("#%x", hash));
+      } else {
+        hashToNodeMap.put(hash, n);
+        if (n.hasChildren())
+          for (TDNode cn : n.children) {
+            queue.add(cn);
+          }
+      }
+    }
   }
 }

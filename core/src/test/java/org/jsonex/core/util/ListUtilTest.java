@@ -9,22 +9,39 @@
 
 package org.jsonex.core.util;
 
-import org.jsonex.core.type.BeanField;
-import org.jsonex.core.type.Identifiable;
-import org.jsonex.core.type.Operator;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.ExtensionMethod;
+import org.jsonex.core.type.BeanField;
+import org.jsonex.core.type.Identifiable;
+import org.jsonex.core.type.Operator;
+import static org.jsonex.core.type.Operator.eq;
+import static org.jsonex.core.type.Operator.ge;
+import static org.jsonex.core.type.Operator.in;
+import static org.jsonex.core.type.Operator.not;
+import static org.jsonex.core.type.Operator.safeOf;
+import static org.jsonex.core.util.ListUtil.listOf;
+import static org.jsonex.core.util.ListUtilTest.TestCls.F_ID;
+import static org.jsonex.core.util.ListUtilTest.TestCls.F_NAME;
+import static org.jsonex.core.util.ListUtilTest.TestCls.F_TAGS;
+import static org.jsonex.core.util.ListUtilTest.TestCls.F_TYPE;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
-import java.util.*;
-
-import static org.jsonex.core.type.Operator.*;
-import static org.jsonex.core.util.ListUtil.listOf;
-import static org.jsonex.core.util.ListUtilTest.TestCls.*;
-import static org.junit.Assert.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.TreeMap;
 
 @ExtensionMethod({Operator.class, ListUtil.class})
 public class ListUtilTest {
@@ -198,7 +215,11 @@ public class ListUtilTest {
     assertEquals(-1, ListUtil.indexOf(null, eq(F_TYPE, 2)));
   }
 
-  @Test public void testJoin() { assertEquals("1,2,3", ListUtil.join(new Integer[]{1,2,3}, ",")); }
+  @Test public void testJoin() {
+    assertEquals("1,2,3", ListUtil.join(new Integer[]{1,2,3}, ","));
+    assertEquals(",,3", ListUtil.join(new Object[]{"","",3}, ","));
+    assertEquals(",,3", ListUtil.join(new Object[]{"","",3}, ','));
+  }
 
   @Test public void testRemoveLast() {
     List<Integer> list = new ArrayList<>(asList(1,2,3));
@@ -251,5 +272,11 @@ public class ListUtilTest {
         .put("key3", asList(7, 8)).getMap();
 
     assertEquals(result, ListUtil.mergeWith(target, source));
+  }
+
+  @Test public void testReduce() {
+    List<String> str = ListUtil.listOf("Hello", "world");
+    assertEquals("Hello world ", ListUtil.reduce(str, "", (sum, item) -> sum + item + " "));
+    assertEquals("Hello world ", ListUtil.reduceTo(str, new StringBuilder(), (sum, item) -> sum.append(item + " ")).toString());
   }
 }

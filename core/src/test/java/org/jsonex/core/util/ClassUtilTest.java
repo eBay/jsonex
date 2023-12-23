@@ -25,13 +25,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
@@ -64,6 +58,17 @@ public class ClassUtilTest {
     @Nullable @Transient
     public void setWriteOnly(String str) { fieldB5 = str; }
     public String getReadOnly() { return fieldB1; }
+
+    public boolean hasFieldWithHasCheck() { return false; };
+    public String getFieldWithHasCheck() { throw new IllegalStateException("fieldWithHasCheck is not available"); }
+
+    public boolean isFieldWithUnionCheck() { return false; };
+    public String getFieldWithUnionCheck() { throw new IllegalStateException("fieldWithUnionCheck is not available"); }
+
+    // To support Java 17 Record feature
+    private String fieldWithSameGetterMethodName;
+    public String fieldWithSameGetterMethodName() { return fieldWithSameGetterMethodName; }
+
   }
 
   @SuppressWarnings({"CanBeFinal", "SameReturnValue", "WeakerAccess"})
@@ -80,9 +85,11 @@ public class ClassUtilTest {
   @Test public void testGetProperties() {
     Map<String, BeanProperty> properties = ClassUtil.getProperties(B.class);
     log.info("Properties.keySet():" + properties.keySet());
-    String[] exp = {"fieldA1", "fieldA2", "fieldA3", "fieldA4", "fieldB1", "fieldB2", "fieldB3", "fieldB4", "fieldB5", "fieldB6", "readOnly", "writeOnly"};
-    // Java compiler will mass up the order of the getter methods, field order is preserved in most of the java versions
-    assertArrayEquals(exp, properties.keySet().toArray());
+    String[] exp = {"fieldA1", "fieldA2", "fieldA3", "fieldA4", "fieldB1", "fieldB2", "fieldB3", "fieldB4", "fieldB5", "fieldB6",
+        "fieldWithSameGetterMethodName", "fieldWithHasCheck", "fieldWithUnionCheck", "readOnly", "writeOnly"};
+    // Java compiler will mess up the order of the getter methods, field order is preserved in most of the java versions
+    // assertArrayEquals(exp, properties.keySet().toArray());  // This will fail
+    assertEquals(ListUtil.setOf(exp), properties.keySet());
 
     // Field with setter/getters
     BeanProperty prop = properties.get("fieldB6");
@@ -125,6 +132,14 @@ public class ClassUtilTest {
     assertNull(prop.getAnnotation(DefaultEnum.class));
     assertEquals(Modifier.PUBLIC, prop.getModifier());
     assertTrue(prop.isTransient());
+
+    // Has checker
+    assertNull(properties.get("fieldWithHasCheck").get(b));
+    assertNull(properties.get("fieldWithUnionCheck").get(b));
+
+    // Support getter with the same name as field name to support java 17 Record pattern
+    prop = properties.get("fieldWithSameGetterMethodName");
+    assertEquals("fieldWithSameGetterMethodName", prop.getter.getName());
   }
 
   @Test public void testGetPropertiesWithExceptions () {
@@ -278,7 +293,18 @@ public class ClassUtilTest {
   }
 
   @Test public void testObjectToSimpleType() {
-    assertEquals((Integer)100, ClassUtil.objectToSimpleType(100, Integer.class));
-    assertEquals((Float)(float)100.1, ClassUtil.objectToSimpleType(100.1, float.class));
+    assertEquals(100, ClassUtil.objectToSimpleType(100, Integer.class));
+    assertEquals(100.1f, ClassUtil.objectToSimpleType(100.1, float.class));
+  }
+
+  @SneakyThrows
+  @Test public void testFindMethod() {
+    MethodWrapper mw = ClassUtil.findMethod(HashMap.class, "<init>", 2, null);
+    assertEquals(HashMap.class.getConstructor(int.class, float.class), mw.getConstructor());
+    assertEquals(new HashMap<>(), mw.invoke(null, new Object[]{1, 0.7f}));
+    assertEquals("java.util.HashMap/<init>(int arg0, float arg1)", mw.toString());
+
+    mw = ClassUtil.findMethod(HashMap.class, "<init>", 1, new Class[]{TreeMap.class});
+    assertEquals(HashMap.class.getConstructor(Map.class), mw.getConstructor());
   }
 }

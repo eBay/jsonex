@@ -33,6 +33,7 @@ public class TDPath {
   /** The path parts */
   final List<Part> parts = new ArrayList<>();
   public TDPath addParts(Part... part) { parts.addAll(Arrays.asList(part)); return this; }
+  public static TDPath ofParts(Part... part) { return new TDPath().addParts(part); }
 
   public static TDPath parse(String str) {
     return parse(str.split("/"));

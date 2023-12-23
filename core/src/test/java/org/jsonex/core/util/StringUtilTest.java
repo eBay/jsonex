@@ -30,6 +30,9 @@ public class StringUtilTest {
 
     assertEquals("234", StringUtil.getRight("1234", 3));
     assertEquals("1234", StringUtil.getRight("1234", 5));
+
+    assertEquals("abc", StringUtil.getLeft("abc=def=ghi", '='));
+    assertEquals("ghi", StringUtil.getRight("abc=def=ghi", '='));
   }
 
   @Test public void testIsDigitOnly() {
@@ -45,6 +48,8 @@ public class StringUtilTest {
   @Test public void testFillString() {
     assertEquals("12  ", StringUtil.fillString("12", 4, ' ', false));
     assertEquals("  12", StringUtil.fillString("12", 4, ' ', true));
+    assertEquals("12  ", StringUtil.fillSpace("12", 4));
+    assertEquals("0012", StringUtil.fillZero("12", 4));
   }
 
   @Test public void testCEscape() {
@@ -89,5 +94,10 @@ public class StringUtilTest {
 
   @Test public void testToTrimmedStr() {
     assertEquals("12", StringUtil.toTrimmedStr("1234", 2));
+  }
+
+  @Test public void testIndexOfAnyChar() {
+    assertEquals(1, StringUtil.indexOfAnyChar("1234", "234"));
+    assertEquals(-1, StringUtil.indexOfAnyChar("1234", "567"));
   }
 }

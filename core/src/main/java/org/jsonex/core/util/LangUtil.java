@@ -3,6 +3,7 @@ package org.jsonex.core.util;
 import lombok.SneakyThrows;
 import org.jsonex.core.type.Nullable;
 
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -71,19 +72,36 @@ public class LangUtil {
     return obj != null && cls.isAssignableFrom(obj.getClass()) ? func.apply(cls.cast(obj)) : elseFunc.apply(obj);
   }
 
-  public static <T, R> R getIfInstanceOfElseThrow(
+  @SneakyThrows
+  public static <E, T, R> R getIfInstanceOfOrElse(
+      E obj, Class<T> cls, Function<? super T, ? extends R> func, Function<? super E, ? extends R> elseFunc) {
+    if (obj != null && cls.isAssignableFrom(obj.getClass()))
+      return func.apply(cls.cast(obj));
+    return elseFunc.apply(obj);
+  }
+
+  public static <T, R> R getIfInstanceOfOrElseThrow(
       Object obj, Class<T> cls, Function<? super T, ? extends R> func) {
-    return getIfInstanceOfElseThrow(obj, cls, func, () ->
+    return getIfInstanceOfOrElseThrow(obj, cls, func, () ->
         new IllegalStateException("Expect class: " + cls + ";got: " + safe(obj, Object::getClass)));
   }
 
   @SneakyThrows
-  public static <T, R> R getIfInstanceOfElseThrow(
+  public static <T, R> R getIfInstanceOfOrElseThrow(
       Object obj, Class<T> cls, Function<? super T, ? extends R> func, Supplier<Exception> exp) {
     if (obj != null && cls.isAssignableFrom(obj.getClass()))
       return func.apply(cls.cast(obj));
     throw exp.get();
   }
+
+  @SneakyThrows
+  public static <E, T, R> R getIfInstanceOfOrElseThrow(
+      E obj, Class<T> cls, Function<? super T, ? extends R> func, Function<? super E, Exception> exp) {
+    if (obj != null && cls.isAssignableFrom(obj.getClass()))
+      return func.apply(cls.cast(obj));
+    throw exp.apply(obj);
+  }
+
 
   public static <T, T1 extends T, T2 extends T> T orElse(T1 value, T2 fullBack) {
     return value == null ? fullBack : value;
@@ -91,5 +109,32 @@ public class LangUtil {
 
   public static <T, T1 extends T> T orElse(T1 value, Supplier<? extends T> fullBack) {
     return value == null ? fullBack.get() : value;
+  }
+
+  /**
+   *  Simulate Javascript comma operator, run actions in sequence and return the last parameter
+   *  This is useful to combine multiple statement into a single espresso, so that we can avoid code block in lambda
+   */
+  public static <T> T seq(Runnable action, T val) {
+    action.run();
+    return val;
+  }
+
+  public static <T> T seq(Runnable action1, Runnable action2, T val) {
+    action1.run();
+    action2.run();
+    return val;
+  }
+
+  /**
+   *  Convert a block of code with local variables definitions into a single expression, it's useful to avoid code block
+   *  in lambda statement.
+   */
+  public static <T, R> R with(T val, Function<T, R> action) {
+    return action.apply(val);
+  }
+
+  public static <T1, T2, R> R with(T1 val1, T2 val2, BiFunction<T1, T2, R> action) {
+    return action.apply(val1, val2);
   }
 }

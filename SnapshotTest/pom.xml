@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.jsonex</groupId>
     <artifactId>jcParent</artifactId>
-    <version>0.1.21</version>
+    <version>0.1.27</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>SnapshotTest</artifactId>
@@ -24,7 +24,7 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>JSONCoder</artifactId>
-    </dependency>
+  </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>

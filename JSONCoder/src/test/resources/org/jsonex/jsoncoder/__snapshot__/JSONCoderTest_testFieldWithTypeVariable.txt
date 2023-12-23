@@ -1,1 +1,13 @@
-{"listOfMap":[{"str1":1}],"refOfMap":{"^":{"str1":1}},"value":"abc"}
+{
+  "listOfMap":[
+    {
+      "str1":1
+    }
+  ],
+  "refOfMap":{
+    "^":{
+      "str1":1
+    }
+  },
+  "value":"abc"
+}

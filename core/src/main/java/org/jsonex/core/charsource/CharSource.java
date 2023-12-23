@@ -41,21 +41,21 @@ public abstract class CharSource {
    *
    * @return true The terminate condition matches. otherwise, could be EOF or length matches
    */
-  public abstract boolean readUntil(Predicate<CharSource> predicate, StringBuilder target, int minLen, int maxLen);
+  public abstract boolean readUntil(StringBuilder target, Predicate<CharSource> predicate, int minLen, int maxLen);
   public boolean readUntil(Predicate<CharSource> predicate, StringBuilder target) {
-    return readUntil(predicate, target, 0, MAX_STRING_LEN);
+    return readUntil(target, predicate, 0, MAX_STRING_LEN);
   }
   public boolean skipUntil(Predicate<CharSource> predicate) {
-    return readUntil(predicate, null, 0, Integer.MAX_VALUE);
+    return readUntil(null, predicate, 0, Integer.MAX_VALUE);
   }
   /** @return true Terminal conditions matches  */
-  public boolean readUntil(String chars, @Nullable Collection<String> strs, StringBuilder target, boolean include, int minLen, int maxLen) {
-    return readUntil(s -> (chars.indexOf(s.peek(0)) >= 0 || startsWithAny(strs))== include, target, minLen, maxLen);
+  public boolean readUntil(StringBuilder target, String chars, @Nullable Collection<String> strs, boolean include, int minLen, int maxLen) {
+    return readUntil(target, s -> (chars.indexOf(s.peek(0)) >= 0 || startsWithAny(strs)) == include, minLen, maxLen);
   }
-  public boolean readUntil(String terminator, StringBuilder target) { return readUntil(terminator, null, target); }
+  public boolean readUntil(StringBuilder target, String terminator) { return readUntil(target, terminator, null); }
     /** @return true Terminal conditions matches  */
-  public boolean readUntil(String terminator, Collection<String> strs, StringBuilder target) {
-    return readUntil(terminator, strs, target, true, 0, MAX_STRING_LEN);
+  public boolean readUntil(StringBuilder target, String terminator, Collection<String> strs) {
+    return readUntil(target, terminator, strs, true, 0, MAX_STRING_LEN);
   }
   public String readUntil(String terminator) { return readUntil(terminator, null,0, Integer.MAX_VALUE); }
   /** @return true Terminal conditions matches  */
@@ -63,13 +63,13 @@ public abstract class CharSource {
   /** @return true Terminal conditions matches  */
   public String readUntil(String terminator, Collection<String> strs, int minLen, int maxLen) {
     StringBuilder sb = new StringBuilder();
-    readUntil(terminator, strs, sb, true, minLen, maxLen);
+    readUntil(sb, terminator, strs, true, minLen, maxLen);
     return sb.toString();
   }
 
   /** @return true Indicates more character in the stream  */
   public boolean skipUntil(String chars, boolean include) {
-    return readUntil(chars, null, null, include, 0, Integer.MAX_VALUE);
+    return readUntil(null, chars, null, include, 0, Integer.MAX_VALUE);
   }
   /** @return true Indicates more character in the stream  */
   public boolean skipUntil(String terminator) { return skipUntil(terminator, true); }
@@ -79,7 +79,7 @@ public abstract class CharSource {
   /** @return true Indicates more character in the stream  */
   public boolean skipChars(String chars) { return skipUntil(chars, false); }
 
-  public boolean read(StringBuilder target, int len) { return readUntil(s -> true, target, len, len); }
+  public boolean read(StringBuilder target, int len) { return readUntil(target, s -> true, len, len); }
 
   public String read(int len) {
     StringBuilder sb = new StringBuilder();
@@ -90,19 +90,19 @@ public abstract class CharSource {
   public boolean skip() { return read(null, 1); }
   public boolean skip(int len) { return read(null, len); }
 
-  public boolean readUntilMatch(String str, boolean skipStr, StringBuilder target, int minLen, int maxLen) {
-    boolean matches = readUntil(s -> startsWith(str), target, minLen, maxLen);
+  public boolean readUntilMatch(StringBuilder target, String str, boolean skipStr, int minLen, int maxLen) {
+    boolean matches = readUntil(target, s -> startsWith(str), minLen, maxLen);
     if (matches && skipStr)
       skip(str.length());
     return matches;
   }
 
   public boolean readUntilMatch(String str, boolean skipStr, StringBuilder target) {
-    return readUntilMatch(str, skipStr, target, 0, MAX_STRING_LEN);
+    return readUntilMatch(target, str, skipStr, 0, MAX_STRING_LEN);
   }
 
   public boolean skipUntilMatch(String str, boolean skipStr) {
-    return readUntilMatch(str, skipStr, null, 0, Integer.MAX_VALUE);
+    return readUntilMatch(null, str, skipStr, 0, Integer.MAX_VALUE);
   }
 
   public String peekString(int len) {
@@ -145,17 +145,17 @@ public abstract class CharSource {
   }
 
   public String readQuotedString(char quote) {
-    return readQuotedString(quote, new StringBuilder()).toString();
+    return readQuotedString( new StringBuilder(), quote).toString();
   }
 
-  public StringBuilder readQuotedString(char quote, StringBuilder sb) {
+  public StringBuilder readQuotedString(StringBuilder sb, char quote) {
     String terminator = getTermStrWithQuoteAndEscape(quote);
     // Not calling getBookmark() to avoid clone an object
     int pos = getPos();
     int line = bookmark.getLine();
     int col = bookmark.getCol();
     while (true) {
-      if (!readUntil(terminator, sb))
+      if (!readUntil(sb, terminator))
         throw new EOFRuntimeException("Can't find matching quote at position:" + pos + ";line:" + line + ";col:" + col);
       char c = read();
       if (c == quote) {

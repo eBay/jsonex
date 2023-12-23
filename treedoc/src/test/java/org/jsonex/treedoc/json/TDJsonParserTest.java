@@ -1,22 +1,28 @@
 package org.jsonex.treedoc.json;
 
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.jsonex.core.charsource.ArrayCharSource;
 import org.jsonex.core.charsource.ReaderCharSource;
-import org.jsonex.core.util.ListUtil;
-import org.jsonex.core.util.MapBuilder;
+import static org.jsonex.core.util.FileUtil.loadResource;
+import static org.jsonex.core.util.FileUtil.readResource;
+import static org.jsonex.core.util.ListUtil.listOf;
+import static org.jsonex.core.util.MapBuilder.mapOf;
 import org.jsonex.treedoc.TDNode;
 import org.jsonex.treedoc.TreeDoc;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import static org.jsonex.core.util.FileUtil.loadResource;
-import static org.jsonex.core.util.FileUtil.readResource;
-import static org.junit.Assert.*;
 
 @Slf4j
 public class TDJsonParserTest {
@@ -99,7 +105,7 @@ public class TDJsonParserTest {
   }
 
   @Test public void testRootMap() {
-    TDNode node = TDJSONParser.get().parse("'a':1\nb:2",
+    TDNode node = TDJSONParser.get().parse("'a':1\nb:2,",
         TDJSONOption.ofDefaultRootType(TDNode.Type.MAP));
     assertEquals(1, node.getValueByPath("a"));
     assertEquals(2, node.getValueByPath("b"));
@@ -180,12 +186,13 @@ public class TDJsonParserTest {
   }
 
   private final static String EXPECTED_STREAM_MERGE_RESULT =
-      "[{a: 1, obj: {$id: '1_0'}, ref: {$ref: '#1_0'}}, {b: 2, obj: {$id: '1_1'}, ref: {$ref: '#1_1'}}, 'a:1', 'b:2']";
+      "[{a: 1, obj: {$id: '1_0'}, ref: {$ref: '#1_0'}}, {b: 2, obj: {$id: '1_1'}, ref: {$ref: '#1_1'}}, {a: 1, b: 2}]";
   @Test public void testStream() {
     ReaderCharSource reader = new ReaderCharSource(loadResource(this.getClass(), "stream.json"));
     List<TDNode> nodes = new ArrayList<>();
-    while(reader.skipSpacesAndReturnsAndCommas())
-      nodes.add(TDJSONParser.get().parse(reader));
+    while(reader.skipSpacesAndReturnsAndCommas()) {
+      nodes.add(TDJSONParser.get().parse(reader, TDJSONOption.ofDefaultRootType(TDNode.Type.MAP)));
+    }
     TDNode node = TreeDoc.merge(nodes).getRoot();
     log.info("testStream=" + node.toString());
     assertEquals("1", node.getChild(1).getKey());
@@ -203,6 +210,18 @@ public class TDJsonParserTest {
     log.info("testStream=" + node.toString());
     assertEquals("root", node.getKey());
     assertEquals("{a: 1, obj: {$id: '1_0'}, ref: {$ref: '#1_0'}}", node.toString());
+  }
+
+  @Test public void testParseWithCustomDeliminator() {
+    String str = "(a=va; c=(d=23; strs=<a; b>))";
+    TDJSONOption opt = new TDJSONOption()
+        .setDeliminatorKey("=")
+        .setDeliminatorValue(";")
+        .setDeliminatorObject("(", ")")
+        .setDeliminatorArray("<", ">");
+    TDNode node = TDJSONParser.get().parse(str, opt);
+    assertEquals("{a: 'va', c: {d: 23, strs: ['a', 'b']}}", node.toString());
+    assertEquals("(a=`va`;c=(d=23;strs=<`a`;`b`>))", TDJSONWriter.get().writeAsString(node, opt.setAlwaysQuoteKey(false).setQuoteChar('`')));
   }
 
   private static void parseWithException(String str, String expectedError) {
@@ -223,17 +242,49 @@ public class TDJsonParserTest {
   }
 
   @Test public void testParseMapToString() {
-    Map<String, Object> map = new MapBuilder<String, Object>()
-        .put("K1", "v1")
+    Map<String, Object> map = mapOf("K1", (Object)"v1")
         .put("k2", 123)
-        .put("k3", new MapBuilder<String, Object>()
-            .put("c", "Test with ,in")
-            .getMap())
-        .put("k4", ListUtil.listOf("ab,c", "def"))
-        .getMap();
+        .put("k3", mapOf("c", "Test with ,in").build())
+        .put("k4", listOf("ab,c", "def"))
+        .build();
     String str = map.toString();
     log.info("testParseMapToString: str=" + str);
     TDNode node = TDJSONParser.get().parse(str, TDJSONOption.ofMapToString());
     assertEquals("{K1: 'v1', k2: 123, k3: {c: 'Test with ,in'}, k4: ['ab,c', 'def']}", node.toString());
+  }
+
+  @Test public void testParseObjectToString() {
+    TestCls test = new TestCls("va", new TestCls1(23, new String[]{"a", "b"}));
+    String str = test.toString();  // TDJsonParserTest.TestCls(a=va, c=TDJsonParserTest.TestCls1(d=23, strs=[a, b]))
+    TDJSONOption opt = new TDJSONOption().setDeliminatorObject("(", ")").setDeliminatorKey("=");
+    testParse(str, opt, "{$type:'TDJsonParserTest.TestCls',a:'va',c:{$type:'TDJsonParserTest.TestCls1',d:23,strs:['a','b']}}");
+  }
+
+  @Test public void testParsePathCompression() {
+    TDJSONOption opt = new TDJSONOption();
+    testParse("a:b:123", opt, "{a:{b:123}}");
+    testParse("[h:i, j:k]", opt, "[{h:'i'},{j:'k'}]");
+    testParse("a:b:{e:123, f:g:[h:i, j:k]}", opt, "{a:{b:{e:123,f:{g:[{h:'i'},{j:'k'}]}}}}");
+    testParse("a:b:123,c:d:456", opt, "{a:{b:123}}");  // Default, read a single map
+    testParse("a:b:123,c:d:456", opt.setDefaultRootType(TDNode.Type.MAP), "{a:{b:123},c:{d:456}}");
+    testParse("a:b:123,c:d:456", opt.setDefaultRootType(TDNode.Type.ARRAY), "[{a:{b:123}},{c:{d:456}}]");
+    testParse("a:b:123,a:d:456", opt.setDefaultRootType(TDNode.Type.MAP), "{a:[{b:123},{d:456}]}");
+  }
+
+  private void testParse(String str, TDJSONOption opt, String expectedJson) {
+    TDNode node = TDJSONParser.get().parse(str, opt);
+    assertEquals(expectedJson, TDJSONWriter.get().writeAsString(node, new TDJSONOption().setAlwaysQuoteKey(false).setQuoteChar('\'')));
+  }
+
+  @Data
+  public static class TestCls {
+    public final String a;
+    public final TestCls1 c;
+  }
+
+  @Data
+  public static class TestCls1 {
+    public final int d;
+    public final String[] strs;
   }
 }

@@ -15,8 +15,10 @@ import lombok.ToString;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
+import java.util.Optional;
 import java.util.function.Function;
 
+import static org.jsonex.core.util.ArrayUtil.first;
 import static org.jsonex.core.util.LangUtil.getIfInstanceOf;
 
 /**
@@ -29,13 +31,15 @@ public class BeanProperty {
   @Getter final String name;
   @Getter Method setter;
   @Getter Method getter;
+  @Getter Method hasChecker;
   @Getter Field field;
   
   public boolean isTransient() {
     if (field != null && Modifier.isTransient(field.getModifiers()))
         return true;
 
-    return getAnnotation(java.beans.Transient.class) != null;
+    // java.beans.Transient.class is not available in Android. we use name matching
+    return getAnnotation("Transient") != null;
   }
 
   public boolean isImmutable(boolean allowPrivate){return setter == null && !isFieldAccessible(allowPrivate); }
@@ -65,6 +69,8 @@ public class BeanProperty {
   
   public Object get(Object obj){
     try {
+      if (hasChecker != null && Boolean.FALSE.equals(hasChecker.invoke(obj)))
+        return null;
       if (getter != null) {
         getter.setAccessible(true);
         return getter.invoke(obj);
@@ -73,7 +79,7 @@ public class BeanProperty {
         return field.get(obj);
       }
     } catch(Exception e) {
-      throw new InvokeRuntimeException("error get value:" + name + ", class:" + obj.getClass(), e);
+      throw new InvokeRuntimeException("error get value:" + name + ", class:" + obj.getClass() + ";hasChecker:" + hasChecker, e);
     }
     throw new InvokeRuntimeException("field is not readable: " + name + ", class:" + obj.getClass());
   }
@@ -97,7 +103,28 @@ public class BeanProperty {
     
     return null;
   }
-  
+
+  public Annotation getAnnotation(String name) {
+    Optional<Annotation> result;
+    if (getter != null) {
+      result = getAnnotation(getter.getAnnotations(), name);
+      if (result.isPresent())
+        return result.get();
+    }
+    if (field != null) {
+      result = getAnnotation(field.getAnnotations(), name);
+      if (result.isPresent())
+        return result.get();
+    }
+    if (setter != null)
+      return getAnnotation(setter.getAnnotations(), name).orElse(null);
+    return null;
+  }
+
+  private Optional<Annotation> getAnnotation(Annotation[] annot, String name) {
+    return first(annot, a -> a.annotationType().getSimpleName().equals(name));
+  }
+
   public Type getGenericType(){
     if (getter != null)
       return getter.getGenericReturnType();

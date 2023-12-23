@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jsonex</groupId>
   <artifactId>jcParent</artifactId>
-  <version>0.1.21</version>
+  <version>0.1.27</version>
   <packaging>pom</packaging>
   <name>JSONCoder Parent</name>
   <description>JSONCoder Parent</description>
@@ -17,6 +17,7 @@
     <module>csv</module>
     <module>CliArg</module>
     <module>SnapshotTest</module>
+    <module>HiveUDF</module>
   </modules>
 
   <properties>
@@ -77,9 +78,14 @@
         <version>${project.version}</version>
       </dependency>
       <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>csv</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
         <groupId>org.projectlombok</groupId>
         <artifactId>lombok</artifactId>
-        <version>1.18.16</version>
+        <version>1.18.24</version>
         <scope>provided</scope>
       </dependency>
       <dependency>
@@ -118,7 +124,7 @@
             <path>
               <groupId>org.projectlombok</groupId>
               <artifactId>lombok</artifactId>
-              <version>1.18.2</version>
+              <version>1.18.24</version>
             </path>
           </annotationProcessorPaths>
         </configuration>
@@ -136,9 +142,16 @@
           </execution>
           <execution>
             <id>jacoco-site</id>
-            <phase>post-integration-test</phase>
+            <phase>package</phase>
             <goals>
               <goal>report</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>jacoco-site-aggregate</id>
+            <phase>post-site</phase>
+            <goals>
+              <goal>report-aggregate</goal>
             </goals>
           </execution>
         </executions>
@@ -176,7 +189,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-plugin</artifactId>
-            <version>2.21.0</version>
+            <version>2.12.4</version>
             <configuration>
               <skipTests>true</skipTests>
             </configuration>
@@ -212,7 +225,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
-            <version>3.1.0</version>
+            <version>3.4.1</version>
             <executions>
               <execution>
                 <id>attach-javadocs</id>

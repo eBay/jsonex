@@ -36,7 +36,7 @@ public class ArrayCharSource extends CharSource {
 
   @Override public boolean isEof(int i) { return startIndex + bookmark.getPos() + i >= endIndex; }
 
-  @Override public boolean readUntil(Predicate<CharSource> predicate, StringBuilder target, int minLen, int maxLen) {
+  @Override public boolean readUntil(StringBuilder target, Predicate<CharSource> predicate, int minLen, int maxLen) {
     int startPos = bookmark.getPos();
     int len = 0;
     boolean matched = false;

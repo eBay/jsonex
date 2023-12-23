@@ -86,7 +86,7 @@ public class ReaderCharSource extends CharSource {
     return p >= loadPos;
   }
 
-  @Override public boolean readUntil(Predicate<CharSource> predicate, StringBuilder target, int minLen, int maxLen) {
+  @Override public boolean readUntil(StringBuilder target, Predicate<CharSource> predicate, int minLen, int maxLen) {
     if (target != null) {
       backupTarget = target;
       backupMark = getPos();

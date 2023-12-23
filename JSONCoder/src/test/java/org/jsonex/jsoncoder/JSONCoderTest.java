@@ -43,7 +43,8 @@ public class JSONCoderTest {
   private static String toJSONString(Object obj, JSONCoderOption option) { return JSONCoder.encode(obj, option); }
 
   private static String toJSONString(Object obj) {
-    return JSONCoder.global.encode(obj, JSONCoderOption.ofIndentFactor(2).setWarnLogLevel(JSONCoderOption.LogLevel.DEBUG));
+    return JSONCoder.global.encode(obj, JSONCoderOption.ofIndentFactor(2).
+        setStrictOrdering(true).setWarnLogLevel(JSONCoderOption.LogLevel.DEBUG));
   }
 
   @Before public void before() {
@@ -123,10 +124,14 @@ public class JSONCoderTest {
     assertEquals(str, toJSONString(tb1));
   }
 
+  @Test public void testEncodeArray() {
+    assertEquals("[1,2,3]", JSONCoder.get().encode(new int[]{1,2,3}));
+  }
+
   @Test public void testCyclicReference() {
     TestBean tb = new TestBean().setBean2(new TestBean2());
     tb.getBean2().testBean = tb;
-    String str = toJSONString(tb, new JSONCoderOption().setJsonOption(false, '`', 2));
+    String str = toJSONString(tb, new JSONCoderOption().setJsonOption(false, '`', 2).setStrictOrdering(true));
     assertMatchesSnapshot(str);
 
     assertTrue("Cyclic reference should be encoded as $ref:str=" + str, str.indexOf("testBean:{\n      $ref:`../../`\n") > 0);
@@ -140,7 +145,8 @@ public class JSONCoderTest {
     tb.bean2List = Collections.singletonList(tb2);
     tb2.setInts(tb.getInts());  // Duplicated arrays
 
-    String str = toJSONString(tb, JSONCoderOption.of().setDedupWithRef(true).setJsonOption(false, '"', 2));
+    String str = toJSONString(tb, JSONCoderOption.of().setDedupWithRef(true)
+        .setJsonOption(false, '"', 2).setStrictOrdering(true));
     assertMatchesSnapshot(str);
 
     assertTrue("Generate ref if dedupWithRef is set", str.contains("$ref"));
@@ -150,7 +156,7 @@ public class JSONCoderTest {
   }
 
   @Test public void testEnumNameOption() {
-    JSONCoderOption codeOption = JSONCoderOption.ofIndentFactor(2).setShowEnumName(true);
+    JSONCoderOption codeOption = JSONCoderOption.ofIndentFactor(2).setShowEnumName(true).setStrictOrdering(true);
     String str = toJSONString(buildTestBean(), codeOption);
     assertMatchesSnapshot(str);
     assertTrue("Should contain both enum id and name when showEnumName is set", str.indexOf("12345-value1") > 0);
@@ -158,7 +164,7 @@ public class JSONCoderTest {
   }
 
   @Test public void testCustomQuote() {
-    JSONCoderOption codeOption = JSONCoderOption.ofIndentFactor(2);
+    JSONCoderOption codeOption = JSONCoderOption.ofIndentFactor(2).setStrictOrdering(true);
     codeOption.getJsonOption().setQuoteChar('\'');
     String str = toJSONString(buildTestBean(), codeOption);
     assertMatchesSnapshot("strWithSingleQuote", str);
@@ -166,7 +172,7 @@ public class JSONCoderTest {
         str.indexOf("'String1: \\'\"'") > 0);
     assertEquals(toJSONString(JSONCoder.global.decode(str, TestBean.class), codeOption), str);
 
-    codeOption.getJsonOption().setAlwaysQuoteName(false);  // Make quote optional for attribute names
+    codeOption.getJsonOption().setAlwaysQuoteKey(false);  // Make quote optional for attribute names
     str = toJSONString(buildTestBean(), codeOption);
     assertMatchesSnapshot("strWithNoKeyQuote", str);
 
@@ -348,7 +354,7 @@ public class JSONCoderTest {
     bean.testBean.setStrField("str2");
     bean.testBean.publicStrField = "publicStr";
 
-    JSONCoderOption opt = JSONCoderOption.ofIndentFactor(2);
+    JSONCoderOption opt = JSONCoderOption.ofIndentFactor(2).setStrictOrdering(true);
 
     opt.addFilterFor(TestBean2.class, include("ints", "enumField2", "testBean", "strField"));
 
@@ -487,21 +493,25 @@ public class JSONCoderTest {
     ClsWithTypeVar bean = new ClsWithTypeVar();
     bean.listOfMap.add(new MapBuilder("str1", 1).getMap());
     bean.refOfMap.set(new MapBuilder("str1", 1).getMap());
-    String json = JSONCoder.global.encode(bean);
+    String json = toJSONString(bean);
     assertMatchesSnapshot(json);
     ClsWithTypeVar bean1 = JSONCoder.global.decode(json, ClsWithTypeVar.class);
-    String json1 = JSONCoder.global.encode(bean1);
+    String json1 = toJSONString(bean1);
     assertEquals(json, json1);
   }
 
-  @Test public void testStrictOrder() {
+  @Test public void testSortMapAndSet() {
     Set<NoneComparable> set = new HashSet<>(listOf(new NoneComparable("a"), new NoneComparable("b"), new NoneComparable("c"), new NoneComparable("d")));
-    assertMatchesSnapshot("set", JSONCoder.encode(set, JSONCoderOption.of().setStrictOrder(true)));
+    assertMatchesSnapshot("set", JSONCoder.encode(set, JSONCoderOption.of().setStrictOrdering(true)));
 
     Map<NoneComparable, String> map = new HashMap<>();
     map.put(new NoneComparable("a"), "value 1");
     map.put(new NoneComparable("b"), "value 2");
-    assertMatchesSnapshot("map", JSONCoder.encode(map, JSONCoderOption.of().setStrictOrder(true)));
+    assertMatchesSnapshot("map", JSONCoder.encode(map, JSONCoderOption.of().setStrictOrdering(true)));
+  }
+
+  @Test public void testSortObjectKey() {
+    assertMatchesSnapshot(JSONCoder.encode(buildTestBean(), JSONCoderOption.of().setStrictOrdering(true)));
   }
 
   private void expectDecodeWithException(String str, Class<?> cls, String expectedError) {

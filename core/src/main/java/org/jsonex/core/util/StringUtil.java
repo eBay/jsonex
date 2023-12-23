@@ -24,7 +24,21 @@ public class StringUtil {
    * Truncates the rightmost characters of a String to a desired length
    */
   public static String getLeft(String src, int length) { return src == null || length > src.length() ? src : src.substring(0, length); }
-  
+
+  public static String getLeft(String src, char sep) {
+    if (src == null)
+      return src;
+    int p = src.indexOf(sep);
+    return p < 0 ? src : src.substring(0, p);
+  }
+
+  public static String getRight(String src, char sep) {
+    if (src == null)
+      return src;
+    int p = src.lastIndexOf(sep);
+    return p < 0 ? src : src.substring(p+1);
+  }
+
   /**
    * Truncates the leftmost characters of a String to a desired length
    */
@@ -72,6 +86,14 @@ public class StringUtil {
       return sb.append(str).toString();
     else
       return str + sb.toString();
+  }
+
+  public static String fillZero(String str,int length) {
+    return fillString(str,length,'0',true);
+  }
+
+  public static String fillSpace(String str,int length) {
+    return fillString(str,length,' ',false);
   }
 
   private final static String C_ESC_CHAR = "'\"`\\\b\f\n\r\t";
@@ -200,5 +222,13 @@ public class StringUtil {
   public static String toTrimmedStr(Object o, int len) { return StringUtil.getLeft(String.valueOf(o), len); }
 
   public static String noNull(Object o) { return o == null ? "" : o.toString(); }
+
+  public static int indexOfAnyChar(String str, String toMatch) {
+    for (int i = 0; i < str.length(); i++) {
+      if (toMatch.indexOf(str.charAt(i)) >= 0)
+        return i;
+    }
+    return -1;
+  }
 }
 

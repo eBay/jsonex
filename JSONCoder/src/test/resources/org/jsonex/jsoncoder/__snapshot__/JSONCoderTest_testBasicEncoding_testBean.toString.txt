@@ -1,0 +1,1 @@
+org.jsonex.jsoncoder.TestBean@6a396c1e

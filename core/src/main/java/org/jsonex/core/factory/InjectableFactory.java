@@ -9,8 +9,8 @@
 
 package org.jsonex.core.factory;
 
-import org.jsonex.core.factory.CacheProvider.NoCache;
-import org.jsonex.core.factory.CacheProvider.ObjectCache;
+import org.jsonex.core.factory.ScopeProvider.NoCache;
+import org.jsonex.core.factory.ScopeProvider.Scope;
 import org.jsonex.core.type.Func;
 import org.jsonex.core.type.Tuple;
 import lombok.Getter;
@@ -33,13 +33,13 @@ public class InjectableFactory<TP, TI> {
   private Function<? super TP, ? extends TI> objectCreator;
   @Getter private static List<Function<Object, Object>> globalCreateHandlers = new ArrayList<>();
   @Getter private List<Function<TI, TI>> createHandlers = new ArrayList<>();
-  private final CacheProvider<TI> cacheProvider;
+  private final ScopeProvider<TI> scopeProvider;
   
   private final Function<? super TP, ? extends TI> initialCreator;
 
-  protected InjectableFactory(Function<? super TP, ? extends TI> creator, CacheProvider<TI> cacheProvider) {
+  protected InjectableFactory(Function<? super TP, ? extends TI> creator, ScopeProvider<TI> scopeProvider) {
     initialCreator = creator;
-    this.cacheProvider = cacheProvider;
+    this.scopeProvider = scopeProvider;
     setCreator(creator);
   }
 
@@ -52,8 +52,8 @@ public class InjectableFactory<TP, TI> {
     return of(objectCreator, NoCache.get());
   }
 
-  public static <TP, TI> InjectableFactory<TP, TI> of(Function<TP, TI> objectCreator, CacheProvider cacheProvider) {
-    return new InjectableFactory<>(objectCreator, cacheProvider);
+  public static <TP, TI> InjectableFactory<TP, TI> of(Function<TP, TI> objectCreator, ScopeProvider scopeProvider) {
+    return new InjectableFactory<>(objectCreator, scopeProvider);
   }
 
   public TI get() { return get(null); }
@@ -62,8 +62,8 @@ public class InjectableFactory<TP, TI> {
     return getCache().get(getCacheKey(param), (key) -> create(param));
   }
 
-  protected ObjectCache<Object, TI> getCache() {
-    return cacheProvider.getCache(this);
+  protected Scope<Object, TI> getCache() {
+    return scopeProvider.getCache(this);
   }
 
   // Have to use a placeholder for null for ConcurrentHashMap unfortunately
@@ -96,51 +96,51 @@ public class InjectableFactory<TP, TI> {
   }
 
   public static class _0<I> extends InjectableFactory<Void, I> {
-    public _0(Function<Void, I> creator, CacheProvider cacheProvider) { super(creator, cacheProvider); }
+    public _0(Function<Void, I> creator, ScopeProvider scopeProvider) { super(creator, scopeProvider); }
     public static <I> _0<I> of(Supplier<I> objectCreator) { return of(objectCreator, NoCache.get()); }
-    public static <I> _0<I> of(Supplier<I> objectCreator, CacheProvider cacheProvider) { return new _0<>((Function<Void, I>)(p -> objectCreator.get()), cacheProvider); }
+    public static <I> _0<I> of(Supplier<I> objectCreator, ScopeProvider scopeProvider) { return new _0<>((Function<Void, I>)(p -> objectCreator.get()), scopeProvider); }
     public I get() { return super.get(null); }
   }
 
-  public static class _2<P1, P2, I> extends InjectableFactory<Tuple.Pair<P1, P2>, I> {
-    public _2(Function<Tuple.Pair<P1, P2>, I> creator, CacheProvider cacheProvider) { super(creator, cacheProvider); }
-    public static <P1, P2, I> _2<P1, P2, I> of(BiFunction<P1, P2, I> objectCreator) { return of(objectCreator, NoCache.get()); }
-    public static <P1, P2, I> _2<P1, P2, I> of(BiFunction<P1, P2, I> objectCreator, CacheProvider cacheProvider) { return new _2<>((Function<Tuple.Pair<P1, P2>, I>)(p -> objectCreator.apply(p._1, p._2)), cacheProvider); }
-    public I get(P1 p1, P2 p2) { return super.get(Tuple.Pair.of(p1, p2)); }
+  public static class _2<P0, P1, I> extends InjectableFactory<Tuple.Pair<P0, P1>, I> {
+    public _2(Function<Tuple.Pair<P0, P1>, I> creator, ScopeProvider scopeProvider) { super(creator, scopeProvider); }
+    public static <P0, P1, I> _2<P0, P1, I> of(BiFunction<P0, P1, I> objectCreator) { return of(objectCreator, NoCache.get()); }
+    public static <P0, P1, I> _2<P0, P1, I> of(BiFunction<P0, P1, I> objectCreator, ScopeProvider scopeProvider) { return new _2<>((Function<Tuple.Pair<P0, P1>, I>)(p -> objectCreator.apply(p._0, p._1)), scopeProvider); }
+    public I get(P0 p0, P1 p1) { return super.get(Tuple.Pair.of(p0, p1)); }
   }
 
-  public static class _3<P1, P2, P3, I> extends InjectableFactory<Tuple._3<P1, P2, P3>, I> {
-    public _3(Function<Tuple._3<P1, P2, P3>, I> creator, CacheProvider cacheProvider) { super(creator, cacheProvider); }
-    public static <P1, P2, P3, I> _3<P1, P2, P3, I> of(Func._3<P1, P2, P3, I> objectCreator) { return of(objectCreator, NoCache.get()); }
-    public static <P1, P2, P3, I> _3<P1, P2, P3, I> of(Func._3<P1, P2, P3, I> objectCreator, CacheProvider cacheProvider) { return new _3<>((Function<Tuple._3<P1, P2, P3>, I>)(p -> objectCreator.apply(p._1, p._2, p._3)), cacheProvider); }
-    public I get(P1 p1, P2 p2, P3 p3) { return super.get(Tuple._3.of(p1, p2, p3)); }
+  public static class _3<P0, P1, P2, I> extends InjectableFactory<Tuple.Tuple3<P0, P1, P2>, I> {
+    public _3(Function<Tuple.Tuple3<P0, P1, P2>, I> creator, ScopeProvider scopeProvider) { super(creator, scopeProvider); }
+    public static <P0, P1, P2, I> _3<P0, P1, P2, I> of(Func._3<P0, P1, P2, I> objectCreator) { return of(objectCreator, NoCache.get()); }
+    public static <P0, P1, P2, I> _3<P0, P1, P2, I> of(Func._3<P0, P1, P2, I> objectCreator, ScopeProvider scopeProvider) { return new _3<>((Function<Tuple.Tuple3<P0, P1, P2>, I>)(p -> objectCreator.apply(p._0, p._1, p._2)), scopeProvider); }
+    public I get(P0 p0, P1 p1, P2 p2) { return super.get(Tuple.Tuple3.of(p0, p1, p2)); }
   }
 
-  public static class _4<P1, P2, P3, P4, I> extends InjectableFactory<Tuple._4<P1, P2, P3, P4>, I> {
-    public _4(Function<Tuple._4<P1, P2, P3, P4>, I> creator, CacheProvider cacheProvider) { super(creator, cacheProvider); }
-    public static <P1, P2, P3, P4, I> _4<P1, P2, P3, P4, I> of(Func._4<P1, P2, P3, P4, I> objectCreator) { return of(objectCreator, NoCache.get()); }
-    public static <P1, P2, P3, P4, I> _4<P1, P2, P3, P4, I> of(Func._4<P1, P2, P3, P4, I> objectCreator, CacheProvider cacheProvider) { return new _4<>((Function<Tuple._4<P1, P2, P3, P4>, I>)(p -> objectCreator.apply(p._1, p._2, p._3, p._4)), cacheProvider); }
-    public I get(P1 p1, P2 p2, P3 p3, P4 p4) { return super.get(Tuple._4.of(p1, p2, p3, p4)); }
+  public static class _4<P0, P1, P2, P3, I> extends InjectableFactory<Tuple.Tuple4<P0, P1, P2, P3>, I> {
+    public _4(Function<Tuple.Tuple4<P0, P1, P2, P3>, I> creator, ScopeProvider scopeProvider) { super(creator, scopeProvider); }
+    public static <P0, P1, P2, P3, I> _4<P0, P1, P2, P3, I> of(Func._4<P0, P1, P2, P3, I> objectCreator) { return of(objectCreator, NoCache.get()); }
+    public static <P0, P1, P2, P3, I> _4<P0, P1, P2, P3, I> of(Func._4<P0, P1, P2, P3, I> objectCreator, ScopeProvider scopeProvider) { return new _4<>((Function<Tuple.Tuple4<P0, P1, P2, P3>, I>)(p -> objectCreator.apply(p._0, p._1, p._2, p._3)), scopeProvider); }
+    public I get(P0 p0, P1 p1, P2 p2, P3 p3) { return super.get(Tuple.Tuple4.of(p0, p1, p2, p3)); }
   }
 
-  public static class _5<P1, P2, P3, P4, P5, I> extends InjectableFactory<Tuple._5<P1, P2, P3, P4, P5>, I> {
-    public _5(Function<Tuple._5<P1, P2, P3, P4, P5>, I> creator, CacheProvider cacheProvider) { super(creator, cacheProvider); }
-    public static <P1, P2, P3, P4, P5, I> _5<P1, P2, P3, P4, P5, I> of(Func._5<P1, P2, P3, P4, P5, I> objectCreator) { return of(objectCreator, NoCache.get()); }
-    public static <P1, P2, P3, P4, P5, I> _5<P1, P2, P3, P4, P5, I> of(Func._5<P1, P2, P3, P4, P5, I> objectCreator, CacheProvider cacheProvider) { return new _5<>((Function<Tuple._5<P1, P2, P3, P4, P5>, I>)(p -> objectCreator.apply(p._1, p._2, p._3, p._4, p._5)), cacheProvider); }
-    public I get(P1 p1, P2 p2, P3 p3, P4 p4, P5 p5) { return super.get(Tuple._5.of(p1, p2, p3, p4, p5)); }
+  public static class _5<P0, P1, P2, P3, P4, I> extends InjectableFactory<Tuple.Tuple5<P0, P1, P2, P3, P4>, I> {
+    public _5(Function<Tuple.Tuple5<P0, P1, P2, P3, P4>, I> creator, ScopeProvider scopeProvider) { super(creator, scopeProvider); }
+    public static <P0, P1, P2, P3, P4, I> _5<P0, P1, P2, P3, P4, I> of(Func._5<P0, P1, P2, P3, P4, I> objectCreator) { return of(objectCreator, NoCache.get()); }
+    public static <P0, P1, P2, P3, P4, I> _5<P0, P1, P2, P3, P4, I> of(Func._5<P0, P1, P2, P3, P4, I> objectCreator, ScopeProvider scopeProvider) { return new _5<>((Function<Tuple.Tuple5<P0, P1, P2, P3, P4>, I>)(p -> objectCreator.apply(p._0, p._1, p._2, p._3, p._4)), scopeProvider); }
+    public I get(P0 p0, P1 p1, P2 p2, P3 p3, P4 p4) { return super.get(Tuple.Tuple5.of(p0, p1, p2, p3, p4)); }
   }
 
-  public static class _6<P1, P2, P3, P4, P5, P6, I> extends InjectableFactory<Tuple._6<P1, P2, P3, P4, P5, P6>, I> {
-    public _6(Function<Tuple._6<P1, P2, P3, P4, P5, P6>, I> creator, CacheProvider cacheProvider) { super(creator, cacheProvider); }
-    public static <P1, P2, P3, P4, P5, P6, I> _6<P1, P2, P3, P4, P5, P6, I> of(Func._6<P1, P2, P3, P4, P5, P6, I> objectCreator) { return of(objectCreator, NoCache.get()); }
-    public static <P1, P2, P3, P4, P5, P6, I> _6<P1, P2, P3, P4, P5, P6, I> of(Func._6<P1, P2, P3, P4, P5, P6, I> objectCreator, CacheProvider cacheProvider) { return new _6<>((Function<Tuple._6<P1, P2, P3, P4, P5, P6>, I>)(p -> objectCreator.apply(p._1, p._2, p._3, p._4, p._5, p._6)), cacheProvider); }
-    public I get(P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6) { return super.get(Tuple._6.of(p1, p2, p3, p4, p5,p6)); }
+  public static class _6<P0, P1, P2, P3, P4, P5, I> extends InjectableFactory<Tuple.Tuple6<P0, P1, P2, P3, P4, P5>, I> {
+    public _6(Function<Tuple.Tuple6<P0, P1, P2, P3, P4, P5>, I> creator, ScopeProvider scopeProvider) { super(creator, scopeProvider); }
+    public static <P0, P1, P2, P3, P4, P5, I> _6<P0, P1, P2, P3, P4, P5, I> of(Func._6<P0, P1, P2, P3, P4, P5, I> objectCreator) { return of(objectCreator, NoCache.get()); }
+    public static <P0, P1, P2, P3, P4, P5, I> _6<P0, P1, P2, P3, P4, P5, I> of(Func._6<P0, P1, P2, P3, P4, P5, I> objectCreator, ScopeProvider scopeProvider) { return new _6<>((Function<Tuple.Tuple6<P0, P1, P2, P3, P4, P5>, I>)(p -> objectCreator.apply(p._0, p._1, p._2, p._3, p._4, p._5)), scopeProvider); }
+    public I get(P0 p0, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5) { return super.get(Tuple.Tuple6.of(p0, p1, p2, p3, p4,p5)); }
   }
 
-  public static class _7<P1, P2, P3, P4, P5, P6, P7, I> extends InjectableFactory<Tuple._7<P1, P2, P3, P4, P5, P6, P7>, I> {
-    public _7(Function<Tuple._7<P1, P2, P3, P4, P5, P6, P7>, I> creator, CacheProvider cacheProvider) { super(creator, cacheProvider); }
-    public static <P1, P2, P3, P4, P5, P6, P7, I> _7<P1, P2, P3, P4, P5, P6, P7, I> of(Func._7<P1, P2, P3, P4, P5, P6, P7, I> objectCreator) { return of(objectCreator, NoCache.get()); }
-    public static <P1, P2, P3, P4, P5, P6, P7, I> _7<P1, P2, P3, P4, P5, P6, P7, I> of(Func._7<P1, P2, P3, P4, P5, P6, P7, I> objectCreator, CacheProvider cacheProvider) { return new _7<>((Function<Tuple._7<P1, P2, P3, P4, P5, P6, P7>, I>)(p -> objectCreator.apply(p._1, p._2, p._3, p._4, p._5, p._6, p._7)), cacheProvider); }
-    public I get(P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7) { return super.get(Tuple._7.of(p1, p2, p3, p4, p5, p6, p7)); }
+  public static class _7<P0, P1, P2, P3, P4, P5, P6, I> extends InjectableFactory<Tuple.Tuple7<P0, P1, P2, P3, P4, P5, P6>, I> {
+    public _7(Function<Tuple.Tuple7<P0, P1, P2, P3, P4, P5, P6>, I> creator, ScopeProvider scopeProvider) { super(creator, scopeProvider); }
+    public static <P0, P1, P2, P3, P4, P5, P6, I> _7<P0, P1, P2, P3, P4, P5, P6, I> of(Func._7<P0, P1, P2, P3, P4, P5, P6, I> objectCreator) { return of(objectCreator, NoCache.get()); }
+    public static <P0, P1, P2, P3, P4, P5, P6, I> _7<P0, P1, P2, P3, P4, P5, P6, I> of(Func._7<P0, P1, P2, P3, P4, P5, P6, I> objectCreator, ScopeProvider scopeProvider) { return new _7<>((Function<Tuple.Tuple7<P0, P1, P2, P3, P4, P5, P6>, I>)(p -> objectCreator.apply(p._0, p._1, p._2, p._3, p._4, p._5, p._6)), scopeProvider); }
+    public I get(P0 p0, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6) { return super.get(Tuple.Tuple7.of(p0, p1, p2, p3, p4, p5, p6)); }
   }
 }

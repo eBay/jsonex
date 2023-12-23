@@ -1,18 +1,18 @@
 {
-  "strParam":"abc",
-  "numParam":10,
-  "point":{
-    "name":"n1",
-    "x":1,
-    "y":2
-  },
-  "opt":"VAL2",
-  "optInt":100,
-  "noShortName":0,
   "arrayArg":[
     "str1",
     "str2",
     "It's escapted",
     "array as separate option"
-  ]
+  ],
+  "noShortName":0,
+  "numParam":10,
+  "opt":"VAL2",
+  "optInt":100,
+  "point":{
+    "name":"n1",
+    "x":1,
+    "y":2
+  },
+  "strParam":"abc"
 }

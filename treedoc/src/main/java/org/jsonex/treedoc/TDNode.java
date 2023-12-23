@@ -15,25 +15,36 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.jsonex.core.charsource.Bookmark;
 import org.jsonex.core.type.Lazy;
+import static org.jsonex.core.util.LangUtil.orElse;
+import static org.jsonex.core.util.LangUtil.safe;
 import org.jsonex.core.util.ListUtil;
+import static org.jsonex.core.util.ListUtil.last;
+import static org.jsonex.core.util.ListUtil.listOf;
+import static org.jsonex.core.util.ListUtil.map;
 import org.jsonex.core.util.StringUtil;
 import org.jsonex.treedoc.TDPath.Part;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Consumer;
-
-import static org.jsonex.core.util.LangUtil.orElse;
-import static org.jsonex.core.util.ListUtil.last;
 
 /** A Node in TreeDoc */
 @RequiredArgsConstructor
 // @Getter @Setter
 @Accessors(chain = true)
 public class TDNode {
+  private final static int SIZE_TO_INIT_NAME_INDEX = 64;
   public final static String ID_KEY = "$id";
   public final static String REF_KEY = "$ref";
+
+  public final static String COLUMN_KEY = "@key";
+  public final static String COLUMN_VALUE = "@value";
 
   public enum Type { MAP, ARRAY, SIMPLE }
   @Getter TreeDoc doc;
@@ -53,6 +64,7 @@ public class TDNode {
   transient private boolean deduped;
   transient private final Lazy<Integer> hash = new Lazy<>();
   transient private final Lazy<String> str = new Lazy<>();
+  transient private Map<String, Integer> nameIndex;  // Will only initialize when size is big enough
 
   public TDNode(TDNode parent, String key) { this.doc = parent.doc; this.parent = parent; this.key = key; }
   public TDNode(TreeDoc doc, String key) { this.doc = doc; this.key = key; }
@@ -72,7 +84,7 @@ public class TDNode {
       return cn;
     }
 
-    // special handling for textproto due to it's bad design that allows duplicated keys
+    // special handling for textproto due to its bad design that allows duplicated keys
     TDNode existNode = children.get(childIndex);
     if (!existNode.deduped) {
       TDNode listNode = new TDNode(this, name).setType(Type.ARRAY);
@@ -96,7 +108,20 @@ public class TDNode {
     if (node.key == null)  // Assume it's array element
       node.key = "" + getChildrenSize();
     children.add(node);
+    if (nameIndex != null)
+      nameIndex.put(node.key, children.size() - 1);
+    else if (children.size() > SIZE_TO_INIT_NAME_INDEX)
+      initNameIndex();
     return touch();
+  }
+
+  private void initNameIndex() {
+    nameIndex = new HashMap<>();
+    for (int i = 0; i< children.size(); i++) {
+      TDNode child = children.get(i);
+      if (child.key != null)
+        nameIndex.put(child.key, i);
+    }
   }
 
   public void swapWith(TDNode to) {
@@ -124,8 +149,12 @@ public class TDNode {
     return idx < 0 ? null : children.get(idx);
   }
 
-  int indexOf(TDNode node) { return ListUtil.indexOf(children, n -> n == node); }
-  int indexOf(String name) { return ListUtil.indexOf(children, n -> n.getKey().equals(name)); }
+  int indexOf(TDNode node) {
+    return nameIndex != null ? indexOf(node.key) : ListUtil.indexOf(children, n -> n == node);
+  }
+  int indexOf(String name) {
+    return nameIndex != null ? orElse(nameIndex.get(name), -1) : ListUtil.indexOf(children, n -> n.getKey().equals(name));
+  }
   int index() { return parent == null ? 0 : parent.indexOf(this); }
 
   public Object getChildValue(String name) {
@@ -201,15 +230,15 @@ public class TDNode {
   public boolean isLeaf() { return getChildrenSize() == 0; }
 
   private TDNode touch() {
-    hash.clear();;
-    str.clear();;
+    hash.clear();
+    str.clear();
     if (parent != null)
       parent.touch();
     return this;
   }
 
   @Override public String toString() {
-    return str.getOrCompute(() -> toString(new StringBuilder(), true, true, 100000).toString());
+    return str.getOrCompute(() -> toString(new StringBuilder(), false, true, 100000).toString());
   }
 
   public StringBuilder toString(StringBuilder sb, boolean includeRootKey, boolean includeReservedKeys, int limit) {
@@ -217,7 +246,8 @@ public class TDNode {
       sb.append(key + ": ");
 
     if (value != null) {
-      if (!(value instanceof String)) {
+      // Don't quote if not inclueRootKey
+      if (!(value instanceof String) || !includeRootKey) {
         sb.append(value);
       } else {
         String str = StringUtil.cEscape((String) value, '\'');
@@ -247,6 +277,58 @@ public class TDNode {
     return sb;
   }
 
+  public List<Object> childrenValueAsList() {
+    return getChildren() == null ? Collections.emptyList() : map(getChildren(), c -> orElse(c.getValue(), c));
+  }
+
+  public List<List<Object>> childrenValueAsListOfList() {
+    return getChildren() == null ? Collections.emptyList() : map(getChildren(), TDNode::childrenValueAsList);
+  }
+
+  public List<Object> childrenValueAsList(List<String> keys, List<Object> target) {
+    for (String k : keys) {
+      if (k.equals(COLUMN_KEY))
+        continue;
+      if (k.equals(COLUMN_VALUE))
+        target.add(value);
+      else {
+        TDNode c = getChild(k);
+        target.add(safe(c, ignore -> orElse(c.value, c)));
+      }
+    }
+    return target;
+  }
+
+  public List<List<Object>> childrenValueAsListOfList(List<String> keys) {
+    return getChildren() == null ? Collections.emptyList() :
+        map(getChildren(), c -> c.childrenValueAsList(keys, keys.get(0).equals(COLUMN_KEY) ? listOf(c.key) : listOf()));
+  }
+
+  /** Get union of keys for all children, it's used for represent children in a table view */
+  public List<String> getChildrenKeys() {
+    List<String> result = new ArrayList<>();
+    if (this.type == Type.SIMPLE || children == null)
+      return result;
+    // Add the key column
+    Set<String> keySet = new HashSet<>();
+    result.add(COLUMN_KEY);
+    keySet.add(COLUMN_KEY);
+    boolean hasValue = false;
+    for (TDNode c : children) {
+      if (c.value != null)
+        hasValue = true;
+      if (c.children != null)
+        for (TDNode cc : c.getChildren())
+          if (!keySet.contains(cc.key)) {
+            result.add(cc.key);
+            keySet.add(cc.key);
+          }
+    }
+    if (hasValue)
+      result.add(1, COLUMN_VALUE);
+    return result;
+  }
+
   @Override public boolean equals(Object o) {
     if (this == o)
       return true;
@@ -258,7 +340,8 @@ public class TDNode {
     return Objects.equals(key, tdNode.key) && Objects.equals(value, tdNode.value) && Objects.equals(children, tdNode.children);
   }
 
+  /** Hash code of value and children, key is not included */
   @Override public int hashCode() {
-    return hash.getOrCompute(() -> Objects.hash(key, value, children));
+    return hash.getOrCompute(() -> Objects.hash(value, children, map(children, TDNode::getKey)));
   }
 }

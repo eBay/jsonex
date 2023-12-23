@@ -29,6 +29,9 @@ public class JSONCoder {
 
   public static JSONCoder get() { return getGlobal(); }
 
+  public static String stringify(Object obj) { return get().encode(obj); }
+  public static String stringify(Object obj, int indentFact) { return encode(obj, JSONCoderOption.ofIndentFactor(indentFact)); }
+  public static <T> T parse(String str, Class<T> cls) { return get().decode(str, cls); }
 
   @SuppressWarnings("unchecked")
   public static <T> T decode(DecodeReq<T> req, JSONCoderOption opt) {
