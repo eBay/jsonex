@@ -384,7 +384,11 @@ public class ListUtil {
     return setAt(list, idx, mutator.apply(getOrDefault(list, idx, defaultVal)));
   }
 
-  /** build a copy of mutable Set whose content will be independent with original array once created */
+  /**
+   * build a copy of mutable Set whose content will be independent with original array once created
+   * @Deprecated use {@link SetUtil#setOf(Object...)} instead
+   */
+  @Deprecated
   public static <T> Set<T> setOf(T... e) { return e == null ? null : new LinkedHashSet<>(Arrays.asList(e)); }
 
   /** build a copy of mutable list whose content will be independent with original array once created */
